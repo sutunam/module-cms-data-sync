@@ -2,20 +2,29 @@
 
 namespace Sutunam\CmsDataSync\Block\Adminhtml\System\Config;
 
+use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\View\Helper\SecureHtmlRenderer;
 
 class TestConnection extends Field
 {
     /**
-     * Set template to itself
+     * Constructor
+     *
+     * @param Context $context
+     * @param array $data
+     * @param SecureHtmlRenderer|null $secureRenderer
      */
-    protected function _prepareLayout()
-    {
-        parent::_prepareLayout();
+    public function __construct(
+        Context $context,
+        array $data = [],
+        ?SecureHtmlRenderer $secureRenderer = null
+    ) {
+        parent::__construct($context, $data, $secureRenderer);
         if (!$this->getTemplate()) {
             $this->setTemplate('Sutunam_CmsDataSync::system/config/test_connection.phtml');
         }
-        return $this;
     }
 
     /**
