@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="sutunam" translate="label" sortOrder="999998">
+            <label>Sutunam</label>
+        </tab>
+        <section id="cms_data_sync" translate="label" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Cms Data Sync</label>
+            <tab>sutunam</tab>
+            <resource>Sutunam_CmsDataSync::config</resource>
+            <group id="connection" type="text" sortOrder="0" showInDefault="1" showInWebsite="0" showInStore="0" translate="label">
+                <label>Connection</label>
+                <field id="enabled" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="site_name" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Website Name</label>
+                    <validate>required-entry</validate>
+                    <comment>Live/Staging/Local ..etc</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="site_url" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Website URL</label>
+                    <comment>For Example: http://magento.com/ (slash at the end of URL is required)</comment>
+                    <validate>validate-url required-entry</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="username" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Username</label>
+                    <validate>required-entry</validate>
+                    <comment>Enter Admin account of target website</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="password" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Password</label>
+                    <validate>required-entry</validate>
+                    <comment>Enter Admin password of target website</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="sync_media" type="select" sortOrder="60" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
+                    <label>Sync Media</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="remote_media_rootdir" type="text" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Remote Media Root Directory</label>
+                    <comment>Enter Root Folder to store Media of target website. E.g: pub/ as default of magento</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="sync_media">1</field>
+                    </depends>
+                </field>
+                <field id="remote_media_subdir" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Remote Media Sub Directory</label>
+                    <comment>Enter Sub  Folder to store Media of target website inside Root Media Directory. E.g: media/</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="sync_media">1</field>
+                    </depends>
+                </field>
+                <field id="is_overwrite" type="select" sortOrder="90" showInDefault="1" showInWebsite="1"
+                       showInStore="0">
+                    <label>Is Overwrite</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment>The content will be overwrited when syncing if yes </comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

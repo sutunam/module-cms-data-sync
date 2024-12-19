@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <!-- Cms Page -->
+    <route url="/V1/sutunam/cmsPage/:pageId" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Magento_Cms::page"/>
+        </resources>
+    </route>
+    <route url="/V1/sutunam/cmsPage/identifier/:identifier" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="getByIdentifier"/>
+        <resources>
+            <resource ref="Magento_Cms::page"/>
+        </resources>
+        <data>
+            <parameter name="storeIds" />
+        </data>
+    </route>
+    <route url="/V1/sutunam/cmsPage" method="POST">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Cms::save"/>
+        </resources>
+    </route>
+    <route url="/V1/sutunam/cmsPage/:id" method="PUT">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Cms::save"/>
+        </resources>
+    </route>
+    <route url="/V1/sutunam/cmsPage/search" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Magento_Cms::page"/>
+        </resources>
+    </route>
+    <!-- Cms Block -->
+    <route url="/V1/sutunam/cmsBlock/:blockId" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/sutunam/cmsBlock/identifier/:identifier" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="getByIdentifier"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+        <data>
+            <parameter name="storeIds" />
+        </data>
+    </route>
+    <route url="/V1/sutunam/cmsBlock" method="POST">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Cms::save"/>
+        </resources>
+    </route>
+    <route url="/V1/sutunam/cmsBlock/:id" method="PUT">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Cms::save"/>
+        </resources>
+    </route>
+    <route url="/V1/sutunam/cmsBlock/search" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+</routes>
