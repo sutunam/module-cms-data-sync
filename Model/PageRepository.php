@@ -261,7 +261,7 @@ class PageRepository implements SutunamPageRepositoryInterface
 
         if ($page->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
             foreach ($page->getMedia() as $media) {
-                $this->sutunamDataHelper->saveMediaFromRemoteHost($media);
+                $this->sutunamDataHelper->saveMediaFromRemoteHost($media, $this->sutunamConfigHelper->isOverwrite());
             }
         }
 

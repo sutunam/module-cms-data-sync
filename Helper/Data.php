@@ -250,15 +250,22 @@ class Data
     public function getAllImageFromCmsContent($cmsContent)
     {
         $result = [];
+
+        preg_match_all('/{{media url="([^"]+)"}}/', $cmsContent, $matches_json);
         preg_match_all('/{{media url=([^}]+)}}/', $cmsContent, $matches);
-        if (is_array($matches) && count($matches) < 2) {
-            return $result;
+
+        if (is_array($matches) && count($matches) > 1) {
+            $imagePaths = $matches[1];
+            foreach ($imagePaths as $path) {
+                $result[] = $path;
+            }
         }
 
-        $imagePaths = $matches[1];
-
-        foreach ($imagePaths as $path) {
-            $result[] = $path;
+        if (is_array($matches_json) && count($matches_json) > 1) {
+            $imagePaths = $matches_json[1];
+            foreach ($imagePaths as $path) {
+                $result[] = $path;
+            }
         }
 
         return $result;

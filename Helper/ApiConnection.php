@@ -104,6 +104,12 @@ class ApiConnection
         }
 
         $accessToken = $this->getAdminToken();
+        if (!$accessToken) {
+            $response['message'] = __('Can not generate the access token of remote host');
+            $this->logger->info($response['message']);
+            return $response;
+        }
+
         $targetUrl = $this->configHelper->getSiteUrl();
 
         $requestEndpoint = $targetUrl . ConfigHelper::API_PREFIX . $endpoint;
@@ -135,15 +141,14 @@ class ApiConnection
         }
 
         $client->setOptions($options);
-        $this->logger->info("\n===========================================\n");
-        $this->logger->info("Request: \n" . json_encode($client->getRequest()));
+        $this->logRequest($requestType, $requestEndpoint, $requestParams, $requestBody);
 
         $responseRequest = $client->send();
 
         if (!$responseRequest->isSuccess()
-            && $responseRequest->getStatusCode() != self::RESTRICT_GET_ADMIN_TOKEN_RETRY_TIME) {
+            && $responseRequest->getStatusCode() != self::REQUEST_RESPONSE_CODE_UNAUTHORIZED) {
             $response['message'] = __("HTTP Error: " . $responseRequest->getStatusCode()
-                . "\n" . $responseRequest->getReasonPhrase());
+                . "\n" . $responseRequest->getBody());
             $this->logger->info("Response: " . $response['message']);
             return $response;
         }
@@ -151,12 +156,16 @@ class ApiConnection
         if ($responseRequest->getStatusCode() == self::REQUEST_RESPONSE_CODE_UNAUTHORIZED) {
             $retry_time = $this->dataPersistor->get('retry_time') ?? 0;
             if ($retry_time < self::RESTRICT_GET_ADMIN_TOKEN_RETRY_TIME) {
-                $this->getAdminToken(true);
+                $this->getAdminToken(
+                    $this->configHelper->getUsername(),
+                    $this->configHelper->getPassword(),
+                    true
+                );
                 $this->dataPersistor->set('retry_time', ++$retry_time);
                 return $this->request($requestType, $endpoint, $requestParams, $requestBody);
             }
             $response['message'] = __("HTTP Error: " . $responseRequest->getStatusCode()
-                . "\n" . $responseRequest->getReasonPhrase());
+                . "\n" . $responseRequest->getBody());
             $this->logger->info("Response: " . $response['message']);
             return $response;
         }
@@ -189,11 +198,13 @@ class ApiConnection
     /**
      * Get Admin token
      *
+     * @param string|null $username
+     * @param string|null $password
      * @param bool $refresh
      * @return mixed
      * @throws \Exception
      */
-    public function getAdminToken($refresh = false)
+    public function getAdminToken($username = null, $password = null, $refresh = false)
     {
         if (!$refresh) {
             if ($currentToken = $this->dataPersistor->get('cmsdatasync/admin_token')) {
@@ -202,8 +213,8 @@ class ApiConnection
         }
 
         $requestBody = [
-            'username' => $this->configHelper->getUsername(),
-            'password' => $this->configHelper->getPassword()
+            'username' => (!empty($username)) ? $username : $this->configHelper->getUsername(),
+            'password' => (!empty($password)) ? $password : $this->configHelper->getPassword()
         ];
 
         $options = [
@@ -228,23 +239,49 @@ class ApiConnection
         $client->setMethod(Request::METHOD_POST);
         $client->setRawBody(json_encode($requestBody));
         $client->setOptions($options);
-        $this->logger->info("\n===========================================\n");
-        $this->logger->info("Request: \n" . json_encode($client->getRequest()));
+        $this->logRequest($client->getMethod(), $requestEndpoint, [], $requestBody);
 
         $responseRequest = $client->send();
         if (!$responseRequest || !$responseRequest->isSuccess()) {
             $this->logger->info("\nHTTP Error: " . $responseRequest->getStatusCode()
-                . "\n" . $responseRequest->getReasonPhrase());
-            return '';
+                . "\n" . $responseRequest->getBody());
+            return false;
         }
 
         $this->logger->info(
             "\nResponse: " . $responseRequest->getStatusCode()
             . " \n" . json_encode($responseRequest->getBody())
         );
-        $token = json_decode($responseRequest->getBody(), true);
 
+        $token = json_decode($responseRequest->getBody(), true);
         $this->dataPersistor->set('cmsdatasync/admin_token', $token);
         return $token;
+    }
+
+    /**
+     * Log request header
+     *
+     * @param $requestType
+     * @param $url
+     * @param $requestParams
+     * @param $requestBody
+     * @return void
+     */
+    public function logRequest(
+        $requestType = Request::METHOD_GET,
+        $url = null,
+        $requestParams = [],
+        $requestBody = []
+    ) {
+        $this->logger->info("\n=======================================================\n");
+        $request = "Request: \n";
+        $request .= $requestType . "\n";
+        $request .= $url . "\n";
+        $request .= "Request Params:\n";
+        $request .= json_encode($requestParams);
+        $request .= "\nRequest Body:\n";
+        $request .= json_encode($requestBody);
+        $request .= "\n";
+        $this->logger->info($request);
     }
 }

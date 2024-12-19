@@ -265,7 +265,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
 
         if ($block->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
             foreach ($block->getMedia() as $media) {
-                $this->sutunamDataHelper->saveMediaFromRemoteHost($media);
+                $this->sutunamDataHelper->saveMediaFromRemoteHost($media, $this->sutunamConfigHelper->isOverwrite());
             }
         }
 
