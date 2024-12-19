@@ -261,10 +261,10 @@ class ApiConnection
     /**
      * Log request header
      *
-     * @param $requestType
-     * @param $url
-     * @param $requestParams
-     * @param $requestBody
+     * @param string $requestType
+     * @param string $url
+     * @param array $requestParams
+     * @param array $requestBody
      * @return void
      */
     public function logRequest(

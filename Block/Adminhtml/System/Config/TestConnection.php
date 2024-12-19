@@ -10,22 +10,9 @@ use Magento\Framework\View\Helper\SecureHtmlRenderer;
 class TestConnection extends Field
 {
     /**
-     * Constructor
-     *
-     * @param Context $context
-     * @param array $data
-     * @param SecureHtmlRenderer|null $secureRenderer
+     * @var string
      */
-    public function __construct(
-        Context $context,
-        array $data = [],
-        ?SecureHtmlRenderer $secureRenderer = null
-    ) {
-        parent::__construct($context, $data, $secureRenderer);
-        if (!$this->getTemplate()) {
-            $this->setTemplate('Sutunam_CmsDataSync::system/config/test_connection.phtml');
-        }
-    }
+    protected $_template = 'Sutunam_CmsDataSync::system/config/test_connection.phtml';
 
     /**
      * @inheritdoc
