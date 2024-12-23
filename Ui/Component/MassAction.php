@@ -38,17 +38,25 @@ class MassAction extends \Magento\Ui\Component\MassAction
     public function prepare()
     {
         parent::prepare();
-        if (!$this->configHelper->isEnabled()) {
-            $config = $this->getConfiguration();
-            $notAllowedActions = ['sync_pull', 'sync_push'];
-            $allowedActions = [];
-            foreach ($config['actions'] as $action) {
-                if (!in_array($action['type'], $notAllowedActions)) {
-                    $allowedActions[] = $action;
-                }
+        $config = $this->getConfiguration();
+        $syncAction = ['sync_pull', 'sync_push'];
+        $allowedActions = [];
+        foreach ($config['actions'] as $action) {
+            if (in_array($action['type'], $syncAction) && !$this->configHelper->isEnabled()) {
+                continue;
             }
-            $config['actions'] = $allowedActions;
-            $this->setData('config', (array)$config);
+
+            if ($action['type'] == 'sync_pull') {
+                $action['label'] = __('Pull from %1', $this->configHelper->getSiteName());
+            }
+
+            if ($action['type'] == 'sync_push') {
+                $action['label'] = __('Push to %1', $this->configHelper->getSiteName());
+            }
+
+            $allowedActions[] = $action;
         }
+        $config['actions'] = $allowedActions;
+        $this->setData('config', (array)$config);
     }
 }
