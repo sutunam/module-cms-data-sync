@@ -156,11 +156,7 @@ class ApiConnection
         if ($responseRequest->getStatusCode() == self::REQUEST_RESPONSE_CODE_UNAUTHORIZED) {
             $retry_time = $this->dataPersistor->get('retry_time') ?? 0;
             if ($retry_time < self::RESTRICT_GET_ADMIN_TOKEN_RETRY_TIME) {
-                $this->getAdminToken(
-                    $this->configHelper->getUsername(),
-                    $this->configHelper->getPassword(),
-                    true
-                );
+                $this->getAdminToken(true);
                 $this->dataPersistor->set('retry_time', ++$retry_time);
                 return $this->request($requestType, $endpoint, $requestParams, $requestBody);
             }
@@ -198,13 +194,14 @@ class ApiConnection
     /**
      * Get Admin token
      *
+     * @param bool $refresh
      * @param string|null $username
      * @param string|null $password
-     * @param bool $refresh
+     * @param string|null $host_url
      * @return mixed
      * @throws \Exception
      */
-    public function getAdminToken($username = null, $password = null, $refresh = false)
+    public function getAdminToken($refresh = false, $username = null, $password = null, $host_url = null)
     {
         if (!$refresh) {
             if ($currentToken = $this->dataPersistor->get('cmsdatasync/admin_token')) {
@@ -223,7 +220,7 @@ class ApiConnection
             'timeout' => 30
         ];
 
-        $requestEndpoint = $this->configHelper->getSiteUrl()
+        $requestEndpoint = ((!empty($host_url)) ? $host_url : $this->configHelper->getSiteUrl())
             . ConfigHelper::API_PREFIX
             . self::API_INTEGRATION_ADMIN_TOKEN;
 
