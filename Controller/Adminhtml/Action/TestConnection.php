@@ -67,9 +67,10 @@ class TestConnection extends Action implements HttpPostActionInterface
         }
         try {
             $response = $this->apiConnection->getAdminToken(
+                true,
                 $request->getParam('username'),
                 $password,
-                true
+                $request->getParam('url')
             );
             if ($response) {
                 $result['success'] = true;
