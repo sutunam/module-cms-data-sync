@@ -255,6 +255,10 @@ class PageRepository implements SutunamPageRepositoryInterface
      */
     public function save(SutunamPageInterface $page)
     {
+        if ($page->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
+            throw new CouldNotSaveException(__('The CMS page cannot be overwritten.'));
+        }
+
         if (empty($page->getStoreId())) {
             $page->setStoreId([$this->storeManager->getStore()->getId()]);
         }
