@@ -10,6 +10,8 @@ use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ResourceModel\Store\CollectionFactory;
 use Magento\Store\Model\StoreRepository;
+use Magento\Theme\Model\Theme;
+use Magento\Theme\Model\ThemeFactory;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 use Sutunam\CmsDataSync\Logger\Logger;
 
@@ -50,6 +52,14 @@ class Data
      */
     protected $configHelper;
 
+    protected $filter;
+
+    protected $instanceCollectionFactory;
+
+    protected $theme;
+
+    protected $themeResource;
+
     /**
      * @var Logger
      */
@@ -73,6 +83,10 @@ class Data
         StoreRepository $storeRepository,
         FileSystem $fileSystem,
         ConfigHelper $configHelper,
+        \Magento\Framework\Filter\FilterManager $filter,
+        \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory,
+        ThemeFactory $theme,
+        \Magento\Theme\Model\ResourceModel\Theme $themeResource,
         Logger $logger
     ) {
         $this->apiHelper = $apiHelper;
@@ -81,6 +95,10 @@ class Data
         $this->storeRepository = $storeRepository;
         $this->fileSystem = $fileSystem;
         $this->configHelper = $configHelper;
+        $this->filter = $filter;
+        $this->instanceCollectionFactory = $instanceCollectionFactory;
+        $this->theme = $theme;
+        $this->themeResource = $themeResource;
         $this->logger = $logger;
     }
 
@@ -104,7 +122,7 @@ class Data
             $this->remoteStoreViews = $this->apiHelper->requestStoreInfo(ApiHelper::REQUEST_STORE_VIEWS);
         }
 
-        $remoteStoreView = $this->remoteStoreViews[$myStoreDetails->getCode()] ?? null;
+        $remoteStoreView = $this->remoteStoreViews[$myStoreDetails->getCode()] ?: null;
         if (!$remoteStoreView) {
             return [
                 'status' => false,
@@ -284,5 +302,29 @@ class Data
         foreach ($allImages as $imagePath) {
             $this->saveMediaFromRemoteHost($imagePath, $isOverwrite);
         }
+    }
+
+    public function generateIdentifier($title) {
+        $checkDuplicatedTitle = $this->instanceCollectionFactory->create()->addFieldToFilter('title', ['eq' => $title]);
+        $lowercaseTitle = strtolower($title);
+        if ($checkDuplicatedTitle->getSize() > 1) {
+            return $this->filter->translitUrl($lowercaseTitle) . '-' . time();
+        }
+
+        return $this->filter->translitUrl($lowercaseTitle);
+    }
+
+    public function getThemeCodeById($themeId) {
+        return $this->theme->create()->load($themeId)->getCode();
+    }
+
+    public function getThemeIdByCode($themeCode) {
+        $connection = $this->themeResource->getConnection();
+
+        $select = $connection->select()->from($this->themeResource->getMainTable(), 'theme_id')->where('code = :code');
+
+        $bind = [':code' => (string)$themeCode];
+
+        return $connection->fetchOne($select, $bind);
     }
 }

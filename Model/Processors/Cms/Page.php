@@ -205,7 +205,7 @@ class Page implements ProcessorInterface
                     continue;
                 }
 
-                $myPageStoreIds  = !empty($myPageStoreIds) ? $myPageStoreIds : $myStoreIds;
+                $myPageStoreIds  = $myPageStoreIds ?: $myStoreIds;
 
                 $myPage->setData($remotePage);
                 $myPage->setStoreId(array_map('intval', $myPageStoreIds));

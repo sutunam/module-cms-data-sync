@@ -11,6 +11,12 @@
     <preference for="Sutunam\CmsDataSync\Api\Data\PageInterface" type="Sutunam\CmsDataSync\Model\Page" />
     <preference for="Sutunam\CmsDataSync\Api\PageRepositoryInterface" type="Sutunam\CmsDataSync\Model\PageRepository" />
 
+    <preference for="Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface" type="Sutunam\CmsDataSync\Model\WidgetInstance" />
+    <preference for="Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface" type="Sutunam\CmsDataSync\Model\WidgetInstancePage" />
+    <preference for="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" type="Sutunam\CmsDataSync\Model\WidgetRepository" />
+    <preference for="Sutunam\CmsDataSync\Api\Data\WidgetInstanceSearchResultsInterface"
+                type="Sutunam\CmsDataSync\Model\WidgetInstanceSearchResults" />
+
     <type name="Sutunam\CmsDataSync\Model\BlockRepository">
         <arguments>
             <argument name="hydrator" xsi:type="object">Magento\Framework\EntityManager\AbstractModelHydrator</argument>
@@ -25,11 +31,18 @@
         </arguments>
     </type>
 
+    <type name="Sutunam\CmsDataSync\Model\WidgetRepository">
+        <arguments>
+            <argument name="hydrator" xsi:type="object">Magento\Framework\EntityManager\AbstractModelHydrator</argument>
+        </arguments>
+    </type>
+
     <type name="Magento\Framework\EntityManager\HydratorPool">
         <arguments>
             <argument name="hydrators" xsi:type="array">
                 <item name="Sutunam\CmsDataSync\Api\Data\PageInterface" xsi:type="string">Magento\Framework\EntityManager\AbstractModelHydrator</item>
                 <item name="Sutunam\CmsDataSync\Api\Data\BlockInterface" xsi:type="string">Magento\Framework\EntityManager\AbstractModelHydrator</item>
+                <item name="Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface" xsi:type="string">Magento\Framework\EntityManager\AbstractModelHydrator</item>
             </argument>
         </arguments>
     </type>

@@ -205,7 +205,7 @@ class Block implements ProcessorInterface
                     continue;
                 }
 
-                $myBlockStoreIds  = !empty($myBlockStoreIds) ? $myBlockStoreIds : $myStoreIds;
+                $myBlockStoreIds  = $myBlockStoreIds ?: $myStoreIds;
 
                 $myBlock->setData($remoteBlock);
                 $myBlock->setStoreId(array_map('intval', $myBlockStoreIds));
