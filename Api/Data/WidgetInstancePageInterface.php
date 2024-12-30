@@ -13,6 +13,13 @@ interface WidgetInstancePageInterface
     public const ENTITIES = 'entities';
     public const PAGE_TEMPLATE = 'page_template';
 
+
+    public const PAGES = 'pages';
+    public const PAGE_LAYOUTS = 'page_layouts';
+    public const FOR = 'for';
+    public const BLOCK = 'block';
+    public const TEMPLATE = 'template';
+
     /**
      * @return int|null
      */

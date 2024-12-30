@@ -34,15 +34,15 @@ class WidgetRepository implements WidgetRepositoryInterface
     protected $hydrator;
 
     public function __construct(
-        \Magento\Widget\Model\Widget\InstanceFactory $instance,
-        \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory,
-        \Sutunam\CmsDataSync\Helper\Data $dataHelper,
+        \Magento\Widget\Model\Widget\InstanceFactory                              $instance,
+        \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory     $instanceCollectionFactory,
+        \Sutunam\CmsDataSync\Helper\Data                                          $dataHelper,
         \Sutunam\CmsDataSync\Api\Data\WidgetInstanceSearchResultsInterfaceFactory $searchResultsInterface,
-        \Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterfaceFactory $widgetInstanceInterface,
-        \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterfaceFactory $widgetInstancePageInterface,
-        DataObjectHelper $dataObjectHelper,
-        StoreManagerInterface $storeManager,
-        ?HydratorInterface $hydrator = null
+        \Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterfaceFactory              $widgetInstanceInterface,
+        \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterfaceFactory          $widgetInstancePageInterface,
+        DataObjectHelper                                                          $dataObjectHelper,
+        StoreManagerInterface                                                     $storeManager,
+        ?HydratorInterface                                                        $hydrator = null
     ) {
         $this->instance = $instance;
         $this->instanceCollectionFactory = $instanceCollectionFactory;
@@ -85,15 +85,15 @@ class WidgetRepository implements WidgetRepositoryInterface
     public function getByIdentifier($identifier, $storeIds)
     {
         $searchedCollection = $this->instanceCollectionFactory->create()
-            ->addFieldToFilter('identifier', ['eq' => $identifier]);
+            ->addFieldToFilter(WidgetInstanceInterface::IDENTIFIER, ['eq' => $identifier]);
 
         if ($storeIds) {
-            $searchedCollection->addFieldToFilter('store_ids', ['in' => explode(',', $storeIds)]);
+            $searchedCollection->addFieldToFilter(WidgetInstanceInterface::STORE_IDS, ['in' => explode(',', $storeIds)]);
         }
 
         $items = [];
         foreach ($searchedCollection->getAllIds() as $instanceId) {
-            $items[] = $this->convertInstanceToDTO($instanceId);;
+            $items[] = $this->convertInstanceToDTO($instanceId);
         }
         $searchResults = $this->searchResultsInterface->create();
         $searchResults->setItems($items);
@@ -105,19 +105,20 @@ class WidgetRepository implements WidgetRepositoryInterface
     /**
      * Save widget data
      *
-     * @param WidgetInstanceInterface $block
+     * @param WidgetInstanceInterface $widgetInstance
      * @return object|WidgetInstanceInterface
      * @throws CouldNotSaveException
      * @throws NoSuchEntityException
      */
     public function save(WidgetInstanceInterface $widgetInstance)
     {
-//        if ($widgetInstance->getInstanceId() && !$this->sutunamConfigHelper->isOverwrite()) {
-//            throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
-//        }
+        //        if ($widgetInstance->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
+        //            throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
+        //        }
+
         $instance = $this->instance->create();
 
-        if ($widgetInstance->getId()){
+        if ($widgetInstance->getId()) {
             $instance->load($widgetInstance->getId());
         }
 
@@ -130,10 +131,7 @@ class WidgetRepository implements WidgetRepositoryInterface
                 }
 
                 if (!empty($widgetInstance->getPageGroups())) {
-                    $pageGroupsArr = [];
-                    foreach ($widgetInstance->getPageGroups() as $pageGroup) {
-                        $pageGroupsArr[] = $pageGroup->getData();
-                    }
+                    $pageGroupsArr = $this->formatPageGroups($widgetInstance->getPageGroups());
                     $instance->setPageGroups($pageGroupsArr);
                 }
 
@@ -153,7 +151,8 @@ class WidgetRepository implements WidgetRepositoryInterface
      * @return WidgetInstanceInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function convertInstanceToDTO($instanceId) {
+    public function convertInstanceToDTO($instanceId)
+    {
         $widgetDTO = $this->widgetInstanceInterface->create();
         $loadInstance = $this->instance->create()->load($instanceId);
 
@@ -166,7 +165,7 @@ class WidgetRepository implements WidgetRepositoryInterface
         $widgetDTO->setData($loadInstance->getData());
         $widgetDTO->setId($loadInstance->getId());
         $widgetDTO->setStoreCodes($this->dataHelper->getStoreCodesByIds($loadInstance->getStoreIds()));
-        $widgetDTO->setThemeCode($this->dataHelper->getThemeCodeById($loadInstance->getData('theme_id')));
+        $widgetDTO->setThemeCode($this->dataHelper->getThemeCodeById($loadInstance->getData(WidgetInstanceInterface::THEME_ID)));
 
         if ($loadInstance->getPageGroups()) {
             $pageGroupsData = [];
@@ -185,8 +184,30 @@ class WidgetRepository implements WidgetRepositoryInterface
         return $widgetDTO;
     }
 
-
-//    public function formatPageGroups($listPageGroup) {
-//
-//    }
+    /**
+     * Convert page group from param to correct format using for saving
+     *
+     * @param WidgetInstancePageInterface[] $listPageGroup
+     * @return array
+     */
+    public function formatPageGroups($listPageGroup)
+    {
+        $result = [];
+        foreach ($listPageGroup as $pageGroup) {
+            $page = [];
+            $page[WidgetInstancePageInterface::PAGE_GROUP] = $pageGroup->getPageGroup();
+            $page[WidgetInstancePageInterface::PAGES] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
+            $page[WidgetInstancePageInterface::PAGE_LAYOUTS] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
+            $page[$pageGroup->getPageGroup()] = [
+                WidgetInstancePageInterface::PAGE_ID => $pageGroup->getPageId() ?: 0,
+                WidgetInstancePageInterface::LAYOUT_HANDLE => $pageGroup->getLayoutHandle() ?: '',
+                WidgetInstancePageInterface::FOR => $pageGroup->getPageFor(),
+                WidgetInstancePageInterface::BLOCK => $pageGroup->getBlockReference(),
+                WidgetInstancePageInterface::TEMPLATE => $pageGroup->getPageTemplate(),
+                WidgetInstancePageInterface::ENTITIES => $pageGroup->getEntities()
+            ];
+            $result[] = $page;
+        }
+        return $result;
+    }
 }

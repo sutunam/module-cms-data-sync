@@ -1,6 +1,6 @@
 <?php
 
-namespace Sutunam\CmsDataSync\Plugin\Block\Adminhtml\Widget\Instance\Edit\Tab;
+namespace Sutunam\CmsDataSync\Plugin\Magento\Widget\Block\Adminhtml\Widget\Instance\Edit\Tab;
 
 
 use Magento\Widget\Block\Adminhtml\Widget\Instance\Edit\Tab\Main;

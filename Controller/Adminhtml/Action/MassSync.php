@@ -50,7 +50,11 @@ class MassSync extends Action implements HttpPostActionInterface
     {
         $type = $this->getRequest()->getParam('type');
         $action = $this->getRequest()->getParam('action');
-        $ids = $this->filter->getCollection($this->processorFactory->getCollection($type))->getAllIds();
+        $ids = $this->getRequest()->getParam('ids');
+        if (!$ids) {
+            $ids = $this->filter->getCollection($this->processorFactory->getCollection($type))->getAllIds();
+        }
+
         if ($ids && $type && $action) {
             $success = 0;
             $processor = $this->processorFactory->create($type, []);

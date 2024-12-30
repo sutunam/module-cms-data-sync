@@ -19,6 +19,7 @@ class ApiHelper
 
     public const CMS_TYPE_BLOCK = 'Block';
     public const CMS_TYPE_PAGE = 'Page';
+    public const CMS_TYPE_WIDGET = 'Widget';
 
     public const REQUEST_SYNC_TYPE_PULL = 'pull';
 
