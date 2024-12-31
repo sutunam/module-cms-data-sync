@@ -38,4 +38,12 @@
                 type="Sutunam\CmsDataSync\Plugin\Magento\Backend\Block\Widget\Grid\Massaction"/>
     </type>
 
+<!--    <virtualType name="PullWidgetButton" type="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\PullBlockButton">-->
+<!--        <arguments>-->
+<!--            <argument name="data" xsi:type="array">-->
+<!--                <item name="action" xsi:type="string">Widget</item>-->
+<!--                <item name="type" xsi:type="string">pull</item>-->
+<!--            </argument>-->
+<!--        </arguments>-->
+<!--    </virtualType>-->
 </config>

@@ -163,7 +163,7 @@ class WidgetInstance extends Instance implements WidgetInstanceInterface
      */
     public function setTitle($title)
     {
-        $this->setData(self::SORT_ORDER, $title);
+        $this->setData(self::TITLE, $title);
 
         return $this;
     }

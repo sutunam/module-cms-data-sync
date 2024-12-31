@@ -3,6 +3,7 @@
 namespace Sutunam\CmsDataSync\Plugin\Model\Widget;
 
 use Magento\Framework\App\RequestFactory;
+use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
 use Sutunam\CmsDataSync\Helper\Data as DataHelper;
 
 class SavingIdentifier
@@ -17,6 +18,12 @@ class SavingIdentifier
      */
     protected $dataHelper;
 
+    /**
+     * Construct
+     *
+     * @param RequestFactory $request
+     * @param DataHelper $dataHelper
+     */
     public function __construct(
         RequestFactory $request,
         DataHelper $dataHelper
@@ -32,12 +39,19 @@ class SavingIdentifier
      * @return \Magento\Widget\Model\Widget\Instance
      */
     public function beforeSave(\Magento\Widget\Model\Widget\Instance $instance) {
-        $identifierParam = $this->request->create()->getParam('identifier');
-        if (!$identifierParam || !$instance->getData('identifier')) {
-            $instance->setData('identifier', $this->dataHelper->generateIdentifier($instance->getData('title')));
+        if ($instance->getData(WidgetInstanceInterface::IDENTIFIER)) {
             return $instance;
         }
-        $instance->setData('identifier', $identifierParam);
+
+        $identifierParam = $this->request->create()->getParam(WidgetInstanceInterface::IDENTIFIER);
+        if (!$identifierParam) {
+            $instance->setData(
+                WidgetInstanceInterface::IDENTIFIER,
+                $this->dataHelper->generateIdentifier($instance->getData('title'))
+            );
+            return $instance;
+        }
+        $instance->setData(WidgetInstanceInterface::IDENTIFIER, $identifierParam);
         return $instance;
     }
 }

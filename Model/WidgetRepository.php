@@ -12,41 +12,90 @@ use Magento\Widget\Model\Widget\Instance;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
 use Sutunam\CmsDataSync\Api\WidgetRepositoryInterface;
+use Sutunam\CmsDataSync\Helper\Config;
 
 class WidgetRepository implements WidgetRepositoryInterface
 {
+    /**
+     * @var \Magento\Widget\Model\Widget\InstanceFactory
+     */
     protected $instance;
 
+    /**
+     * @var \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory
+     */
     protected $instanceCollectionFactory;
 
+    /**
+     * @var \Sutunam\CmsDataSync\Helper\Data
+     */
     protected $dataHelper;
 
+    /**
+     * @var Config
+     */
+    protected $configHelper;
+
+    /**
+     * @var \Sutunam\CmsDataSync\Api\Data\WidgetInstanceSearchResultsInterfaceFactory
+     */
     protected $searchResultsInterface;
 
+    /**
+     * @var \Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterfaceFactory
+     */
     protected $widgetInstanceInterface;
 
+    /**
+     * @var \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterfaceFactory
+     */
     protected $widgetInstancePageInterface;
 
+    /**
+     * @var DataObjectHelper
+     */
     protected $dataObjectHelper;
 
+    /**
+     * @var StoreManagerInterface
+     */
     protected $storeManager;
 
+    /**
+     * @var HydratorInterface|mixed
+     */
     protected $hydrator;
 
+    /**
+     * Construct
+     *
+     * @param \Magento\Widget\Model\Widget\InstanceFactory $instance
+     * @param \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory
+     * @param \Sutunam\CmsDataSync\Helper\Data $dataHelper
+     * @param Config $configHelper
+     * @param \Sutunam\CmsDataSync\Api\Data\WidgetInstanceSearchResultsInterfaceFactory $searchResultsInterface
+     * @param \Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterfaceFactory $widgetInstanceInterface
+     * @param \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterfaceFactory $widgetInstancePageInterface
+     * @param DataObjectHelper $dataObjectHelper
+     * @param StoreManagerInterface $storeManager
+     * @param HydratorInterface|null $hydrator
+     */
     public function __construct(
-        \Magento\Widget\Model\Widget\InstanceFactory                              $instance,
-        \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory     $instanceCollectionFactory,
-        \Sutunam\CmsDataSync\Helper\Data                                          $dataHelper,
+        \Magento\Widget\Model\Widget\InstanceFactory $instance,
+        \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory,
+        \Sutunam\CmsDataSync\Helper\Data $dataHelper,
+        \Sutunam\CmsDataSync\Helper\Config $configHelper,
         \Sutunam\CmsDataSync\Api\Data\WidgetInstanceSearchResultsInterfaceFactory $searchResultsInterface,
-        \Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterfaceFactory              $widgetInstanceInterface,
-        \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterfaceFactory          $widgetInstancePageInterface,
-        DataObjectHelper                                                          $dataObjectHelper,
-        StoreManagerInterface                                                     $storeManager,
-        ?HydratorInterface                                                        $hydrator = null
+        \Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterfaceFactory $widgetInstanceInterface,
+        \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterfaceFactory $widgetInstancePageInterface,
+        DataObjectHelper $dataObjectHelper,
+        StoreManagerInterface $storeManager,
+        ?HydratorInterface $hydrator = null
     ) {
         $this->instance = $instance;
         $this->instanceCollectionFactory = $instanceCollectionFactory;
         $this->dataHelper = $dataHelper;
+        $this->configHelper = $configHelper;
         $this->searchResultsInterface = $searchResultsInterface;
         $this->widgetInstanceInterface = $widgetInstanceInterface;
         $this->widgetInstancePageInterface = $widgetInstancePageInterface;
@@ -88,7 +137,7 @@ class WidgetRepository implements WidgetRepositoryInterface
             ->addFieldToFilter(WidgetInstanceInterface::IDENTIFIER, ['eq' => $identifier]);
 
         if ($storeIds) {
-            $searchedCollection->addFieldToFilter(WidgetInstanceInterface::STORE_IDS, ['in' => explode(',', $storeIds)]);
+            $searchedCollection->addStoreFilter(explode(',', $storeIds));
         }
 
         $items = [];
@@ -112,9 +161,9 @@ class WidgetRepository implements WidgetRepositoryInterface
      */
     public function save(WidgetInstanceInterface $widgetInstance)
     {
-        //        if ($widgetInstance->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
-        //            throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
-        //        }
+        if ($widgetInstance->getId() && !$this->configHelper->isOverwrite()) {
+            throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
+        }
 
         $instance = $this->instance->create();
 
@@ -122,16 +171,21 @@ class WidgetRepository implements WidgetRepositoryInterface
             $instance->load($widgetInstance->getId());
         }
 
+        if ($widgetInstance->getCode() && !$this->dataHelper->getThemeIdByCode($widgetInstance->getThemeCode())) {
+            throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
+        }
+
         try {
             if (!$widgetInstance->getOrigData()) {
                 $instance->setData($widgetInstance->getData());
+                $instance->setThemeId($this->dataHelper->getThemeIdByCode($widgetInstance->getThemeCode()));
 
                 if (empty($widgetInstance->getStoreIds())) {
                     $instance->setStoreIds(implode(',', $this->storeManager->getStore()->getId()));
                 }
 
                 if (!empty($widgetInstance->getPageGroups())) {
-                    $pageGroupsArr = $this->formatPageGroups($widgetInstance->getPageGroups());
+                    $pageGroupsArr = $this->dataHelper->formatPageGroupsToSave($widgetInstance->getPageGroups());
                     $instance->setPageGroups($pageGroupsArr);
                 }
 
@@ -182,32 +236,5 @@ class WidgetRepository implements WidgetRepositoryInterface
         }
 
         return $widgetDTO;
-    }
-
-    /**
-     * Convert page group from param to correct format using for saving
-     *
-     * @param WidgetInstancePageInterface[] $listPageGroup
-     * @return array
-     */
-    public function formatPageGroups($listPageGroup)
-    {
-        $result = [];
-        foreach ($listPageGroup as $pageGroup) {
-            $page = [];
-            $page[WidgetInstancePageInterface::PAGE_GROUP] = $pageGroup->getPageGroup();
-            $page[WidgetInstancePageInterface::PAGES] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
-            $page[WidgetInstancePageInterface::PAGE_LAYOUTS] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
-            $page[$pageGroup->getPageGroup()] = [
-                WidgetInstancePageInterface::PAGE_ID => $pageGroup->getPageId() ?: 0,
-                WidgetInstancePageInterface::LAYOUT_HANDLE => $pageGroup->getLayoutHandle() ?: '',
-                WidgetInstancePageInterface::FOR => $pageGroup->getPageFor(),
-                WidgetInstancePageInterface::BLOCK => $pageGroup->getBlockReference(),
-                WidgetInstancePageInterface::TEMPLATE => $pageGroup->getPageTemplate(),
-                WidgetInstancePageInterface::ENTITIES => $pageGroup->getEntities()
-            ];
-            $result[] = $page;
-        }
-        return $result;
     }
 }

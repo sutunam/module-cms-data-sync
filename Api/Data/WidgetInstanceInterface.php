@@ -6,7 +6,10 @@ use \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
 
 interface WidgetInstanceInterface
 {
+    public const ID = 'id';
+
     public const INSTANCE_ID = 'instance_id';
+
     public const INSTANCE_TYPE = 'instance_type';
 
     public const THEME_ID = 'theme_id';

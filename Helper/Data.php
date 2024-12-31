@@ -3,6 +3,7 @@
 namespace Sutunam\CmsDataSync\Helper;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\DataObject;
 use Magento\Framework\Filesystem;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Api\Data\StoreInterface;
@@ -12,8 +13,12 @@ use Magento\Store\Model\ResourceModel\Store\CollectionFactory;
 use Magento\Store\Model\StoreRepository;
 use Magento\Theme\Model\Theme;
 use Magento\Theme\Model\ThemeFactory;
+use Magento\Widget\Model\Widget\Instance;
+use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
+use Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 use Sutunam\CmsDataSync\Logger\Logger;
+use Sutunam\CmsDataSync\Model\WidgetInstance;
 
 class Data
 {
@@ -326,5 +331,77 @@ class Data
         $bind = [':code' => (string)$themeCode];
 
         return $connection->fetchOne($select, $bind);
+    }
+
+    /**
+     * Convert page group from param to correct format using for saving
+     *
+     * @param WidgetInstancePageInterface[]|mixed $listPageGroup
+     * @return array
+     */
+    public function formatPageGroupsToSave($listPageGroup)
+    {
+        $result = [];
+        foreach ($listPageGroup as $pageGroup) {
+            $page = [];
+            $page[WidgetInstancePageInterface::PAGE_GROUP] = $pageGroup[WidgetInstancePageInterface::PAGE_GROUP] ?? '';
+            $page[WidgetInstancePageInterface::PAGES] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
+            $page[WidgetInstancePageInterface::PAGE_LAYOUTS] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
+            $page[$pageGroup[WidgetInstancePageInterface::PAGE_GROUP]] = [
+                WidgetInstancePageInterface::PAGE_ID => 0,
+                WidgetInstancePageInterface::LAYOUT_HANDLE => $pageGroup[WidgetInstancePageInterface::LAYOUT_HANDLE] ?? '',
+                WidgetInstancePageInterface::FOR => $pageGroup[WidgetInstancePageInterface::PAGE_FOR] ?? '',
+                WidgetInstancePageInterface::BLOCK => $pageGroup[WidgetInstancePageInterface::BLOCK_REFERENCE] ?? '',
+                WidgetInstancePageInterface::TEMPLATE => $pageGroup[WidgetInstancePageInterface::PAGE_TEMPLATE] ?? '',
+                WidgetInstancePageInterface::ENTITIES => $pageGroup[WidgetInstancePageInterface::ENTITIES] ?? '',
+            ];
+            $result[] = $page;
+        }
+        return $result;
+    }
+
+    /**
+     * Convert page groups to the correct format of API
+     *
+     * @param array $listPageGroupParams
+     * @return array
+     */
+    public function formatPageGroupsToParams($listPageGroupParams)
+    {
+        $pageGroups = [];
+        foreach ($listPageGroupParams as $pageGroup) {
+            $pageGroups[] = [
+                WidgetInstancePageInterface::PAGE_ID => 0,
+                WidgetInstancePageInterface::PAGE_GROUP => $pageGroup[WidgetInstancePageInterface::PAGE_GROUP] ?? '',
+                WidgetInstancePageInterface::LAYOUT_HANDLE => $pageGroup[WidgetInstancePageInterface::LAYOUT_HANDLE] ?? '',
+                WidgetInstancePageInterface::BLOCK_REFERENCE => $pageGroup[WidgetInstancePageInterface::BLOCK_REFERENCE] ?? '',
+                WidgetInstancePageInterface::PAGE_FOR => $pageGroup[WidgetInstancePageInterface::PAGE_FOR] ?? '',
+                WidgetInstancePageInterface::ENTITIES => $pageGroup[WidgetInstancePageInterface::ENTITIES] ?? '',
+                WidgetInstancePageInterface::PAGE_TEMPLATE => $pageGroup[WidgetInstancePageInterface::PAGE_TEMPLATE] ?? '',
+            ];
+        }
+        return $pageGroups;
+    }
+
+    /**
+     * Format widget instance params to correct format
+     *
+     * @param WidgetInstanceInterface|Instance|array $widgetInstanceParams
+     * @return array
+     */
+    public function formatWidgetInstanceParams($widgetInstanceParams)
+    {
+        if ($widgetInstanceParams instanceof DataObject) {
+            $widgetInstanceParams = $widgetInstanceParams->getData();
+        }
+
+        return [
+            WidgetInstanceInterface::IDENTIFIER => $widgetInstanceParams[WidgetInstanceInterface::IDENTIFIER] ?? '',
+            WidgetInstanceInterface::TITLE => $widgetInstanceParams[WidgetInstanceInterface::TITLE] ?? '',
+            WidgetInstanceInterface::INSTANCE_TYPE => $widgetInstanceParams[WidgetInstanceInterface::INSTANCE_TYPE] ?? '',
+            WidgetInstanceInterface::THEME_CODE => $this->getThemeCodeById($widgetInstanceParams[WidgetInstanceInterface::THEME_ID]) ?? '',
+            WidgetInstanceInterface::WIDGET_PARAMETERS => $widgetInstanceParams[WidgetInstanceInterface::WIDGET_PARAMETERS] ?? '',
+            WidgetInstanceInterface::SORT_ORDER => $widgetInstanceParams[WidgetInstanceInterface::SORT_ORDER] ?? '',
+        ];
     }
 }

@@ -12,6 +12,12 @@ class Instance extends \Magento\Widget\Block\Adminhtml\Widget\Instance
      */
     protected $configHelper;
 
+    /**
+     * Construct
+     *
+     * @param \Sutunam\CmsDataSync\Helper\Config $configHelper
+     * @param Context $context
+     */
     public function __construct(
         \Sutunam\CmsDataSync\Helper\Config $configHelper,
         Context $context

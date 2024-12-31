@@ -66,7 +66,7 @@ class ApiHelper
     }
 
     /**
-     * Get remote cms page/block by identifier
+     * Get remote cms page/block/widget by identifier
      *
      * @param string $identifier
      * @param string $cmsType
@@ -95,7 +95,7 @@ class ApiHelper
     }
 
     /**
-     * Get all remote cms block/page depend on cmsType
+     * Get all remote cms block/page/widget depend on cmsType
      *
      * @param string $cmsType
      * @return array|mixed
@@ -110,7 +110,14 @@ class ApiHelper
                 $paramPrefix . '[0][condition_type]' => 'neq',
             ];
 
-            $response = $this->api->request(Request::METHOD_GET, "sutunam/cms$cmsType/search", $queryParams);
+            $endpoint = "sutunam/cms$cmsType/search";
+
+            if ($cmsType == self::CMS_TYPE_WIDGET) {
+                $endpoint = "sutunam/cms$cmsType";
+                $queryParams = [];
+            }
+
+            $response = $this->api->request(Request::METHOD_GET, $endpoint, $queryParams);
 
             if (!$response || !$response['success']) {
                 return [];

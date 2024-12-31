@@ -39,7 +39,8 @@ class PullBlockButton extends GenericButton implements ButtonProviderInterface
         Context $context,
         BlockRepositoryInterface $blockRepository,
         ConfigHelper $configHelper,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        $data = []
     ) {
         $this->configHelper = $configHelper;
         $this->logger = $logger;

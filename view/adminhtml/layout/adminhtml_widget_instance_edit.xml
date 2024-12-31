@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="page.actions.toolbar">
+            <block class="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\PullBlockButton" as="sync_pull"/>
+        </referenceBlock>
+    </body>
+</page>
