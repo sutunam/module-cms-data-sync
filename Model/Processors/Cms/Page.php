@@ -119,7 +119,7 @@ class Page implements ProcessorInterface
 
         $remotePages = $this->apiHelper->getDataByIdentifier(
             $page->getIdentifier(),
-            ApiHelper::CMS_TYPE_BLOCK,
+            ApiHelper::CMS_TYPE_PAGE,
             ['store_ids' => implode(',', $remoteStoreIds)]
         );
         if (!$remotePages) {
@@ -136,6 +136,7 @@ class Page implements ProcessorInterface
         try {
             $page->setData($remotePage);
             $page->setId($id);
+            $page->setStoreId(array_map('intval', $pageStoreIds));
             $page->save();
             if ($this->configHelper->isSyncMedia()) {
                 $this->dataHelper->saveAllImageFromCmsContent($page->getContent(), true);
@@ -162,7 +163,7 @@ class Page implements ProcessorInterface
             'message' => ''
         ];
 
-        $allRemotePages = $this->apiHelper->getAllCms(ApiHelper::CMS_TYPE_BLOCK);
+        $allRemotePages = $this->apiHelper->getAllCms(ApiHelper::CMS_TYPE_PAGE);
         if (!$allRemotePages) {
             $result['message'] = __(
                 'There is no remote page on the remote host %1',
@@ -202,6 +203,11 @@ class Page implements ProcessorInterface
                 }
 
                 if (!$this->validatePage($remotePage, $myPageStoreIds, $myStoreIds)) {
+                    $result['message'] .= __(
+                        'Pull Page ID: %1 ||Status: %2.<br>',
+                        $myPageId,
+                        __('Skipped')
+                    );
                     continue;
                 }
 
@@ -218,6 +224,11 @@ class Page implements ProcessorInterface
                     /** @phpstan-ignore-next-line */
                     $myPage->save();
                 } else {
+                    $result['message'] .= __(
+                        'Pull Page ID: %1 ||Status: %2.<br>',
+                        $myPageId,
+                        __('Skipped')
+                    );
                     continue;
                 }
 
@@ -229,8 +240,18 @@ class Page implements ProcessorInterface
                 }
 
                 if ($myPageId) {
+                    $result['message'] .= __(
+                        'Pull Page ID: %1 ||Status: %2.<br>',
+                        $myPageId,
+                        __('Updated Successfully')
+                    );
                     $result['total_update_success']++;
                 } else {
+                    $result['message'] .= __(
+                        'Pull Page ID: %1 ||Status: %2.<br>',
+                        $myPageId,
+                        __('Created Successfully')
+                    );
                     $result['total_create_success']++;
                 }
             } catch (\Exception $e) {
@@ -253,17 +274,35 @@ class Page implements ProcessorInterface
     {
         $result = [
             "success" => false,
+            "type" => "",
             "message" => ""
         ];
 
         $entity = $this->getPage($id);
         if ($entity) {
             $remoteStoreIds = $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($entity->getStores());
-            $data = ["page" => $entity->getData()];
+            $data = ["page" => [
+                PageInterface::IDENTIFIER => $entity->getIdentifier(),
+                PageInterface::TITLE => $entity->getTitle(),
+                PageInterface::PAGE_LAYOUT  => $entity->getPageLayout(),
+                PageInterface::META_TITLE => $entity->getMetaTitle(),
+                PageInterface::META_KEYWORDS => $entity->getMetaKeywords(),
+                PageInterface::META_DESCRIPTION => $entity->getMetaDescription(),
+                PageInterface::CONTENT_HEADING => $entity->getContentHeading(),
+                PageInterface::CONTENT => $entity->getContent(),
+                PageInterface::SORT_ORDER => $entity->getSortOrder(),
+                PageInterface::LAYOUT_UPDATE_XML => $entity->getLayoutUpdateXml(),
+                PageInterface::CUSTOM_THEME => $entity->getCustomTheme(),
+                PageInterface::CUSTOM_ROOT_TEMPLATE => $entity->getCustomRootTemplate(),
+                PageInterface::CUSTOM_LAYOUT_UPDATE_XML => $entity->getCustomLayoutUpdateXml(),
+                PageInterface::CUSTOM_THEME_FROM => $entity->getCustomThemeFrom(),
+                PageInterface::CUSTOM_THEME_TO => $entity->getCustomThemeTo(),
+                SutunamPageInterface::ACTIVE => $entity->isActive(),
+            ]];
 
             $remotePages = $this->apiHelper->getDataByIdentifier(
                 $entity->getIdentifier(),
-                ApiHelper::CMS_TYPE_BLOCK,
+                ApiHelper::CMS_TYPE_PAGE,
                 ['store_ids' => implode(',', $remoteStoreIds)]
             );
 
@@ -275,18 +314,21 @@ class Page implements ProcessorInterface
 
             if (!$remotePages) {
                 $data['page'][SutunamPageInterface::STORE_ID] = $remoteStoreIds;
+
                 $result = $this->apiConnection->request(
                     Request::METHOD_POST,
                     self::SUTUNAM_CMS_PAGE_API_ENDPOINT,
                     [],
                     $data
                 );
+                $result['type'] = 'created';
                 return $result;
             }
 
             foreach ($remotePages as $remotePage) {
-                $remotePageId = $remotePage['id'];
+                $remotePageId = $remotePage[SutunamPageInterface::ID];
                 $data['page'][SutunamPageInterface::STORE_ID] = $remotePage[SutunamPageInterface::STORE_ID];
+                $data['page'][SutunamPageInterface::ID] = $remotePageId;
                 $response = $this->apiConnection->request(
                     Request::METHOD_PUT,
                     self::SUTUNAM_CMS_PAGE_API_ENDPOINT . $remotePageId,
@@ -295,10 +337,14 @@ class Page implements ProcessorInterface
                 );
                 if ($response['success']) {
                     $result['success'] = true;
+                    $result['type'] = 'updated';
+                    return $result;
                 }
+
+                $result['message'] = $response['message'];
             }
         } else {
-            $result['response'] = __("Couldn't load CMS page content.");
+            $result['message'] = __("Couldn't load CMS page content.");
         }
         return $result;
     }
@@ -311,7 +357,8 @@ class Page implements ProcessorInterface
     public function pushAll()
     {
         $result = [
-            'total_success' => 0,
+            'total_update_success' => 0,
+            'total_create_success' => 0,
             'total_failed' => 0,
             'message' => ''
         ];
@@ -329,9 +376,31 @@ class Page implements ProcessorInterface
             $response = $this->push($pageId);
             if (!$response['success']) {
                 $result['total_failed']++;
+                $result['message'] .= __(
+                    'Push Page ID: %1 ||Status: %2.<br>',
+                    $pageId,
+                    $response['message']
+                );
                 continue;
             }
-            $result['total_success']++;
+
+            if ($response['type'] == 'created') {
+                $result['total_create_success']++;
+                $result['message'] .= __(
+                    'Push Page ID: %1 ||Status: %2.<br>',
+                    $pageId,
+                    __('Created Successfully')
+                );
+                continue;
+            }
+
+            $result['message'] .= __(
+                'Push Page ID: %1 ||Status: %2.<br>',
+                $pageId,
+                __('Updated Successfully')
+            );
+
+            $result['total_update_success']++;
         }
         return $result;
     }
@@ -368,7 +437,7 @@ class Page implements ProcessorInterface
             //Check there's any other remote page using diff ids
             $remotePageUsingDiffIds = $this->apiHelper->getDataByIdentifier(
                 $remotePage[PageInterface::IDENTIFIER],
-                ApiHelper::CMS_TYPE_BLOCK,
+                ApiHelper::CMS_TYPE_PAGE,
                 $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($diffIds)
             );
 

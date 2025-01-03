@@ -89,7 +89,7 @@
         <arguments>
             <argument name="params" xsi:type="array">
                 <item name="type" xsi:type="string">Widget</item>
-                <item name="action" xsi:type="string">push</item>
+                <item name="action" xsi:type="string">pull</item>
             </argument>
         </arguments>
     </virtualType>

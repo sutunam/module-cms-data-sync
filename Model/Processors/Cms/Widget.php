@@ -18,7 +18,7 @@ use Sutunam\CmsDataSync\Logger\Logger;
 class Widget implements ProcessorInterface
 {
 
-    public const SUTUNAM_CMS_WIDGET_API_ENDPOINT = "sutunam/cmsWidget/";
+    public const SUTUNAM_CMS_WIDGET_API_ENDPOINT = 'sutunam/cmsWidget/';
 
     /**
      * @var WidgetRepositoryInterface
@@ -239,6 +239,11 @@ class Widget implements ProcessorInterface
                 }
 
                 if (!$this->validateWidgetInstance($remoteWidgetInstance, $myWidgetInstanceStoreIds, $myStoreIds)) {
+                    $result['message'] .= __(
+                        'Pull Widget ID: %1 ||Status: %2.<br>',
+                        $myWidgetInstanceId,
+                        __('Skipped')
+                    );
                     continue;
                 }
 
@@ -261,6 +266,11 @@ class Widget implements ProcessorInterface
                 } elseif (!$myWidgetInstanceId) {
                     $myWidgetInstance->save();
                 } else {
+                    $result['message'] .= __(
+                        'Pull Widget ID: %1 ||Status: %2.<br>',
+                        $myWidgetInstanceId,
+                        __('Skipped')
+                    );
                     continue;
                 }
 
@@ -275,8 +285,18 @@ class Widget implements ProcessorInterface
 
                 if ($myWidgetInstanceId) {
                     $result['total_update_success']++;
+                    $result['message'] .= __(
+                        'Pull Widget ID: %1 ||Status: %2.<br>',
+                        $myWidgetInstanceId,
+                        __('Updated Successfully')
+                    );
                 } else {
                     $result['total_create_success']++;
+                    $result['message'] .= __(
+                        'Pull Widget ID: %1 ||Status: %2.<br>',
+                        $myWidgetInstanceId,
+                        __('Created Successfully')
+                    );
                 }
             } catch (\Exception $e) {
                 $result['total_failed']++;
@@ -297,9 +317,9 @@ class Widget implements ProcessorInterface
     public function push($id)
     {
         $result = [
-            "success" => false,
-            "type" => "",
-            "message" => ""
+            'success' => false,
+            'type' => '',
+            'message' => ''
         ];
         $entity = $this->getWigetInstance($id);
         if ($entity) {
@@ -322,7 +342,7 @@ class Widget implements ProcessorInterface
                         $media[] = $image;
                     }
                 }
-                $data['block'][WidgetInstanceInterface::MEDIA] = $media;
+                $data['widgetInstance'][WidgetInstanceInterface::MEDIA] = $media;
             }
 
             if (!$remoteWidgetInstances) {
@@ -341,6 +361,7 @@ class Widget implements ProcessorInterface
                 $remoteWidgetInstanceId = $remoteWidgetInstance[WidgetInstanceInterface::ID];
                 $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] =
                     explode(',', $remoteWidgetInstance[WidgetInstanceInterface::STORE_IDS]);
+                $data['widgetInstance'][WidgetInstanceInterface::ID] = $remoteWidgetInstanceId;
                 $response = $this->apiConnection->request(
                     Request::METHOD_PUT,
                     self::SUTUNAM_CMS_WIDGET_API_ENDPOINT . $remoteWidgetInstanceId,
@@ -350,11 +371,14 @@ class Widget implements ProcessorInterface
                 if ($response['success']) {
                     $result['success'] = true;
                     $result['type'] = 'updated';
+                    return $result;
                 }
+
+                $result['message'] = $response['message'];
             }
 
         } else {
-            $result['response'] = __("Couldn't load CMS page content.");
+            $result['message'] = __('Couldn\'t load CMS widget content.');
         }
         return $result;
     }
@@ -386,14 +410,29 @@ class Widget implements ProcessorInterface
             $response = $this->push($widgetId);
             if (!$response['success']) {
                 $result['total_failed']++;
+                $result['message'] .= __(
+                    'Push Widget ID: %1 ||Status: %2.<br>',
+                    $widgetId,
+                    $response['message']
+                );
                 continue;
             }
 
             if ($response['type'] == 'created') {
                 $result['total_create_success']++;
+                $result['message'] .= __(
+                    'Push Widget ID: %1 ||Status: %2.<br>',
+                    $widgetId,
+                    __('Created Successfully')
+                );
                 continue;
             }
 
+            $result['message'] .= __(
+                'Push Widget ID: %1 ||Status: %2.<br>',
+                $widgetId,
+                __('Updated Successfully')
+            );
             $result['total_update_success']++;
         }
         return $result;
@@ -426,13 +465,13 @@ class Widget implements ProcessorInterface
      */
     public function validateWidgetInstance($remoteWidgetInstance, $myWidgetInstanceStoreIds, $mappingStoreIds)
     {
-        //Get list diff stores id from block found in collection with list store gotten from remote codes list
+        //Get list diff stores id from widget found in collection with list store gotten from remote codes list
         $diffIds = array_diff($myWidgetInstanceStoreIds, $mappingStoreIds);
         if ($diffIds) {
-            //Check there's any other remote block using diff ids
+            //Check there's any other remote widget using diff ids
             $remoteWidgetInstanceUsingDiffIds = $this->apiHelper->getDataByIdentifier(
                 $remoteWidgetInstance[WidgetInstanceInterface::IDENTIFIER],
-                ApiHelper::CMS_TYPE_BLOCK,
+                ApiHelper::CMS_TYPE_WIDGET,
                 $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($diffIds)
             );
 
