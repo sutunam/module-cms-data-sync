@@ -23,7 +23,6 @@ class WidgetInstance extends Instance implements WidgetInstanceInterface
         return $this->_getData(self::THEME_ID);
     }
 
-
     /**
      * @inheritdoc
      */

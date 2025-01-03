@@ -38,7 +38,8 @@ class SavingIdentifier
      * @param \Magento\Widget\Model\Widget\Instance $instance
      * @return \Magento\Widget\Model\Widget\Instance
      */
-    public function beforeSave(\Magento\Widget\Model\Widget\Instance $instance) {
+    public function beforeSave(\Magento\Widget\Model\Widget\Instance $instance)
+    {
         if ($instance->getData(WidgetInstanceInterface::IDENTIFIER)) {
             return $instance;
         }

@@ -73,6 +73,7 @@ class Instance extends \Magento\Widget\Block\Adminhtml\Widget\Instance
     /**
      * Get action url
      *
+     * @param string $action
      * @return string
      */
     protected function getActionUrl($action)

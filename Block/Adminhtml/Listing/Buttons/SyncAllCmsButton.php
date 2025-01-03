@@ -25,6 +25,13 @@ class SyncAllCmsButton implements ButtonProviderInterface
      */
     protected $data;
 
+    /**
+     * Construct
+     *
+     * @param Context $context
+     * @param ConfigHelper $configHelper
+     * @param array $data
+     */
     public function __construct(
         Context $context,
         ConfigHelper $configHelper,

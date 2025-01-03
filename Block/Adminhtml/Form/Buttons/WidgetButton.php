@@ -70,6 +70,11 @@ class WidgetButton extends Container
         ];
     }
 
+    /**
+     * Get action url
+     *
+     * @return string
+     */
     protected function getActionUrl()
     {
         return $this->getUrl(

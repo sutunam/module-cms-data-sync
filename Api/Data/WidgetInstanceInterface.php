@@ -33,132 +33,180 @@ interface WidgetInstanceInterface
     public const MEDIA = 'media';
 
     /**
+     * Get Id
+     *
      * @return int|null
      */
     public function getId();
 
     /**
+     * Get Instance Type
+     *
      * @return string|null
      */
     public function getInstanceType();
 
     /**
+     * Get theme id
+     *
      * @return int
      */
     public function getThemeId();
 
     /**
+     * Get theme code
+     *
      * @return string
      */
     public function getThemeCode();
 
     /**
+     * Get store ids list
+     *
      * @return int[]
      */
     public function getStoreIds();
 
     /**
+     * Get store codes
+     *
      * @return string[]
      */
     public function getStoreCodes();
 
     /**
+     * Get Widget params
+     *
      * @return mixed
      */
     public function getWidgetParameters();
 
     /**
+     * Get Identifier
+     *
      * @return string|null
      */
     public function getIdentifier();
 
     /**
+     * Get title
+     *
      * @return string|null
      */
     public function getTitle();
 
     /**
+     * Get sort order
+     *
      * @return int
      */
     public function getSortOrder();
 
     /**
+     * Get Page Groups
+     *
      * @return \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface[]
      */
     public function getPageGroups();
 
     /**
+     * Get Media
+     *
      * @return string[]
      */
     public function getMedia();
 
     /**
+     * Set Id
+     *
      * @param int $id
      * @return WidgetInstanceInterface
      */
     public function setId($id);
 
     /**
+     * set Instance type
+     *
      * @param string $instanceType
      * @return WidgetInstanceInterface
      */
     public function setInstanceType($instanceType);
 
     /**
+     * Set theme id
+     *
      * @param int $themeId
      * @return WidgetInstanceInterface
      */
     public function setThemeId($themeId);
 
     /**
+     * Set theme code
+     *
      * @param string $themeCode
      * @return WidgetInstanceInterface
      */
     public function setThemeCode($themeCode);
 
     /**
+     * Set store ids
+     *
      * @param int[] $storeIds
      * @return WidgetInstanceInterface
      */
     public function setStoreIds($storeIds);
 
     /**
+     * Set store codes
+     *
      * @param string[] $storeCodes
      * @return WidgetInstanceInterface
      */
     public function setStoreCodes($storeCodes);
 
     /**
+     * Set widget params
+     *
      * @param mixed $widgetParameters
      * @return WidgetInstanceInterface
      */
     public function setWidgetParameters($widgetParameters);
 
     /**
+     * Set identifier
+     *
      * @param string $identifier
      * @return WidgetInstanceInterface
      */
     public function setIdentifier($identifier);
 
     /**
+     * Set title
+     *
      * @param string|null $title
      * @return WidgetInstanceInterface
      */
     public function setTitle($title);
 
     /**
+     * Set sort order
+     *
      * @param int $sortOrder
      * @return WidgetInstanceInterface
      */
     public function setSortOrder($sortOrder);
 
     /**
+     * Set page groups
+     *
      * @param \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface[] $pageGroups
      * @return WidgetInstanceInterface
      */
     public function setPageGroups($pageGroups);
 
     /**
+     * Set media
+     *
      * @param string[] $media
      * @return WidgetInstanceInterface
      */

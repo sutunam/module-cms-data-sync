@@ -57,12 +57,24 @@ class Data
      */
     protected $configHelper;
 
+    /**
+     * @var \Magento\Framework\Filter\FilterManager
+     */
     protected $filter;
 
+    /**
+     * @var \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory
+     */
     protected $instanceCollectionFactory;
 
+    /**
+     * @var ThemeFactory
+     */
     protected $theme;
 
+    /**
+     * @var \Magento\Theme\Model\ResourceModel\Theme
+     */
     protected $themeResource;
 
     /**
@@ -79,6 +91,10 @@ class Data
      * @param StoreRepository $storeRepository
      * @param Filesystem $fileSystem
      * @param Config $configHelper
+     * @param \Magento\Framework\Filter\FilterManager $filter
+     * @param \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory
+     * @param ThemeFactory $theme
+     * @param \Magento\Theme\Model\ResourceModel\Theme $themeResource
      * @param Logger $logger
      */
     public function __construct(
@@ -309,6 +325,12 @@ class Data
         }
     }
 
+    /**
+     * Generated title to identifier
+     *
+     * @param string|null $title
+     * @return string
+     */
     public function generateIdentifier($title) {
         $checkDuplicatedTitle = $this->instanceCollectionFactory->create()->addFieldToFilter('title', ['eq' => $title]);
         $lowercaseTitle = strtolower($title);
@@ -319,14 +341,30 @@ class Data
         return $this->filter->translitUrl($lowercaseTitle);
     }
 
+    /**
+     * Get Theme code by theme id
+     *
+     * @param int|string $themeId
+     * @return string
+     */
     public function getThemeCodeById($themeId) {
         return $this->theme->create()->load($themeId)->getCode();
     }
 
+    /**
+     * Get Theme id by theme code
+     *
+     * @param string|null $themeCode
+     * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function getThemeIdByCode($themeCode) {
         $connection = $this->themeResource->getConnection();
 
-        $select = $connection->select()->from($this->themeResource->getMainTable(), 'theme_id')->where('code = :code');
+        $select = $connection->select()->from(
+            $this->themeResource->getMainTable(),
+            'theme_id'
+        )->where('code = :code');
 
         $bind = [':code' => (string)$themeCode];
 
@@ -349,7 +387,8 @@ class Data
             $page[WidgetInstancePageInterface::PAGE_LAYOUTS] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
             $page[$pageGroup[WidgetInstancePageInterface::PAGE_GROUP]] = [
                 WidgetInstancePageInterface::PAGE_ID => 0,
-                WidgetInstancePageInterface::LAYOUT_HANDLE => $pageGroup[WidgetInstancePageInterface::LAYOUT_HANDLE] ?? '',
+                WidgetInstancePageInterface::LAYOUT_HANDLE =>
+                    $pageGroup[WidgetInstancePageInterface::LAYOUT_HANDLE] ?? '',
                 WidgetInstancePageInterface::FOR => $pageGroup[WidgetInstancePageInterface::PAGE_FOR] ?? '',
                 WidgetInstancePageInterface::BLOCK => $pageGroup[WidgetInstancePageInterface::BLOCK_REFERENCE] ?? '',
                 WidgetInstancePageInterface::TEMPLATE => $pageGroup[WidgetInstancePageInterface::PAGE_TEMPLATE] ?? '',
@@ -373,11 +412,14 @@ class Data
             $pageGroups[] = [
                 WidgetInstancePageInterface::PAGE_ID => 0,
                 WidgetInstancePageInterface::PAGE_GROUP => $pageGroup[WidgetInstancePageInterface::PAGE_GROUP] ?? '',
-                WidgetInstancePageInterface::LAYOUT_HANDLE => $pageGroup[WidgetInstancePageInterface::LAYOUT_HANDLE] ?? '',
-                WidgetInstancePageInterface::BLOCK_REFERENCE => $pageGroup[WidgetInstancePageInterface::BLOCK_REFERENCE] ?? '',
+                WidgetInstancePageInterface::LAYOUT_HANDLE =>
+                    $pageGroup[WidgetInstancePageInterface::LAYOUT_HANDLE] ?? '',
+                WidgetInstancePageInterface::BLOCK_REFERENCE =>
+                    $pageGroup[WidgetInstancePageInterface::BLOCK_REFERENCE] ?? '',
                 WidgetInstancePageInterface::PAGE_FOR => $pageGroup[WidgetInstancePageInterface::PAGE_FOR] ?? '',
                 WidgetInstancePageInterface::ENTITIES => $pageGroup[WidgetInstancePageInterface::ENTITIES] ?? '',
-                WidgetInstancePageInterface::PAGE_TEMPLATE => $pageGroup[WidgetInstancePageInterface::PAGE_TEMPLATE] ?? '',
+                WidgetInstancePageInterface::PAGE_TEMPLATE =>
+                    $pageGroup[WidgetInstancePageInterface::PAGE_TEMPLATE] ?? '',
             ];
         }
         return $pageGroups;
@@ -398,9 +440,12 @@ class Data
         return [
             WidgetInstanceInterface::IDENTIFIER => $widgetInstanceParams[WidgetInstanceInterface::IDENTIFIER] ?? '',
             WidgetInstanceInterface::TITLE => $widgetInstanceParams[WidgetInstanceInterface::TITLE] ?? '',
-            WidgetInstanceInterface::INSTANCE_TYPE => $widgetInstanceParams[WidgetInstanceInterface::INSTANCE_TYPE] ?? '',
-            WidgetInstanceInterface::THEME_CODE => $this->getThemeCodeById($widgetInstanceParams[WidgetInstanceInterface::THEME_ID]) ?? '',
-            WidgetInstanceInterface::WIDGET_PARAMETERS => $widgetInstanceParams[WidgetInstanceInterface::WIDGET_PARAMETERS] ?? '',
+            WidgetInstanceInterface::INSTANCE_TYPE =>
+                $widgetInstanceParams[WidgetInstanceInterface::INSTANCE_TYPE] ?? '',
+            WidgetInstanceInterface::THEME_CODE =>
+                $this->getThemeCodeById($widgetInstanceParams[WidgetInstanceInterface::THEME_ID]) ?? '',
+            WidgetInstanceInterface::WIDGET_PARAMETERS =>
+                $widgetInstanceParams[WidgetInstanceInterface::WIDGET_PARAMETERS] ?? '',
             WidgetInstanceInterface::SORT_ORDER => $widgetInstanceParams[WidgetInstanceInterface::SORT_ORDER] ?? '',
         ];
     }

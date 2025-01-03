@@ -195,7 +195,9 @@ class Widget implements ProcessorInterface
             return $result;
         }
         foreach ($allRemoteWidgetInstances as $remoteWidgetInstance) {
-            $myThemeId = $this->dataHelper->getThemeIdByCode($remoteWidgetInstance[WidgetInstanceInterface::THEME_CODE]);
+            $myThemeId = $this->dataHelper->getThemeIdByCode(
+                $remoteWidgetInstance[WidgetInstanceInterface::THEME_CODE]
+            );
 
             if (!$myThemeId) {
                 continue;
@@ -306,7 +308,8 @@ class Widget implements ProcessorInterface
             $remoteStoreIds = $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($entity->getStoreIds());
 
             $data = ['widgetInstance' => $this->dataHelper->formatWidgetInstanceParams($entity)];
-            $data['widgetInstance'][WidgetInstanceInterface::PAGE_GROUPS] = $this->dataHelper->formatPageGroupsToParams($entity->getPageGroups());
+            $data['widgetInstance'][WidgetInstanceInterface::PAGE_GROUPS] =
+                $this->dataHelper->formatPageGroupsToParams($entity->getPageGroups());
 
             $remoteWidgetInstances = $this->apiHelper->getDataByIdentifier(
                 $entity->getData(WidgetInstanceInterface::IDENTIFIER),
@@ -413,9 +416,11 @@ class Widget implements ProcessorInterface
     }
 
     /**
+     * Validate widget instance
+     *
      * @param WidgetInstanceInterface $remoteWidgetInstance
      * @param array $myWidgetInstanceStoreIds
-     * @param $mappingStoreIds
+     * @param array $mappingStoreIds
      * @return bool
      */
     public function validateWidgetInstance($remoteWidgetInstance, $myWidgetInstanceStoreIds, $mappingStoreIds)

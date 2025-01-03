@@ -225,7 +225,9 @@ class WidgetRepository implements WidgetRepositoryInterface
         $widgetDTO->setData($loadInstance->getData());
         $widgetDTO->setId($loadInstance->getId());
         $widgetDTO->setStoreCodes($this->dataHelper->getStoreCodesByIds($loadInstance->getStoreIds()));
-        $widgetDTO->setThemeCode($this->dataHelper->getThemeCodeById($loadInstance->getData(WidgetInstanceInterface::THEME_ID)));
+        $widgetDTO->setThemeCode($this->dataHelper->getThemeCodeById(
+            $loadInstance->getData(WidgetInstanceInterface::THEME_ID))
+        );
 
         if ($loadInstance->getPageGroups()) {
             $pageGroupsData = [];

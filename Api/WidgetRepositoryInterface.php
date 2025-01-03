@@ -8,12 +8,16 @@ use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
 interface WidgetRepositoryInterface
 {
     /**
+     * Save widget
+     *
      * @param WidgetInstanceInterface $widgetInstance
      * @return WidgetInstanceInterface
      */
     public function save(WidgetInstanceInterface $widgetInstance);
 
     /**
+     * Get Widget by identifier and store ids list
+     *
      * @param string $identifier
      * @param string $storeIds
      * @return \Sutunam\CmsDataSync\Api\Data\WidgetInstanceSearchResultsInterface
@@ -27,5 +31,4 @@ interface WidgetRepositoryInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getAll();
-
 }

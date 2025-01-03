@@ -2,7 +2,6 @@
 
 namespace Sutunam\CmsDataSync\Plugin\Magento\Widget\Block\Adminhtml\Widget\Instance\Edit\Tab;
 
-
 use Magento\Widget\Block\Adminhtml\Widget\Instance\Edit\Tab\Main;
 
 class IdentifierField
@@ -14,7 +13,8 @@ class IdentifierField
      * @param \Closure $proceed
      * @return mixed
      */
-    public function aroundGetFormHtml(Main $subject, \Closure $proceed) {
+    public function aroundGetFormHtml(Main $subject, \Closure $proceed)
+    {
         $form = $subject->getForm();
 
         if (!is_object($form)) {

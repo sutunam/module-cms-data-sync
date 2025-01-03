@@ -2,7 +2,6 @@
 
 namespace Sutunam\CmsDataSync\Plugin\Magento\Backend\Block\Widget\Grid;
 
-
 use Magento\Framework\DataObject;
 use Sutunam\CmsDataSync\Helper\Config;
 
@@ -18,7 +17,7 @@ class Massaction
      *
      * @param Config $configHelper
      */
-    public function __construct(Config $configHelper )
+    public function __construct(Config $configHelper)
     {
         $this->configHelper = $configHelper;
     }
