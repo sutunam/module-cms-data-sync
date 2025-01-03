@@ -267,18 +267,18 @@ class BlockRepository implements SutunamBlockRepositoryInterface
             $block->setStoreId([$this->storeManager->getStore()->getId()]);
         }
 
-        if ($block->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
-            foreach ($block->getMedia() as $media) {
-                $this->sutunamDataHelper->saveMediaFromRemoteHost($media, $this->sutunamConfigHelper->isOverwrite());
-            }
-        }
-
         if ($block->getId() && $block instanceof Block && !$block->getOrigData()) {
             $block = $this->hydrator->hydrate($this->getById($block->getId()), $this->hydrator->extract($block));
         }
 
         try {
             $this->resource->save($block);
+
+            if ($block->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
+                foreach ($block->getMedia() as $media) {
+                    $this->sutunamDataHelper->saveMediaFromRemoteHost($media, $this->sutunamConfigHelper->isOverwrite());
+                }
+            }
         } catch (\Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));
         }

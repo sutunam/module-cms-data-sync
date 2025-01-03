@@ -263,18 +263,18 @@ class PageRepository implements SutunamPageRepositoryInterface
             $page->setStoreId([$this->storeManager->getStore()->getId()]);
         }
 
-        if ($page->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
-            foreach ($page->getMedia() as $media) {
-                $this->sutunamDataHelper->saveMediaFromRemoteHost($media, $this->sutunamConfigHelper->isOverwrite());
-            }
-        }
-
         if ($page->getId() && $page instanceof Page && !$page->getOrigData()) {
             $page = $this->hydrator->hydrate($this->getById($page->getId()), $this->hydrator->extract($page));
         }
 
         try {
             $this->resource->save($page);
+
+            if ($page->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
+                foreach ($page->getMedia() as $media) {
+                    $this->sutunamDataHelper->saveMediaFromRemoteHost($media, $this->sutunamConfigHelper->isOverwrite());
+                }
+            }
         } catch (\Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));
         }

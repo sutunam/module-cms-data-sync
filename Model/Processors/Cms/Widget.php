@@ -159,9 +159,11 @@ class Widget implements ProcessorInterface
                 $this->dataHelper->formatPageGroupsToSave($remoteWidgetInstance[WidgetInstanceInterface::PAGE_GROUPS])
             );
             $widgetInstance->save();
-//            if ($this->configHelper->isSyncMedia()) {
-//                $this->dataHelper->saveAllImageFromCmsContent($widgetInstance->getContent(), true);
-//            }
+            if ($this->configHelper->isSyncMedia()) {
+                foreach ($widgetInstance->getWidgetParameters() as $widgetParameter) {
+                    $this->dataHelper->saveAllImageFromCmsContent($widgetParameter, true);
+                }
+            }
         } catch (\Exception $e) {
             $result['message'] = $e->getMessage();
             $this->logger->critical($e->getMessage());
@@ -263,10 +265,12 @@ class Widget implements ProcessorInterface
                 }
 
                 if ($this->configHelper->isSyncMedia()) {
-                    $this->dataHelper->saveAllImageFromCmsContent(
-                        $myWidgetInstance->getContent(),
-                        $this->configHelper->isOverwrite()
-                    );
+                    foreach ($myWidgetInstance->getWidgetParameters() as $widgetParameter) {
+                        $this->dataHelper->saveAllImageFromCmsContent(
+                            $widgetParameter,
+                            $this->configHelper->isOverwrite()
+                        );
+                    }
                 }
 
                 if ($myWidgetInstanceId) {
@@ -310,11 +314,13 @@ class Widget implements ProcessorInterface
                 ['store_ids' => implode(',', $remoteStoreIds)]
             );
 
-//            if ($this->configHelper->isSyncMedia()) {
-//                $data['block'][SutunamBlockInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
-//                    $entity->getContent()
-//                );
-//            }
+            if ($this->configHelper->isSyncMedia()) {
+                $media = [];
+                foreach ($entity->getWidgetParameters() as $widgetParameter) {
+                    $media = array_merge($media, $this->dataHelper->getAllImageFromCmsContent($widgetParameter));
+                }
+                $data['block'][WidgetInstanceInterface::MEDIA] = $media;
+            }
 
             if (!$remoteWidgetInstances) {
                 $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = $remoteStoreIds;
@@ -330,7 +336,8 @@ class Widget implements ProcessorInterface
 
             foreach ($remoteWidgetInstances as $remoteWidgetInstance) {
                 $remoteWidgetInstanceId = $remoteWidgetInstance[WidgetInstanceInterface::ID];
-                $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = explode(',', $remoteWidgetInstance[WidgetInstanceInterface::STORE_IDS]);
+                $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] =
+                    explode(',', $remoteWidgetInstance[WidgetInstanceInterface::STORE_IDS]);
                 $response = $this->apiConnection->request(
                     Request::METHOD_PUT,
                     self::SUTUNAM_CMS_WIDGET_API_ENDPOINT . $remoteWidgetInstanceId,
@@ -408,7 +415,7 @@ class Widget implements ProcessorInterface
     /**
      * @param WidgetInstanceInterface $remoteWidgetInstance
      * @param array $myWidgetInstanceStoreIds
-     * @param array $mappingStoreIds
+     * @param $mappingStoreIds
      * @return bool
      */
     public function validateWidgetInstance($remoteWidgetInstance, $myWidgetInstanceStoreIds, $mappingStoreIds)

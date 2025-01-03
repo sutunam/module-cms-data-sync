@@ -30,6 +30,8 @@ interface WidgetInstanceInterface
 
     public const PAGE_GROUPS = 'page_groups';
 
+    public const MEDIA = 'media';
+
     /**
      * @return int|null
      */
@@ -84,6 +86,11 @@ interface WidgetInstanceInterface
      * @return \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface[]
      */
     public function getPageGroups();
+
+    /**
+     * @return string[]
+     */
+    public function getMedia();
 
     /**
      * @param int $id
@@ -151,4 +158,9 @@ interface WidgetInstanceInterface
      */
     public function setPageGroups($pageGroups);
 
+    /**
+     * @param string[] $media
+     * @return WidgetInstanceInterface
+     */
+    public function setMedia($media);
 }

@@ -190,6 +190,12 @@ class WidgetRepository implements WidgetRepositoryInterface
                 }
 
                 $instance->save();
+
+                if ($widgetInstance->getMedia() && $this->configHelper->isSyncMedia()) {
+                    foreach ($widgetInstance->getMedia() as $media) {
+                        $this->dataHelper->saveMediaFromRemoteHost($media, $this->configHelper->isOverwrite());
+                    }
+                }
             }
 
         } catch (\Exception $exception) {

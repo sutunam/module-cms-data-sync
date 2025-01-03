@@ -1,5 +1,5 @@
 <?php
-namespace Sutunam\CmsDataSync\Page\Adminhtml\Form\Buttons;
+namespace Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons;
 
 use Magento\Backend\Block\Widget\Context;
 use Magento\Cms\Api\PageRepositoryInterface;
@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 use Sutunam\CmsDataSync\Helper\ApiHelper;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 
-class PushPageButton extends GenericButton implements ButtonProviderInterface
+class PageButton extends GenericButton implements ButtonProviderInterface
 {
     /**
      * @var ConfigHelper
@@ -28,21 +28,29 @@ class PushPageButton extends GenericButton implements ButtonProviderInterface
     protected $logger;
 
     /**
+     * @var array
+     */
+    protected $data;
+
+    /**
      * Constructor
      *
      * @param Context $context
      * @param PageRepositoryInterface $pageRepository
      * @param ConfigHelper $configHelper
      * @param LoggerInterface $logger
+     * @param array $data
      */
     public function __construct(
         Context $context,
         PageRepositoryInterface $pageRepository,
         ConfigHelper $configHelper,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        array $data = []
     ) {
         $this->configHelper = $configHelper;
         $this->logger = $logger;
+        $this->data = $data;
         parent::__construct($context, $pageRepository);
     }
 
@@ -60,8 +68,10 @@ class PushPageButton extends GenericButton implements ButtonProviderInterface
 
         $this->_page = $this->getPage();
         if ($this->_page) {
+            $label = $this->data['type'] == ApiHelper::REQUEST_SYNC_TYPE_PULL ?
+                'Pull from %1' : ($this->data['type'] == ApiHelper::REQUEST_SYNC_TYPE_PUSH ? 'Push to %1' : '');
             return [
-                'label' => __('Push to %1', $this->configHelper->getSiteName()),
+                'label' => __($label, $this->configHelper->getSiteName()),
                 'on_click' => sprintf("location.href ='%s'", $this->getActionUrl()),
                 'sort_order' => 0,
             ];
@@ -69,7 +79,7 @@ class PushPageButton extends GenericButton implements ButtonProviderInterface
     }
 
     /**
-     * Get Action url
+     * Get action url
      *
      * @return string
      */
@@ -78,8 +88,8 @@ class PushPageButton extends GenericButton implements ButtonProviderInterface
         return $this->getUrl(
             'cms_data_sync/action/sync',
             [
-                "type" => ApiHelper::CMS_TYPE_BLOCK,
-                "action" => ApiHelper::REQUEST_SYNC_TYPE_PUSH,
+                "type" => $this->data['type'] ?: '',
+                "action" => $this->data['action'] ?: '',
                 "id" => $this->_page->getId()
             ]
         );

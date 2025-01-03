@@ -91,6 +91,14 @@ class WidgetInstance extends Instance implements WidgetInstanceInterface
     /**
      * @inheritdoc
      */
+    public function getMedia()
+    {
+        return $this->_getData(self::MEDIA);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function setInstanceType($instanceType)
     {
         $this->setData(self::INSTANCE_TYPE, $instanceType);
@@ -184,6 +192,16 @@ class WidgetInstance extends Instance implements WidgetInstanceInterface
     public function setPageGroups($pageGroups)
     {
         $this->setData(self::PAGE_GROUPS, $pageGroups);
+
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setMedia($media)
+    {
+        $this->setData(self::MEDIA, $media);
 
         return $this;
     }

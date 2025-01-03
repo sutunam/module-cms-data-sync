@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
-        <item name="sync_cms_page_push" xsi:type="string">
-            Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\PushPageButton
-        </item>
-        <item name="sync_cms_page_pull" xsi:type="string">
-            Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\PullPageButton
-        </item>
+        <item name="sync_cms_page_push" xsi:type="string">PushPageButton</item>
+        <item name="sync_cms_page_pull" xsi:type="string">PullPageButton</item>
     </argument>
 </form>
