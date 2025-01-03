@@ -318,7 +318,9 @@ class Widget implements ProcessorInterface
             if ($this->configHelper->isSyncMedia()) {
                 $media = [];
                 foreach ($entity->getWidgetParameters() as $widgetParameter) {
-                    $media = array_merge(...$this->dataHelper->getAllImageFromCmsContent($widgetParameter));
+                    foreach ($this->dataHelper->getAllImageFromCmsContent($widgetParameter) as $image) {
+                        $media[] = $image;
+                    }
                 }
                 $data['block'][WidgetInstanceInterface::MEDIA] = $media;
             }
