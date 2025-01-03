@@ -125,7 +125,7 @@ interface WidgetInstanceInterface
     public function setId($id);
 
     /**
-     * set Instance type
+     * Set Instance type
      *
      * @param string $instanceType
      * @return WidgetInstanceInterface

@@ -168,6 +168,7 @@ class WidgetRepository implements WidgetRepositoryInterface
         $instance = $this->instance->create();
 
         if ($widgetInstance->getId()) {
+            /** @phpstan-ignore-next-line */
             $instance->load($widgetInstance->getId());
         }
 
@@ -188,7 +189,7 @@ class WidgetRepository implements WidgetRepositoryInterface
                     $pageGroupsArr = $this->dataHelper->formatPageGroupsToSave($widgetInstance->getPageGroups());
                     $instance->setPageGroups($pageGroupsArr);
                 }
-
+                /** @phpstan-ignore-next-line */
                 $instance->save();
 
                 if ($widgetInstance->getMedia() && $this->configHelper->isSyncMedia()) {
@@ -214,6 +215,7 @@ class WidgetRepository implements WidgetRepositoryInterface
     public function convertInstanceToDTO($instanceId)
     {
         $widgetDTO = $this->widgetInstanceInterface->create();
+        /** @phpstan-ignore-next-line */
         $loadInstance = $this->instance->create()->load($instanceId);
 
         $this->dataObjectHelper->populateWithArray(
@@ -226,8 +228,8 @@ class WidgetRepository implements WidgetRepositoryInterface
         $widgetDTO->setId($loadInstance->getId());
         $widgetDTO->setStoreCodes($this->dataHelper->getStoreCodesByIds($loadInstance->getStoreIds()));
         $widgetDTO->setThemeCode($this->dataHelper->getThemeCodeById(
-            $loadInstance->getData(WidgetInstanceInterface::THEME_ID))
-        );
+            $loadInstance->getData(WidgetInstanceInterface::THEME_ID)
+        ));
 
         if ($loadInstance->getPageGroups()) {
             $pageGroupsData = [];

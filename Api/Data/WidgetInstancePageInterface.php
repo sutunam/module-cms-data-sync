@@ -13,7 +13,6 @@ interface WidgetInstancePageInterface
     public const ENTITIES = 'entities';
     public const PAGE_TEMPLATE = 'page_template';
 
-
     public const PAGES = 'pages';
     public const PAGE_LAYOUTS = 'page_layouts';
     public const FOR = 'for';
@@ -139,5 +138,4 @@ interface WidgetInstancePageInterface
      * @return WidgetInstancePageInterface
      */
     public function setPageTemplate($pageTemplate);
-
 }

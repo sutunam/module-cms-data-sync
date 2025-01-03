@@ -257,10 +257,8 @@ class Widget implements ProcessorInterface
 
                 if ($this->configHelper->isOverwrite()) {
                     $myWidgetInstance->setId($myWidgetInstanceId);
-                    /** @phpstan-ignore-next-line */
                     $myWidgetInstance->save();
                 } elseif (!$myWidgetInstanceId) {
-                    /** @phpstan-ignore-next-line */
                     $myWidgetInstance->save();
                 } else {
                     continue;
@@ -320,7 +318,7 @@ class Widget implements ProcessorInterface
             if ($this->configHelper->isSyncMedia()) {
                 $media = [];
                 foreach ($entity->getWidgetParameters() as $widgetParameter) {
-                    $media = array_merge($media, $this->dataHelper->getAllImageFromCmsContent($widgetParameter));
+                    $media = array_merge(...$this->dataHelper->getAllImageFromCmsContent($widgetParameter));
                 }
                 $data['block'][WidgetInstanceInterface::MEDIA] = $media;
             }
@@ -408,6 +406,7 @@ class Widget implements ProcessorInterface
     protected function getWigetInstance($id)
     {
         try {
+            /** @phpstan-ignore-next-line */
             return $this->instanceFactory->create()->load($id);
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
@@ -430,7 +429,7 @@ class Widget implements ProcessorInterface
         if ($diffIds) {
             //Check there's any other remote block using diff ids
             $remoteWidgetInstanceUsingDiffIds = $this->apiHelper->getDataByIdentifier(
-                $remoteWidgetInstance[BlockInterface::IDENTIFIER],
+                $remoteWidgetInstance[WidgetInstanceInterface::IDENTIFIER],
                 ApiHelper::CMS_TYPE_BLOCK,
                 $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($diffIds)
             );

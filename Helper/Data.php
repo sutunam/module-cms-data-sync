@@ -5,20 +5,15 @@ namespace Sutunam\CmsDataSync\Helper;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\DataObject;
 use Magento\Framework\Filesystem;
-use Magento\Framework\UrlInterface;
-use Magento\Store\Api\Data\StoreInterface;
-use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ResourceModel\Store\CollectionFactory;
 use Magento\Store\Model\StoreRepository;
-use Magento\Theme\Model\Theme;
 use Magento\Theme\Model\ThemeFactory;
 use Magento\Widget\Model\Widget\Instance;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 use Sutunam\CmsDataSync\Logger\Logger;
-use Sutunam\CmsDataSync\Model\WidgetInstance;
 
 class Data
 {
@@ -331,7 +326,8 @@ class Data
      * @param string|null $title
      * @return string
      */
-    public function generateIdentifier($title) {
+    public function generateIdentifier($title)
+    {
         $checkDuplicatedTitle = $this->instanceCollectionFactory->create()->addFieldToFilter('title', ['eq' => $title]);
         $lowercaseTitle = strtolower($title);
         if ($checkDuplicatedTitle->getSize() > 1) {
@@ -347,7 +343,9 @@ class Data
      * @param int|string $themeId
      * @return string
      */
-    public function getThemeCodeById($themeId) {
+    public function getThemeCodeById($themeId)
+    {
+        /** @phpstan-ignore-next-line */
         return $this->theme->create()->load($themeId)->getCode();
     }
 
@@ -358,7 +356,8 @@ class Data
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getThemeIdByCode($themeCode) {
+    public function getThemeIdByCode($themeCode)
+    {
         $connection = $this->themeResource->getConnection();
 
         $select = $connection->select()->from(
