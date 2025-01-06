@@ -300,17 +300,20 @@ class Page implements ProcessorInterface
                 SutunamPageInterface::ACTIVE => $entity->isActive(),
             ]];
 
+            if (!$remoteStoreIds) {
+                $result['message'] = __('No remote store found by page id %1', $id);
+                return $result;
+            }
+
             $remotePages = $this->apiHelper->getDataByIdentifier(
                 $entity->getIdentifier(),
                 ApiHelper::CMS_TYPE_PAGE,
                 ['store_ids' => implode(',', $remoteStoreIds)]
             );
 
-            if ($this->configHelper->isSyncMedia()) {
-                $data['page'][SutunamPageInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
-                    $entity->getContent()
-                );
-            }
+            $data['page'][SutunamPageInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
+                $entity->getContent()
+            );
 
             if (!$remotePages) {
                 $data['page'][SutunamPageInterface::STORE_ID] = $remoteStoreIds;

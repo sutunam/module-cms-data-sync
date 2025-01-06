@@ -444,7 +444,7 @@ class Data
             WidgetInstanceInterface::THEME_CODE =>
                 $this->getThemeCodeById($widgetInstanceParams[WidgetInstanceInterface::THEME_ID]) ?? '',
             WidgetInstanceInterface::WIDGET_PARAMETERS =>
-                $widgetInstanceParams[WidgetInstanceInterface::WIDGET_PARAMETERS] ?? '',
+                $widgetInstanceParams[WidgetInstanceInterface::WIDGET_PARAMETERS] ?? [],
             WidgetInstanceInterface::SORT_ORDER => $widgetInstanceParams[WidgetInstanceInterface::SORT_ORDER] ?? '',
         ];
     }

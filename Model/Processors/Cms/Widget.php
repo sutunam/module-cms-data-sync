@@ -324,6 +324,10 @@ class Widget implements ProcessorInterface
         $entity = $this->getWigetInstance($id);
         if ($entity) {
             $remoteStoreIds = $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($entity->getStoreIds());
+            if (!$remoteStoreIds) {
+                $result['message'] = __('No remote store found by widget id %1', $id);
+                return $result;
+            }
 
             $data = ['widgetInstance' => $this->dataHelper->formatWidgetInstanceParams($entity)];
             $data['widgetInstance'][WidgetInstanceInterface::PAGE_GROUPS] =
@@ -335,15 +339,13 @@ class Widget implements ProcessorInterface
                 ['store_ids' => implode(',', $remoteStoreIds)]
             );
 
-            if ($this->configHelper->isSyncMedia()) {
-                $media = [];
-                foreach ($entity->getWidgetParameters() as $widgetParameter) {
-                    foreach ($this->dataHelper->getAllImageFromCmsContent($widgetParameter) as $image) {
-                        $media[] = $image;
-                    }
+            $media = [];
+            foreach ($entity->getWidgetParameters() as $widgetParameter) {
+                foreach ($this->dataHelper->getAllImageFromCmsContent($widgetParameter) as $image) {
+                    $media[] = $image;
                 }
-                $data['widgetInstance'][WidgetInstanceInterface::MEDIA] = $media;
             }
+            $data['widgetInstance'][WidgetInstanceInterface::MEDIA] = $media;
 
             if (!$remoteWidgetInstances) {
                 $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = $remoteStoreIds;
