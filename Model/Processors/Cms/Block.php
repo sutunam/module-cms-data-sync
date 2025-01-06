@@ -288,17 +288,20 @@ class Block implements ProcessorInterface
                 SutunamBlockInterface::ACTIVE => $entity->isActive()
             ]];
 
+            if (!$remoteStoreIds) {
+                $result['message'] = __('No remote store found by block id %1', $id);
+                return $result;
+            }
+
             $remoteBlocks = $this->apiHelper->getDataByIdentifier(
                 $entity->getIdentifier(),
                 ApiHelper::CMS_TYPE_BLOCK,
                 ['store_ids' => implode(',', $remoteStoreIds)]
             );
 
-            if ($this->configHelper->isSyncMedia()) {
-                $data['block'][SutunamBlockInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
-                    $entity->getContent()
-                );
-            }
+            $data['block'][SutunamBlockInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
+                $entity->getContent()
+            );
 
             if (!$remoteBlocks) {
                 $data['block'][SutunamBlockInterface::STORE_ID] = $remoteStoreIds;

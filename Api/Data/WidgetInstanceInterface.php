@@ -77,7 +77,7 @@ interface WidgetInstanceInterface
     /**
      * Get Widget params
      *
-     * @return mixed
+     * @return array|string
      */
     public function getWidgetParameters();
 
