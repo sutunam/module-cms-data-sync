@@ -15,6 +15,8 @@ interface PageInterface extends \Magento\Cms\Api\Data\PageInterface
     /**#@+
      * Constants for keys of data array. Identical to the name of the getter in snake case
      */
+    public const ID = 'id';
+
     public const ACTIVE = 'active';
 
     public const STORE_ID = 'store_id';

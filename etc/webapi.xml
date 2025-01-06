@@ -75,4 +75,32 @@
             <resource ref="Magento_Cms::block"/>
         </resources>
     </route>
+    <!-- Cms Widget -->
+    <route url="/V1/sutunam/cmsWidget" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="getAll"/>
+        <resources>
+            <resource ref="Magento_Widget::widget_instance"/>
+        </resources>
+    </route>
+    <route url="/V1/sutunam/cmsWidget/identifier/:identifier" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="getByIdentifier"/>
+        <resources>
+            <resource ref="Magento_Widget::widget_instance"/>
+        </resources>
+        <data>
+            <parameter name="storeIds" />
+        </data>
+    </route>
+    <route url="/V1/sutunam/cmsWidget" method="POST">
+        <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Widget::widget_instance"/>
+        </resources>
+    </route>
+    <route url="/V1/sutunam/cmsWidget/:id" method="PUT">
+        <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Widget::widget_instance"/>
+        </resources>
+    </route>
 </routes>

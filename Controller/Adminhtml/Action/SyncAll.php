@@ -76,7 +76,7 @@ class SyncAll extends Action implements HttpGetActionInterface
                 $this->messageManager->addErrorMessage($message);
             }
             if ($result['message']) {
-                $this->messageManager->addErrorMessage($result['message']);
+                $this->messageManager->addNotice($result['message']);
             }
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());

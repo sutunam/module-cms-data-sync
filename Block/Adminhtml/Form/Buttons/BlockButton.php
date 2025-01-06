@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 use Sutunam\CmsDataSync\Helper\ApiHelper;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 
-class PushBlockButton extends GenericButton implements ButtonProviderInterface
+class BlockButton extends GenericButton implements ButtonProviderInterface
 {
     /**
      * @var ConfigHelper
@@ -28,21 +28,27 @@ class PushBlockButton extends GenericButton implements ButtonProviderInterface
     protected $logger;
 
     /**
-     * Constructor
-     *
+     * @var array
+     */
+    protected $data;
+
+    /**
      * @param Context $context
      * @param BlockRepositoryInterface $blockRepository
      * @param ConfigHelper $configHelper
      * @param LoggerInterface $logger
+     * @param array $data
      */
     public function __construct(
         Context $context,
         BlockRepositoryInterface $blockRepository,
         ConfigHelper $configHelper,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        array $data = []
     ) {
         $this->configHelper = $configHelper;
         $this->logger = $logger;
+        $this->data = $data;
         parent::__construct($context, $blockRepository);
     }
 
@@ -60,8 +66,10 @@ class PushBlockButton extends GenericButton implements ButtonProviderInterface
 
         $this->_block = $this->getBlock();
         if ($this->_block) {
+            $label = $this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PULL ?
+                'Pull from %1' : ($this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PUSH ? 'Push to %1' : '');
             return [
-                'label' => __('Push to %1', $this->configHelper->getSiteName()),
+                'label' => __($label, $this->configHelper->getSiteName()),
                 'on_click' => sprintf("location.href ='%s'", $this->getActionUrl()),
                 'sort_order' => 0,
             ];
@@ -69,7 +77,7 @@ class PushBlockButton extends GenericButton implements ButtonProviderInterface
     }
 
     /**
-     * Get Action url
+     * Get action url
      *
      * @return string
      */
@@ -78,8 +86,8 @@ class PushBlockButton extends GenericButton implements ButtonProviderInterface
         return $this->getUrl(
             'cms_data_sync/action/sync',
             [
-                "type" => ApiHelper::CMS_TYPE_BLOCK,
-                "action" => ApiHelper::REQUEST_SYNC_TYPE_PUSH,
+                "type" => $this->data['type'],
+                "action" => $this->data['action'],
                 "id" => $this->_block->getId()
             ]
         );

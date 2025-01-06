@@ -3,13 +3,15 @@
 namespace Sutunam\CmsDataSync\Helper;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\DataObject;
 use Magento\Framework\Filesystem;
-use Magento\Framework\UrlInterface;
-use Magento\Store\Api\Data\StoreInterface;
-use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ResourceModel\Store\CollectionFactory;
 use Magento\Store\Model\StoreRepository;
+use Magento\Theme\Model\ThemeFactory;
+use Magento\Widget\Model\Widget\Instance;
+use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
+use Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 use Sutunam\CmsDataSync\Logger\Logger;
 
@@ -51,6 +53,26 @@ class Data
     protected $configHelper;
 
     /**
+     * @var \Magento\Framework\Filter\FilterManager
+     */
+    protected $filter;
+
+    /**
+     * @var \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory
+     */
+    protected $instanceCollectionFactory;
+
+    /**
+     * @var ThemeFactory
+     */
+    protected $theme;
+
+    /**
+     * @var \Magento\Theme\Model\ResourceModel\Theme
+     */
+    protected $themeResource;
+
+    /**
      * @var Logger
      */
     protected $logger;
@@ -64,6 +86,10 @@ class Data
      * @param StoreRepository $storeRepository
      * @param Filesystem $fileSystem
      * @param Config $configHelper
+     * @param \Magento\Framework\Filter\FilterManager $filter
+     * @param \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory
+     * @param ThemeFactory $theme
+     * @param \Magento\Theme\Model\ResourceModel\Theme $themeResource
      * @param Logger $logger
      */
     public function __construct(
@@ -73,6 +99,10 @@ class Data
         StoreRepository $storeRepository,
         FileSystem $fileSystem,
         ConfigHelper $configHelper,
+        \Magento\Framework\Filter\FilterManager $filter,
+        \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory,
+        ThemeFactory $theme,
+        \Magento\Theme\Model\ResourceModel\Theme $themeResource,
         Logger $logger
     ) {
         $this->apiHelper = $apiHelper;
@@ -81,6 +111,10 @@ class Data
         $this->storeRepository = $storeRepository;
         $this->fileSystem = $fileSystem;
         $this->configHelper = $configHelper;
+        $this->filter = $filter;
+        $this->instanceCollectionFactory = $instanceCollectionFactory;
+        $this->theme = $theme;
+        $this->themeResource = $themeResource;
         $this->logger = $logger;
     }
 
@@ -104,7 +138,7 @@ class Data
             $this->remoteStoreViews = $this->apiHelper->requestStoreInfo(ApiHelper::REQUEST_STORE_VIEWS);
         }
 
-        $remoteStoreView = $this->remoteStoreViews[$myStoreDetails->getCode()] ?? null;
+        $remoteStoreView = $this->remoteStoreViews[$myStoreDetails->getCode()] ?: null;
         if (!$remoteStoreView) {
             return [
                 'status' => false,
@@ -284,5 +318,134 @@ class Data
         foreach ($allImages as $imagePath) {
             $this->saveMediaFromRemoteHost($imagePath, $isOverwrite);
         }
+    }
+
+    /**
+     * Generated title to identifier
+     *
+     * @param string|null $title
+     * @return string
+     */
+    public function generateIdentifier($title)
+    {
+        $checkDuplicatedTitle = $this->instanceCollectionFactory->create()->addFieldToFilter('title', ['eq' => $title]);
+        $lowercaseTitle = strtolower($title);
+        if ($checkDuplicatedTitle->getSize() > 1) {
+            return $this->filter->translitUrl($lowercaseTitle) . '-' . time();
+        }
+
+        return $this->filter->translitUrl($lowercaseTitle);
+    }
+
+    /**
+     * Get Theme code by theme id
+     *
+     * @param int|string $themeId
+     * @return string
+     */
+    public function getThemeCodeById($themeId)
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->theme->create()->load($themeId)->getCode();
+    }
+
+    /**
+     * Get Theme id by theme code
+     *
+     * @param string|null $themeCode
+     * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getThemeIdByCode($themeCode)
+    {
+        $connection = $this->themeResource->getConnection();
+
+        $select = $connection->select()->from(
+            $this->themeResource->getMainTable(),
+            'theme_id'
+        )->where('code = :code');
+
+        $bind = [':code' => (string)$themeCode];
+
+        return $connection->fetchOne($select, $bind);
+    }
+
+    /**
+     * Convert page group from param to correct format using for saving
+     *
+     * @param WidgetInstancePageInterface[]|mixed $listPageGroup
+     * @return array
+     */
+    public function formatPageGroupsToSave($listPageGroup)
+    {
+        $result = [];
+        foreach ($listPageGroup as $pageGroup) {
+            $page = [];
+            $page[WidgetInstancePageInterface::PAGE_GROUP] = $pageGroup[WidgetInstancePageInterface::PAGE_GROUP] ?? '';
+            $page[WidgetInstancePageInterface::PAGES] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
+            $page[WidgetInstancePageInterface::PAGE_LAYOUTS] = [WidgetInstancePageInterface::LAYOUT_HANDLE => ''];
+            $page[$pageGroup[WidgetInstancePageInterface::PAGE_GROUP]] = [
+                WidgetInstancePageInterface::PAGE_ID => 0,
+                WidgetInstancePageInterface::LAYOUT_HANDLE =>
+                    $pageGroup[WidgetInstancePageInterface::LAYOUT_HANDLE] ?? '',
+                WidgetInstancePageInterface::FOR => $pageGroup[WidgetInstancePageInterface::PAGE_FOR] ?? '',
+                WidgetInstancePageInterface::BLOCK => $pageGroup[WidgetInstancePageInterface::BLOCK_REFERENCE] ?? '',
+                WidgetInstancePageInterface::TEMPLATE => $pageGroup[WidgetInstancePageInterface::PAGE_TEMPLATE] ?? '',
+                WidgetInstancePageInterface::ENTITIES => $pageGroup[WidgetInstancePageInterface::ENTITIES] ?? '',
+            ];
+            $result[] = $page;
+        }
+        return $result;
+    }
+
+    /**
+     * Convert page groups to the correct format of API
+     *
+     * @param array $listPageGroupParams
+     * @return array
+     */
+    public function formatPageGroupsToParams($listPageGroupParams)
+    {
+        $pageGroups = [];
+        foreach ($listPageGroupParams as $pageGroup) {
+            $pageGroups[] = [
+                WidgetInstancePageInterface::PAGE_ID => 0,
+                WidgetInstancePageInterface::PAGE_GROUP => $pageGroup[WidgetInstancePageInterface::PAGE_GROUP] ?? '',
+                WidgetInstancePageInterface::LAYOUT_HANDLE =>
+                    $pageGroup[WidgetInstancePageInterface::LAYOUT_HANDLE] ?? '',
+                WidgetInstancePageInterface::BLOCK_REFERENCE =>
+                    $pageGroup[WidgetInstancePageInterface::BLOCK_REFERENCE] ?? '',
+                WidgetInstancePageInterface::PAGE_FOR => $pageGroup[WidgetInstancePageInterface::PAGE_FOR] ?? '',
+                WidgetInstancePageInterface::ENTITIES => $pageGroup[WidgetInstancePageInterface::ENTITIES] ?? '',
+                WidgetInstancePageInterface::PAGE_TEMPLATE =>
+                    $pageGroup[WidgetInstancePageInterface::PAGE_TEMPLATE] ?? '',
+            ];
+        }
+        return $pageGroups;
+    }
+
+    /**
+     * Format widget instance params to correct format
+     *
+     * @param WidgetInstanceInterface|Instance|array $widgetInstanceParams
+     * @return array
+     */
+    public function formatWidgetInstanceParams($widgetInstanceParams)
+    {
+        if ($widgetInstanceParams instanceof DataObject) {
+            $widgetInstanceParams = $widgetInstanceParams->getData();
+        }
+
+        return [
+            WidgetInstanceInterface::IDENTIFIER => $widgetInstanceParams[WidgetInstanceInterface::IDENTIFIER] ?? '',
+            WidgetInstanceInterface::TITLE => $widgetInstanceParams[WidgetInstanceInterface::TITLE] ?? '',
+            WidgetInstanceInterface::INSTANCE_TYPE =>
+                $widgetInstanceParams[WidgetInstanceInterface::INSTANCE_TYPE] ?? '',
+            WidgetInstanceInterface::THEME_CODE =>
+                $this->getThemeCodeById($widgetInstanceParams[WidgetInstanceInterface::THEME_ID]) ?? '',
+            WidgetInstanceInterface::WIDGET_PARAMETERS =>
+                $widgetInstanceParams[WidgetInstanceInterface::WIDGET_PARAMETERS] ?? '',
+            WidgetInstanceInterface::SORT_ORDER => $widgetInstanceParams[WidgetInstanceInterface::SORT_ORDER] ?? '',
+        ];
     }
 }

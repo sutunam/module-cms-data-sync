@@ -1,7 +1,7 @@
 <?php
 namespace Sutunam\CmsDataSync\Model;
 
-use Magento\Cms\Model\ResourceModel\AbstractCollection;
+use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Magento\Framework\ObjectManagerInterface;
 use Sutunam\CmsDataSync\Api\ProcessorInterface;
 

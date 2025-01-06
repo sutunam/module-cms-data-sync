@@ -2,33 +2,44 @@
 namespace Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons;
 
 use Magento\Backend\Block\Widget\Context;
-use Magento\Cms\Api\PageRepositoryInterface;
-use Magento\Cms\Block\Adminhtml\Page\Edit\GenericButton;
+use Magento\Cms\Api\BlockRepositoryInterface;
+use Magento\Cms\Block\Adminhtml\Block\Edit\GenericButton;
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 use Sutunam\CmsDataSync\Helper\ApiHelper;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 
-class PushAllCmsPage extends GenericButton implements ButtonProviderInterface
+class SyncAllCmsButton implements ButtonProviderInterface
 {
+    /**
+     * @var Context
+     */
+    protected $context;
+
     /**
      * @var ConfigHelper
      */
     protected $configHelper;
 
     /**
-     * Constructor
+     * @var array
+     */
+    protected $data;
+
+    /**
+     * Construct
      *
      * @param Context $context
-     * @param PageRepositoryInterface $pageRepository
      * @param ConfigHelper $configHelper
+     * @param array $data
      */
     public function __construct(
         Context $context,
-        PageRepositoryInterface $pageRepository,
         ConfigHelper $configHelper,
+        array $data = []
     ) {
         $this->configHelper = $configHelper;
-        parent::__construct($context, $pageRepository);
+        $this->data = $data;
+        $this->context = $context;
     }
 
     /**
@@ -42,8 +53,11 @@ class PushAllCmsPage extends GenericButton implements ButtonProviderInterface
             return [];
         }
 
+        $label = $this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PULL ?
+            'Pull All from %1' : ($this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PUSH ? 'Push All to %1' : '');
+
         return [
-            'label' => __('Push All to %1', $this->configHelper->getSiteName()),
+            'label' => __($label, $this->configHelper->getSiteName()),
             'class' => 'primary',
             'on_click' => 'require([\'Magento_Ui/js/modal/confirm\'], function(confirm) {
                 confirm({
@@ -70,9 +84,21 @@ class PushAllCmsPage extends GenericButton implements ButtonProviderInterface
         return $this->getUrl(
             'cms_data_sync/action/syncAll',
             [
-                'type' => ApiHelper::CMS_TYPE_PAGE,
-                'action' => ApiHelper::REQUEST_SYNC_TYPE_PUSH
+                'type' => $this->data['type'] ?: '',
+                'action' => $this->data['action'] ?: '',
             ]
         );
+    }
+
+    /**
+     * Generate url by route and parameters
+     *
+     * @param   string $route
+     * @param   array $params
+     * @return  string
+     */
+    public function getUrl($route = '', $params = [])
+    {
+        return $this->context->getUrlBuilder()->getUrl($route, $params);
     }
 }

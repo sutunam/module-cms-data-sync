@@ -1,15 +1,133 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <type name="Sutunam\CmsDataSync\Model\ProcessorFactory">
         <arguments>
             <argument name="processors" xsi:type="array">
                 <item name="Page" xsi:type="string">Sutunam\CmsDataSync\Model\Processors\Cms\Page</item>
                 <item name="Block" xsi:type="string">Sutunam\CmsDataSync\Model\Processors\Cms\Block</item>
+                <item name="Widget" xsi:type="string">Sutunam\CmsDataSync\Model\Processors\Cms\Widget</item>
             </argument>
             <argument name="collections" xsi:type="array">
                 <item name="Page" xsi:type="object">Magento\Cms\Model\ResourceModel\Page\CollectionFactory</item>
                 <item name="Block" xsi:type="object">Magento\Cms\Model\ResourceModel\Block\CollectionFactory</item>
+                <item name="Widget" xsi:type="object">
+                    Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory
+                </item>
             </argument>
         </arguments>
     </type>
+
+    <type name="Magento\Widget\Block\Adminhtml\Widget\Instance\Edit\Tab\Main">
+        <plugin name="Sutunam_CmsDataSync:add_identifier_for_widget_form"
+                type="Sutunam\CmsDataSync\Plugin\Magento\Widget\Block\Adminhtml\Widget\Instance\Edit\Tab\IdentifierField"/>
+    </type>
+
+    <type name="Magento\Widget\Model\Widget\Instance">
+        <plugin name="Sutunam_CmsDataSync:save_identifier_when_submit_widget_form"
+                type="Sutunam\CmsDataSync\Plugin\Model\Widget\SavingIdentifier" disabled="false"/>
+    </type>
+
+    <type name="Magento\Widget\Controller\Adminhtml\Widget\Instance\MassDelete">
+        <plugin name="Sutunam_CmsDataSync:change_form_field_name"
+                type="Sutunam\CmsDataSync\Plugin\Magento\Widget\Controller\Adminhtml\Widget\Instance\MassDelete"/>
+    </type>
+
+    <type name="Magento\Backend\Block\Widget\Grid\Massaction">
+        <plugin name="Sutunam_CmsDataSync:display_sync_mass_action"
+                type="Sutunam\CmsDataSync\Plugin\Magento\Backend\Block\Widget\Grid\Massaction"/>
+    </type>
+
+    <virtualType name="PullBlockButton" type="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\BlockButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">Block</item>
+                <item name="action" xsi:type="string">pull</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PushBlockButton" type="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\BlockButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">Block</item>
+                <item name="action" xsi:type="string">push</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PullPageButton" type="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\PageButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">Page</item>
+                <item name="action" xsi:type="string">pull</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PushPageButton" type="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\PageButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">Page</item>
+                <item name="action" xsi:type="string">push</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\PushWidgetButton"
+                 type="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\WidgetButton">
+        <arguments>
+            <argument name="params" xsi:type="array">
+                <item name="type" xsi:type="string">Widget</item>
+                <item name="action" xsi:type="string">push</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\PullWidgetButton"
+                 type="Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons\WidgetButton">
+        <arguments>
+            <argument name="params" xsi:type="array">
+                <item name="type" xsi:type="string">Widget</item>
+                <item name="action" xsi:type="string">pull</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons\PushAllCmsBlock"
+                 type="Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons\SyncAllCmsButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">Block</item>
+                <item name="action" xsi:type="string">push</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons\PullAllCmsBlock"
+                 type="Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons\SyncAllCmsButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">Block</item>
+                <item name="action" xsi:type="string">pull</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons\PushAllCmsPage"
+                 type="Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons\SyncAllCmsButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">Page</item>
+                <item name="action" xsi:type="string">push</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons\PullAllCmsPage"
+                 type="Sutunam\CmsDataSync\Block\Adminhtml\Listing\Buttons\SyncAllCmsButton">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">Page</item>
+                <item name="action" xsi:type="string">pull</item>
+            </argument>
+        </arguments>
+    </virtualType>
 </config>

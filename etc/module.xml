@@ -3,6 +3,7 @@
     <module name="Sutunam_CmsDataSync" setup_version="1.0.0">
         <sequence>
             <module name="Magento_Cms"/>
+            <module name="Magento_Widget"/>
         </sequence>
     </module>
 </config>

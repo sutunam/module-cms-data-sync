@@ -59,6 +59,6 @@ class Handler extends \Magento\Framework\Logger\Handler\Base
     public function setFileName($fileName)
     {
         $date = $this->localeDate->date()->format('Y-m-d');
-        $this->fileName = $fileName ?? '/var/log/CmsDataSync/ApiConnect-' . $date . '.log';
+        $this->fileName = $fileName ?: '/var/log/CmsDataSync/ApiConnect-' . $date . '.log';
     }
 }

@@ -136,6 +136,7 @@ class Block implements ProcessorInterface
         try {
             $block->setData($remoteBlock);
             $block->setId($id);
+            $block->setStoreId(array_map('intval', $blockStoreIds));
             $block->save();
             if ($this->configHelper->isSyncMedia()) {
                 $this->dataHelper->saveAllImageFromCmsContent($block->getContent(), true);
@@ -202,10 +203,15 @@ class Block implements ProcessorInterface
                 }
 
                 if (!$this->validateBlock($remoteBlock, $myBlockStoreIds, $myStoreIds)) {
+                    $result['message'] .= __(
+                        'Pull Block ID: %1 ||Status: %2.<br>',
+                        $myBlockId,
+                        __('Skipped')
+                    );
                     continue;
                 }
 
-                $myBlockStoreIds  = !empty($myBlockStoreIds) ? $myBlockStoreIds : $myStoreIds;
+                $myBlockStoreIds  = $myBlockStoreIds ?: $myStoreIds;
 
                 $myBlock->setData($remoteBlock);
                 $myBlock->setStoreId(array_map('intval', $myBlockStoreIds));
@@ -218,6 +224,11 @@ class Block implements ProcessorInterface
                     /** @phpstan-ignore-next-line */
                     $myBlock->save();
                 } else {
+                    $result['message'] .= __(
+                        'Pull Block ID: %1 ||Status: %2.<br>',
+                        $myBlockId,
+                        __('Skipped')
+                    );
                     continue;
                 }
 
@@ -229,8 +240,18 @@ class Block implements ProcessorInterface
                 }
 
                 if ($myBlockId) {
+                    $result['message'] .= __(
+                        'Pull Block ID: %1 ||Status: %2.<br>',
+                        $myBlockId,
+                        __('Updated Successfully')
+                    );
                     $result['total_update_success']++;
                 } else {
+                    $result['message'] .= __(
+                        'Pull Block ID: %1 ||Status: %2.<br>',
+                        $myBlockId,
+                        __('Created Successfully')
+                    );
                     $result['total_create_success']++;
                 }
             } catch (\Exception $e) {
@@ -253,8 +274,10 @@ class Block implements ProcessorInterface
     {
         $result = [
             "success" => false,
+            "type" => "",
             "message" => ""
         ];
+
         $entity = $this->getBlock($id);
         if ($entity) {
             $remoteStoreIds = $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($entity->getStores());
@@ -285,12 +308,14 @@ class Block implements ProcessorInterface
                     [],
                     $data
                 );
+                $result['type'] = 'created';
                 return $result;
             }
 
             foreach ($remoteBlocks as $remoteBlock) {
-                $remoteBlockId = $remoteBlock['id'];
+                $remoteBlockId = $remoteBlock[SutunamBlockInterface::ID];
                 $data['block'][SutunamBlockInterface::STORE_ID] = $remoteBlock[SutunamBlockInterface::STORE_ID];
+                $data['block'][SutunamBlockInterface::ID] = $remoteBlockId;
                 $response = $this->apiConnection->request(
                     Request::METHOD_PUT,
                     self::SUTUNAM_CMS_BLOCK_API_ENDPOINT . $remoteBlockId,
@@ -299,11 +324,15 @@ class Block implements ProcessorInterface
                 );
                 if ($response['success']) {
                     $result['success'] = true;
+                    $result['type'] = 'updated';
+                    return $result;
                 }
+
+                $result['message'] = $response['message'];
             }
 
         } else {
-            $result['response'] = __("Couldn't load CMS page content.");
+            $result['message'] = __("Couldn't load CMS block content.");
         }
         return $result;
     }
@@ -316,7 +345,8 @@ class Block implements ProcessorInterface
     public function pushAll()
     {
         $result = [
-            'total_success' => 0,
+            'total_update_success' => 0,
+            'total_create_success' => 0,
             'total_failed' => 0,
             'message' => ''
         ];
@@ -334,9 +364,30 @@ class Block implements ProcessorInterface
             $response = $this->push($blockId);
             if (!$response['success']) {
                 $result['total_failed']++;
+                $result['message'] .= __(
+                    'Push Block ID: %1 ||Status: %2.<br>',
+                    $blockId,
+                    $response['message']
+                );
                 continue;
             }
-            $result['total_success']++;
+
+            if ($response['type'] == 'created') {
+                $result['total_create_success']++;
+                $result['message'] .= __(
+                    'Push Block ID: %1 ||Status: %2.<br>',
+                    $blockId,
+                    __('Created Successfully')
+                );
+                continue;
+            }
+
+            $result['message'] .= __(
+                'Push Block ID: %1 ||Status: %2.<br>',
+                $blockId,
+                __('Updated Successfully')
+            );
+            $result['total_update_success']++;
         }
         return $result;
     }

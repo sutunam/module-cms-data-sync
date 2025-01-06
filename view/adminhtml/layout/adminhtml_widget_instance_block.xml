@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="adminhtml.widget.instance.grid.massactions">
+            <arguments>
+                <argument name="massaction_id_field" xsi:type="string">instance_id</argument>
+                <argument name="form_field_name" xsi:type="string">ids</argument>
+                <argument name="use_select_all" xsi:type="string">1</argument>
+                <argument name="options" xsi:type="array">
+                    <item name="sync_push" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Sync Push</item>
+                        <item name="url" xsi:type="string">cms_data_sync/action/massSync/type/Widget/action/push</item>
+                        <item name="selected" xsi:type="string">0</item>
+                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to sync selected
+                            items?
+                        </item>
+                        <item name="type" xsi:type="string">sync_push</item>
+                    </item>
+                    <item name="sync_pull" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Sync Pull</item>
+                        <item name="url" xsi:type="string">cms_data_sync/action/massSync/type/Widget/action/pull</item>
+                        <item name="selected" xsi:type="string">0</item>
+                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to sync selected
+                            items?
+                        </item>
+                    </item>
+                    <item name="delete" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Delete</item>
+                        <item name="url" xsi:type="string">*/*/massDelete</item>
+                        <item name="selected" xsi:type="string">0</item>
+                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to delete the
+                            selected widget(s)?
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="adminhtml.widget.instance.grid.columnSet">
+            <block class="Magento\Backend\Block\Widget\Grid\Column"
+                   name="adminhtml.widget.instance.grid.columnSet.identifier"
+                   as="identifier"
+                   after="adminhtml.widget.instance.grid.columnSet.title"
+            >
+                <arguments>
+                    <argument name="header" xsi:type="string" translate="true">Identifier</argument>
+                    <argument name="index" xsi:type="string">identifier</argument>
+                    <argument name="column_css_class" xsi:type="string">col-id</argument>
+                    <argument name="header_css_class" xsi:type="string">col-id</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

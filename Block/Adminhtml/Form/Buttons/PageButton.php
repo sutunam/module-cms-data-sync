@@ -2,15 +2,15 @@
 namespace Sutunam\CmsDataSync\Block\Adminhtml\Form\Buttons;
 
 use Magento\Backend\Block\Widget\Context;
-use Magento\Cms\Api\BlockRepositoryInterface;
-use Magento\Cms\Block\Adminhtml\Block\Edit\GenericButton;
+use Magento\Cms\Api\PageRepositoryInterface;
+use Magento\Cms\Block\Adminhtml\Page\Edit\GenericButton;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 use Psr\Log\LoggerInterface;
 use Sutunam\CmsDataSync\Helper\ApiHelper;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 
-class PullBlockButton extends GenericButton implements ButtonProviderInterface
+class PageButton extends GenericButton implements ButtonProviderInterface
 {
     /**
      * @var ConfigHelper
@@ -18,9 +18,9 @@ class PullBlockButton extends GenericButton implements ButtonProviderInterface
     protected $configHelper;
 
     /**
-     * @var \Magento\Cms\Api\Data\BlockInterface|null
+     * @var \Magento\Cms\Api\Data\PageInterface|null
      */
-    protected $_block;
+    protected $_page;
 
     /**
      * @var LoggerInterface
@@ -28,22 +28,30 @@ class PullBlockButton extends GenericButton implements ButtonProviderInterface
     protected $logger;
 
     /**
+     * @var array
+     */
+    protected $data;
+
+    /**
      * Constructor
      *
      * @param Context $context
-     * @param BlockRepositoryInterface $blockRepository
+     * @param PageRepositoryInterface $pageRepository
      * @param ConfigHelper $configHelper
      * @param LoggerInterface $logger
+     * @param array $data
      */
     public function __construct(
         Context $context,
-        BlockRepositoryInterface $blockRepository,
+        PageRepositoryInterface $pageRepository,
         ConfigHelper $configHelper,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        array $data = []
     ) {
         $this->configHelper = $configHelper;
         $this->logger = $logger;
-        parent::__construct($context, $blockRepository);
+        $this->data = $data;
+        parent::__construct($context, $pageRepository);
     }
 
     /**
@@ -58,10 +66,12 @@ class PullBlockButton extends GenericButton implements ButtonProviderInterface
             return [];
         }
 
-        $this->_block = $this->getBlock();
-        if ($this->_block) {
+        $this->_page = $this->getPage();
+        if ($this->_page) {
+            $label = $this->data['type'] == ApiHelper::REQUEST_SYNC_TYPE_PULL ?
+                'Pull from %1' : ($this->data['type'] == ApiHelper::REQUEST_SYNC_TYPE_PUSH ? 'Push to %1' : '');
             return [
-                'label' => __('Pull from %1', $this->configHelper->getSiteName()),
+                'label' => __($label, $this->configHelper->getSiteName()),
                 'on_click' => sprintf("location.href ='%s'", $this->getActionUrl()),
                 'sort_order' => 0,
             ];
@@ -78,24 +88,24 @@ class PullBlockButton extends GenericButton implements ButtonProviderInterface
         return $this->getUrl(
             'cms_data_sync/action/sync',
             [
-                "type" => ApiHelper::CMS_TYPE_BLOCK,
-                "action" => ApiHelper::REQUEST_SYNC_TYPE_PULL,
-                "id" => $this->_block->getId()
+                "type" => $this->data['type'] ?: '',
+                "action" => $this->data['action'] ?: '',
+                "id" => $this->_page->getId()
             ]
         );
     }
 
     /**
-     * Get current block
+     * Get current page
      *
-     * @return \Magento\Cms\Api\Data\BlockInterface|null
+     * @return \Magento\Cms\Api\Data\PageInterface|null
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getBlock()
+    public function getPage()
     {
         try {
-            return $this->blockRepository->getById(
-                $this->context->getRequest()->getParam('block_id')
+            return $this->pageRepository->getById(
+                $this->context->getRequest()->getParam('page_id')
             );
         } catch (NoSuchEntityException $e) {
             $this->logger->critical($e->getMessage());

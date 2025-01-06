@@ -154,7 +154,7 @@ class ApiConnection
         }
 
         if ($responseRequest->getStatusCode() == self::REQUEST_RESPONSE_CODE_UNAUTHORIZED) {
-            $retry_time = $this->dataPersistor->get('retry_time') ?? 0;
+            $retry_time = $this->dataPersistor->get('retry_time') ?: 0;
             if ($retry_time < self::RESTRICT_GET_ADMIN_TOKEN_RETRY_TIME) {
                 $this->getAdminToken(true);
                 $this->dataPersistor->set('retry_time', ++$retry_time);
@@ -210,8 +210,8 @@ class ApiConnection
         }
 
         $requestBody = [
-            'username' => (!empty($username)) ? $username : $this->configHelper->getUsername(),
-            'password' => (!empty($password)) ? $password : $this->configHelper->getPassword()
+            'username' => $username ?: $this->configHelper->getUsername(),
+            'password' => $password ?: $this->configHelper->getPassword()
         ];
 
         $options = [
@@ -220,7 +220,7 @@ class ApiConnection
             'timeout' => 30
         ];
 
-        $requestEndpoint = ((!empty($host_url)) ? $host_url : $this->configHelper->getSiteUrl())
+        $requestEndpoint = ($host_url ?: $this->configHelper->getSiteUrl())
             . ConfigHelper::API_PREFIX
             . self::API_INTEGRATION_ADMIN_TOKEN;
 
