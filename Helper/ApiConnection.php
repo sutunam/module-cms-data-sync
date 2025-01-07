@@ -145,24 +145,25 @@ class ApiConnection
 
         $responseRequest = $client->send();
 
-        if (!$responseRequest->isSuccess()
-            && $responseRequest->getStatusCode() != self::REQUEST_RESPONSE_CODE_UNAUTHORIZED) {
-            $response['message'] = __("HTTP Error: " . $responseRequest->getStatusCode()
-                . "\n" . $responseRequest->getBody());
-            $this->logger->info("Response: " . $response['message']);
-            return $response;
-        }
+        if (!$responseRequest->isSuccess()) {
+            $response['message'] = __("Error: " . $responseRequest->getStatusCode()
+                . "\n" . json_decode($responseRequest->getBody())->message);
+            $this->logger->info(__(
+                "Response: \nHTTP Error: %1 \n %2",
+                $responseRequest->getStatusCode(),
+                $responseRequest->getBody()
+            ));
 
-        if ($responseRequest->getStatusCode() == self::REQUEST_RESPONSE_CODE_UNAUTHORIZED) {
+            if ($responseRequest->getStatusCode() != self::REQUEST_RESPONSE_CODE_UNAUTHORIZED) {
+                return $response;
+            }
+
             $retry_time = $this->dataPersistor->get('retry_time') ?: 0;
             if ($retry_time < self::RESTRICT_GET_ADMIN_TOKEN_RETRY_TIME) {
                 $this->getAdminToken(true);
                 $this->dataPersistor->set('retry_time', ++$retry_time);
                 return $this->request($requestType, $endpoint, $requestParams, $requestBody);
             }
-            $response['message'] = __("HTTP Error: " . $responseRequest->getStatusCode()
-                . "\n" . $responseRequest->getBody());
-            $this->logger->info("Response: " . $response['message']);
             return $response;
         }
 
