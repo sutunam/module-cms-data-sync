@@ -4,30 +4,45 @@
     <preference for="Sutunam\CmsDataSync\Api\Data\BlockSearchResultsInterface"
                 type="Magento\Cms\Model\BlockSearchResults" />
     <preference for="Sutunam\CmsDataSync\Api\Data\BlockInterface" type="Sutunam\CmsDataSync\Model\Block" />
-    <preference for="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" type="Sutunam\CmsDataSync\Model\BlockRepository" />
+    <preference for="Sutunam\CmsDataSync\Api\BlockRepositoryInterface"
+                type="Sutunam\CmsDataSync\Model\BlockRepository" />
 
     <preference for="Sutunam\CmsDataSync\Api\Data\PageSearchResultsInterface"
                 type="Magento\Cms\Model\PageSearchResults" />
     <preference for="Sutunam\CmsDataSync\Api\Data\PageInterface" type="Sutunam\CmsDataSync\Model\Page" />
     <preference for="Sutunam\CmsDataSync\Api\PageRepositoryInterface" type="Sutunam\CmsDataSync\Model\PageRepository" />
 
-    <preference for="Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface" type="Sutunam\CmsDataSync\Model\WidgetInstance" />
-    <preference for="Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface" type="Sutunam\CmsDataSync\Model\WidgetInstancePage" />
-    <preference for="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" type="Sutunam\CmsDataSync\Model\WidgetRepository" />
+    <preference for="Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface"
+                type="Sutunam\CmsDataSync\Model\WidgetInstance" />
+    <preference for="Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface"
+                type="Sutunam\CmsDataSync\Model\WidgetInstancePage" />
+    <preference for="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface"
+                type="Sutunam\CmsDataSync\Model\WidgetRepository" />
     <preference for="Sutunam\CmsDataSync\Api\Data\WidgetInstanceSearchResultsInterface"
                 type="Sutunam\CmsDataSync\Model\WidgetInstanceSearchResults" />
 
+    <preference for="Sutunam\CmsDataSync\Api\ConfigsRepositoryInterface"
+                type="Sutunam\CmsDataSync\Model\ConfigsRepository" />
+
     <type name="Sutunam\CmsDataSync\Model\BlockRepository">
         <arguments>
-            <argument name="hydrator" xsi:type="object">Magento\Framework\EntityManager\AbstractModelHydrator</argument>
-            <argument name="collectionProcessor" xsi:type="object">Magento\Cms\Model\Api\SearchCriteria\BlockCollectionProcessor</argument>
+            <argument name="hydrator" xsi:type="object">
+                Magento\Framework\EntityManager\AbstractModelHydrator
+            </argument>
+            <argument name="collectionProcessor" xsi:type="object">
+                Magento\Cms\Model\Api\SearchCriteria\BlockCollectionProcessor
+            </argument>
         </arguments>
     </type>
 
     <type name="Sutunam\CmsDataSync\Model\PageRepository">
         <arguments>
-            <argument name="hydrator" xsi:type="object">Magento\Framework\EntityManager\AbstractModelHydrator</argument>
-            <argument name="collectionProcessor" xsi:type="object">Magento\Cms\Model\Api\SearchCriteria\PageCollectionProcessor</argument>
+            <argument name="hydrator" xsi:type="object">
+                Magento\Framework\EntityManager\AbstractModelHydrator
+            </argument>
+            <argument name="collectionProcessor" xsi:type="object">
+                Magento\Cms\Model\Api\SearchCriteria\PageCollectionProcessor
+            </argument>
         </arguments>
     </type>
 
@@ -40,9 +55,15 @@
     <type name="Magento\Framework\EntityManager\HydratorPool">
         <arguments>
             <argument name="hydrators" xsi:type="array">
-                <item name="Sutunam\CmsDataSync\Api\Data\PageInterface" xsi:type="string">Magento\Framework\EntityManager\AbstractModelHydrator</item>
-                <item name="Sutunam\CmsDataSync\Api\Data\BlockInterface" xsi:type="string">Magento\Framework\EntityManager\AbstractModelHydrator</item>
-                <item name="Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface" xsi:type="string">Magento\Framework\EntityManager\AbstractModelHydrator</item>
+                <item name="Sutunam\CmsDataSync\Api\Data\PageInterface" xsi:type="string">
+                    Magento\Framework\EntityManager\AbstractModelHydrator
+                </item>
+                <item name="Sutunam\CmsDataSync\Api\Data\BlockInterface" xsi:type="string">
+                    Magento\Framework\EntityManager\AbstractModelHydrator
+                </item>
+                <item name="Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface" xsi:type="string">
+                    Magento\Framework\EntityManager\AbstractModelHydrator
+                </item>
             </argument>
         </arguments>
     </type>

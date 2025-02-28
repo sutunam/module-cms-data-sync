@@ -68,8 +68,8 @@ class PageButton extends GenericButton implements ButtonProviderInterface
 
         $this->_page = $this->getPage();
         if ($this->_page) {
-            $label = $this->data['type'] == ApiHelper::REQUEST_SYNC_TYPE_PULL ?
-                'Pull from %1' : ($this->data['type'] == ApiHelper::REQUEST_SYNC_TYPE_PUSH ? 'Push to %1' : '');
+            $label = $this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PULL ?
+                'Pull from %1' : ($this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PUSH ? 'Push to %1' : '');
             return [
                 'label' => __($label, $this->configHelper->getSiteName()),
                 'on_click' => sprintf("location.href ='%s'", $this->getActionUrl()),

@@ -75,8 +75,14 @@ class SyncAll extends Action implements HttpGetActionInterface
                 $message = __('%1 item(s) have been synced failed', $totalFailed);
                 $this->messageManager->addErrorMessage($message);
             }
-            if ($result['message']) {
-                $this->messageManager->addNotice($result['message']);
+            if ($result['error_message']) {
+                $this->messageManager->addError($result['error_message']);
+            }
+            if ($result['notice_message']) {
+                $this->messageManager->addNotice($result['notice_message']);
+            }
+            if ($result['success_message']) {
+                $this->messageManager->addSuccess($result['success_message']);
             }
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
