@@ -4,10 +4,14 @@ namespace Sutunam\CmsDataSync\Helper;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Filesystem;
+use Magento\Framework\Filter\FilterManager;
+use Magento\Framework\UrlInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ResourceModel\Store\CollectionFactory;
 use Magento\Store\Model\StoreRepository;
+use Magento\Theme\Model\ResourceModel\Theme;
 use Magento\Theme\Model\ThemeFactory;
 use Magento\Widget\Model\Widget\Instance;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
@@ -17,10 +21,19 @@ use Sutunam\CmsDataSync\Logger\Logger;
 
 class Data
 {
+    public const STORES_MAPPED = 'stores_mapped';
+
+    public const STORES_UNMAPPED = 'stores_unmapped';
+
     /**
      * @var array
      */
     protected $remoteStoreViews = [];
+
+    /**
+     * @var array
+     */
+    protected $remoteCmsSyncConfigs = [];
 
     /**
      * @var ApiHelper
@@ -53,7 +66,7 @@ class Data
     protected $configHelper;
 
     /**
-     * @var \Magento\Framework\Filter\FilterManager
+     * @var FilterManager
      */
     protected $filter;
 
@@ -68,7 +81,7 @@ class Data
     protected $theme;
 
     /**
-     * @var \Magento\Theme\Model\ResourceModel\Theme
+     * @var Theme
      */
     protected $themeResource;
 
@@ -86,10 +99,10 @@ class Data
      * @param StoreRepository $storeRepository
      * @param Filesystem $fileSystem
      * @param Config $configHelper
-     * @param \Magento\Framework\Filter\FilterManager $filter
+     * @param FilterManager $filter
      * @param \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory
      * @param ThemeFactory $theme
-     * @param \Magento\Theme\Model\ResourceModel\Theme $themeResource
+     * @param Theme $themeResource
      * @param Logger $logger
      */
     public function __construct(
@@ -99,10 +112,10 @@ class Data
         StoreRepository $storeRepository,
         FileSystem $fileSystem,
         ConfigHelper $configHelper,
-        \Magento\Framework\Filter\FilterManager $filter,
+        FilterManager $filter,
         \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory,
         ThemeFactory $theme,
-        \Magento\Theme\Model\ResourceModel\Theme $themeResource,
+        Theme $themeResource,
         Logger $logger
     ) {
         $this->apiHelper = $apiHelper;
@@ -119,40 +132,19 @@ class Data
     }
 
     /**
-     * Get remote store id by my store id
+     * Get Store Id by Store Code
      *
-     * @param int $myStoreId
-     * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @param string $code
+     * @return int|null
      */
-    public function getRemoteStoreId($myStoreId)
+    public function getStoreIdByCode($code)
     {
-        $myStoreDetails = $this->storeManager->getStore($myStoreId);
-        if (!$myStoreDetails) {
-            return [
-                'status' => false,
-                'message' => __('There is no store details associated with this store.'),
-            ];
+        try {
+            $store = $this->storeRepository->get($code);
+            return $store->getId();
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+            return null;
         }
-        if (!$this->remoteStoreViews) {
-            $this->remoteStoreViews = $this->apiHelper->requestStoreInfo(ApiHelper::REQUEST_STORE_VIEWS);
-        }
-
-        $remoteStoreView = $this->remoteStoreViews[$myStoreDetails->getCode()] ?: null;
-        if (!$remoteStoreView) {
-            return [
-                'status' => false,
-                'message' => __('There is no remote store associated with this store (store_code).'),
-            ];
-        }
-
-        return [
-            'status' => true,
-            'message' => null,
-            'data' => [
-                'id' => $remoteStoreView['id'],
-            ]
-        ];
     }
 
     /**
@@ -160,13 +152,16 @@ class Data
      *
      * @param array $storeIds
      * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getStoreCodesByIds($storeIds)
     {
-        $result = [];
-        foreach ($storeIds as $storeId) {
-            $result[] = $this->storeManager->getStore($storeId)->getCode();
+        try {
+            $result = [];
+            foreach ($storeIds as $storeId) {
+                $result[$storeId] = $this->storeManager->getStore($storeId)->getCode();
+            }
+        } catch (NoSuchEntityException $e) {
+            $this->logger->critical($e->getMessage());
         }
         return $result;
     }
@@ -179,17 +174,56 @@ class Data
      */
     public function getRemoteStoreIdsListByMyStoreCodes($myStoreCodes)
     {
+        $result = [
+            self::STORES_MAPPED => [],
+            self::STORES_UNMAPPED => []
+        ];
+
         if (!$this->remoteStoreViews) {
-            $this->remoteStoreViews = $this->apiHelper->requestStoreInfo(ApiHelper::REQUEST_STORE_VIEWS);
+            try {
+                $this->remoteStoreViews = $this->apiHelper->requestStoreInfo();
+            } catch (\Exception $e) {
+                $this->logger->critical($e);
+                return $result;
+            }
         }
 
-        $result = [];
-
-        foreach ($myStoreCodes as $myStoreCode) {
+        foreach ($myStoreCodes as $myStoreId => $myStoreCode) {
             if (!isset($this->remoteStoreViews[$myStoreCode])) {
+                $result[self::STORES_UNMAPPED][$myStoreCode] = $myStoreId;
                 continue;
             }
-            $result[] = (int) $this->remoteStoreViews[$myStoreCode]['id'];
+            $result[self::STORES_MAPPED][$myStoreCode]
+                = (int) $this->remoteStoreViews[$myStoreCode][ApiHelper::TYPE_ID];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get remote store id list by my store codes
+     *
+     * @param array $remoteStoreCodes
+     * @return array
+     */
+    public function getUnmappedRemoteStoreIdsByRemoteStoreCodes($remoteStoreCodes)
+    {
+        $result = [];
+
+        if (!$this->remoteStoreViews) {
+            try {
+                $this->remoteStoreViews = $this->apiHelper->requestStoreInfo();
+            } catch (\Exception $e) {
+                $this->logger->critical($e);
+                return $result;
+            }
+        }
+
+        foreach ($remoteStoreCodes as $remoteStoreCode) {
+            if ($this->getStoreIdByCode($remoteStoreCode) != null) {
+                continue;
+            }
+            $result[] = $this->remoteStoreViews[$remoteStoreCode][ApiHelper::TYPE_ID];
         }
 
         return $result;
@@ -201,10 +235,10 @@ class Data
      * @param array $myStoreIds
      * @return array
      */
-    public function getRemoteStoreIdsListByMyStoreIds($myStoreIds)
+    public function getMappedRemoteStoreIdsListByMyStoreIds($myStoreIds)
     {
         $myStoreCodes = $this->getStoreCodesByIds($myStoreIds);
-        return $this->getRemoteStoreIdsListByMyStoreCodes($myStoreCodes);
+        return $this->getRemoteStoreIdsListByMyStoreCodes($myStoreCodes)[self::STORES_MAPPED];
     }
 
     /**
@@ -213,18 +247,31 @@ class Data
      * @param array $remoteStoreCodes
      * @return array
      */
-    public function getMyStoreIdsListByRemoteStoreCodes($remoteStoreCodes)
+    public function getMyMappedStoreIdsListByRemoteStoreCodes($remoteStoreCodes)
     {
         $result = [];
         foreach ($remoteStoreCodes as $remoteStoreCode) {
-            try {
-                $result[] = (int) $this->storeRepository->get($remoteStoreCode)->getId();
-            } catch (\Exception $e) {
-                $this->logger->critical($e);
+            if ($this->getStoreIdByCode($remoteStoreCode) == null) {
+                continue;
             }
+            $result[] = (int) $this->getStoreIdByCode($remoteStoreCode);
         }
 
         return $result;
+    }
+
+    /**
+     * Get remote Cms sync configs
+     *
+     * @return array
+     */
+    public function getCmsSyncConfigs()
+    {
+        if (!$this->remoteCmsSyncConfigs) {
+            $this->remoteCmsSyncConfigs = $this->apiHelper->getCmsSyncConfigs();
+        }
+
+        return $this->remoteCmsSyncConfigs;
     }
 
     /**
@@ -283,26 +330,39 @@ class Data
      */
     public function getAllImageFromCmsContent($cmsContent)
     {
-        $result = [];
+        try {
+            $cmsContentDecode = $this->decodingCmsContent($cmsContent);
+            $regex = '/["\']*[^"\'\s]+["\']*\s*[:=]\s*["\']*(?:(?:' .
+                str_replace(
+                    '/',
+                    '\/',
+                    $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA)
+                ) .
+                '|{{media\s+url=)([^"\']+\.(?:' .
+                implode('|', $this->configHelper->getMediaType()) .
+                ')))["\']*/';
 
-        preg_match_all('/{{media url="([^"]+)"}}/', $cmsContent, $matches_json);
-        preg_match_all('/{{media url=([^}]+)}}/', $cmsContent, $matches);
-
-        if (is_array($matches) && count($matches) > 1) {
-            $imagePaths = $matches[1];
-            foreach ($imagePaths as $path) {
-                $result[] = $path;
-            }
+            preg_match_all($regex, $cmsContentDecode, $matches);
+        } catch (NoSuchEntityException $e) {
+            return [];
         }
 
-        if (is_array($matches_json) && count($matches_json) > 1) {
-            $imagePaths = $matches_json[1];
-            foreach ($imagePaths as $path) {
-                $result[] = $path;
-            }
+        return isset($matches[1]) ? $matches[1] : [];
+    }
+
+    /**
+     * Decoding CMS content (should be decoding the cms content because widget param potentially has encoding content)
+     *
+     * @param string $string
+     * @return string
+     */
+    public function decodingCmsContent($string)
+    {
+        while ($string !== html_entity_decode($string, ENT_QUOTES | ENT_HTML5)) { // phpcs:ignore
+            $string = html_entity_decode($string, ENT_QUOTES | ENT_HTML5); // phpcs:ignore
         }
 
-        return $result;
+        return $string;
     }
 
     /**
@@ -314,7 +374,7 @@ class Data
      */
     public function saveAllImageFromCmsContent($cmsContent, $isOverwrite = false)
     {
-        $allImages = $this->getAllImageFromCmsContent($cmsContent);
+        $allImages = array_unique($this->getAllImageFromCmsContent($cmsContent));
         foreach ($allImages as $imagePath) {
             $this->saveMediaFromRemoteHost($imagePath, $isOverwrite);
         }
@@ -428,13 +488,19 @@ class Data
      * Format widget instance params to correct format
      *
      * @param WidgetInstanceInterface|Instance|array $widgetInstanceParams
+     * @param string $action
      * @return array
      */
-    public function formatWidgetInstanceParams($widgetInstanceParams)
+    public function formatWidgetInstanceParams($widgetInstanceParams, $action): array
     {
         if ($widgetInstanceParams instanceof DataObject) {
             $widgetInstanceParams = $widgetInstanceParams->getData();
         }
+
+        $widgetInstanceWidgetParams = $this->replaceDomainInContentByAction(
+            $widgetInstanceParams[WidgetInstanceInterface::WIDGET_PARAMETERS],
+            $action
+        ) ?? [];
 
         return [
             WidgetInstanceInterface::IDENTIFIER => $widgetInstanceParams[WidgetInstanceInterface::IDENTIFIER] ?? '',
@@ -443,9 +509,58 @@ class Data
                 $widgetInstanceParams[WidgetInstanceInterface::INSTANCE_TYPE] ?? '',
             WidgetInstanceInterface::THEME_CODE =>
                 $this->getThemeCodeById($widgetInstanceParams[WidgetInstanceInterface::THEME_ID]) ?? '',
-            WidgetInstanceInterface::WIDGET_PARAMETERS =>
-                $widgetInstanceParams[WidgetInstanceInterface::WIDGET_PARAMETERS] ?? [],
+            WidgetInstanceInterface::WIDGET_PARAMETERS => $widgetInstanceWidgetParams,
             WidgetInstanceInterface::SORT_ORDER => $widgetInstanceParams[WidgetInstanceInterface::SORT_ORDER] ?? '',
         ];
+    }
+
+    /**
+     * Replace the domain existed on cms content
+     *
+     * @param string $cmsContent
+     * @param string $action
+     * @return string|null
+     */
+    public function replaceDomainInContentByAction($cmsContent, $action): ?string
+    {
+        try {
+            $remoteSiteUrl = $this->configHelper->getSiteUrl();
+            $mySiteUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_WEB);
+            $cmsContent = ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
+                str_replace('/', '\/', $remoteSiteUrl),
+                str_replace('/', '\/', $mySiteUrl),
+                $cmsContent
+            ) : (($action == ApiHelper::REQUEST_SYNC_TYPE_PUSH) ? str_replace(
+                str_replace('/', '\/', $mySiteUrl),
+                str_replace('/', '\/', $remoteSiteUrl),
+                $cmsContent
+            ) : $cmsContent);
+            return ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
+                $remoteSiteUrl,
+                $mySiteUrl,
+                $cmsContent
+            ) : (($action == ApiHelper::REQUEST_SYNC_TYPE_PUSH) ? str_replace(
+                $mySiteUrl,
+                $remoteSiteUrl,
+                $cmsContent
+            ) : $cmsContent);
+        } catch (NoSuchEntityException $exception) {
+            return null;
+        }
+    }
+
+    /**
+     * Merge two array function instead of using array_merge
+     *
+     * @param array $array1
+     * @param array $array2
+     * @return array
+     */
+    public function mergeTwoArrays(array $array1, array $array2)
+    {
+        foreach ($array2 as $item) {
+            $array1[] = $item;
+        }
+        return $array1;
     }
 }

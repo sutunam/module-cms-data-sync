@@ -3,6 +3,8 @@
 namespace Sutunam\CmsDataSync\Model\Processors\Cms;
 
 use Laminas\Http\Request;
+use Magento\Framework\UrlInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory;
 use Magento\Widget\Model\Widget\InstanceFactory;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
@@ -18,7 +20,7 @@ use Sutunam\CmsDataSync\Logger\Logger;
 class Widget implements ProcessorInterface
 {
 
-    public const SUTUNAM_CMS_WIDGET_API_ENDPOINT = 'sutunam/cmsWidget/';
+    public const SUTUNAM_CMS_WIDGET_API_ENDPOINT = 'sync/cmsWidget/';
 
     /**
      * @var WidgetRepositoryInterface
@@ -56,12 +58,17 @@ class Widget implements ProcessorInterface
     protected $instanceCollectionFactory;
 
     /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+
+    /**
      * @var Logger
      */
     protected $logger;
 
     /**
-     * Construct
+     * Constructor
      *
      * @param WidgetRepositoryInterface $widgetRepository
      * @param InstanceFactory $instanceFactory
@@ -70,6 +77,7 @@ class Widget implements ProcessorInterface
      * @param DataHelper $dataHelper
      * @param ConfigHelper $configHelper
      * @param CollectionFactory $instanceCollectionFactory
+     * @param StoreManagerInterface $storeManager
      * @param Logger $logger
      */
     public function __construct(
@@ -80,6 +88,7 @@ class Widget implements ProcessorInterface
         DataHelper $dataHelper,
         ConfigHelper $configHelper,
         CollectionFactory $instanceCollectionFactory,
+        StoreManagerInterface $storeManager,
         Logger $logger
     ) {
         $this->instanceFactory = $instanceFactory;
@@ -89,6 +98,7 @@ class Widget implements ProcessorInterface
         $this->dataHelper = $dataHelper;
         $this->configHelper = $configHelper;
         $this->instanceCollectionFactory = $instanceCollectionFactory;
+        $this->storeManager = $storeManager;
         $this->logger = $logger;
     }
 
@@ -103,30 +113,33 @@ class Widget implements ProcessorInterface
     {
         $result = [
             'success' => false,
-            'message' => ''
+            'notice_message' => '',
+            'error_message' => ''
         ];
 
         $widgetInstance = $this->getWigetInstance($id);
         if (!$widgetInstance) {
-            $result['message'] = __('Couldn\'t load CMS widget content.');
+            $result['notice_message'] = __('Couldn\'t load CMS widget content.');
         }
 
         $widgetInstanceStoreIds = $widgetInstance->getStoreIds();
         $widgetInstanceStoreCodes = $this->dataHelper->getStoreCodesByIds($widgetInstanceStoreIds);
         $remoteStoreIds = $this->dataHelper->getRemoteStoreIdsListByMyStoreCodes($widgetInstanceStoreCodes);
-        if (!$remoteStoreIds) {
-            $result['message'] = __('The store scope of widget is not match.');
+
+        $mappedStoresIds = $remoteStoreIds[DataHelper::STORES_MAPPED];
+        if (!$mappedStoresIds) {
+            $result['error_message'] = __('The store scope of widget is not match.');
             return $result;
         }
 
         $remoteWidgetInstances = $this->apiHelper->getDataByIdentifier(
             $widgetInstance->getData(WidgetInstanceInterface::IDENTIFIER),
             ApiHelper::CMS_TYPE_WIDGET,
-            ['store_ids' => implode(',', $remoteStoreIds)]
+            ['store_ids' => implode(',', $mappedStoresIds)]
         );
 
         if (!$remoteWidgetInstances) {
-            $result['message'] = __(
+            $result['error_message'] = __(
                 'There is no remote widget instance with identifier %1',
                 $widgetInstance->getData(WidgetInstanceInterface::IDENTIFIER)
             );
@@ -134,7 +147,7 @@ class Widget implements ProcessorInterface
         }
 
         if (count($remoteWidgetInstances) != 1) {
-            $result['message'] = __('The store scope of widget instance is not match.');
+            $result['error_message'] = __('The store scope of widget instance is not match.');
             return $result;
         }
 
@@ -142,30 +155,58 @@ class Widget implements ProcessorInterface
 
         $myThemeId = $this->dataHelper->getThemeIdByCode($remoteWidgetInstance[WidgetInstanceInterface::THEME_CODE]);
         if (!$myThemeId) {
-            $result['message'] = __(
+            $result['error_message'] = __(
                 'There is no theme corresponding to the remote theme code %.',
                 $remoteWidgetInstance[WidgetInstanceInterface::THEME_CODE]
             );
             return $result;
         }
 
+        if ($this->configHelper->isOverwrite()) {
+            $storeCodesOfRemoteWidget = $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES];
+            $mappingStoreIdByCodesOfRemoteWidget = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
+                $storeCodesOfRemoteWidget
+            );
+
+            if ($diff = array_diff($mappingStoreIdByCodesOfRemoteWidget, $widgetInstanceStoreIds)) {
+                $checkInstanceUsingDiffStores = $this->instanceCollectionFactory->create()
+                    ->addFieldToFilter(WidgetInstanceInterface::IDENTIFIER, ['eq' => $widgetInstance->getIdentifier()])
+                    ->addFieldToFilter(WidgetInstanceInterface::INSTANCE_ID, ['neq' => $id])
+                    ->addStoreFilter($diff)
+                    ->getSize();
+                if (!$checkInstanceUsingDiffStores) {
+                    $widgetInstanceStoreIds = $this->dataHelper->mergeTwoArrays(
+                        $mappingStoreIdByCodesOfRemoteWidget,
+                        $remoteStoreIds[DataHelper::STORES_UNMAPPED]
+                    );
+                }
+            } else {
+                $widgetInstanceStoreIds = $mappingStoreIdByCodesOfRemoteWidget;
+            }
+        }
+
         try {
-            $data = $this->dataHelper->formatWidgetInstanceParams($remoteWidgetInstance);
+            $data = $this->dataHelper->formatWidgetInstanceParams(
+                $remoteWidgetInstance,
+                ApiHelper::REQUEST_SYNC_TYPE_PULL
+            );
             $widgetInstance->setData($data);
-            $widgetInstance->setId($id);
             $widgetInstance->setThemeId($myThemeId);
-            $widgetInstance->setStoreIds($widgetInstanceStoreIds);
+            $widgetInstance->setStoreIds(implode(',', $widgetInstanceStoreIds));
             $widgetInstance->setPageGroups(
                 $this->dataHelper->formatPageGroupsToSave($remoteWidgetInstance[WidgetInstanceInterface::PAGE_GROUPS])
             );
+
+            $widgetInstance->setId($id);
             $widgetInstance->save();
             if ($this->configHelper->isSyncMedia()) {
-                foreach ($widgetInstance->getWidgetParameters() as $widgetParameter) {
-                    $this->dataHelper->saveAllImageFromCmsContent($widgetParameter, true);
-                }
+                $this->dataHelper->saveAllImageFromCmsContent(
+                    json_encode($widgetInstance->getWidgetParameters()),
+                    $this->configHelper->isOverwrite()
+                );
             }
         } catch (\Exception $e) {
-            $result['message'] = $e->getMessage();
+            $result['error_message'] = $e->getMessage();
             $this->logger->critical($e->getMessage());
         }
         $result['success'] = true;
@@ -183,12 +224,14 @@ class Widget implements ProcessorInterface
             'total_update_success' => 0,
             'total_create_success' => 0,
             'total_failed' => 0,
-            'message' => ''
+            'error_message' => '',
+            'notice_message' => '',
+            'success_message' => ''
         ];
 
         $allRemoteWidgetInstances = $this->apiHelper->getAllCms(ApiHelper::CMS_TYPE_WIDGET);
         if (!$allRemoteWidgetInstances) {
-            $result['message'] = __(
+            $result['error_message'] = __(
                 'There is no remote widget instance on the remote host %1',
                 $this->configHelper->getSiteName()
             );
@@ -204,7 +247,7 @@ class Widget implements ProcessorInterface
             }
 
             //Get Stores Ids list on my site that have the same values code with remote codes list
-            $myStoreIds = $this->dataHelper->getMyStoreIdsListByRemoteStoreCodes(
+            $myStoreIds = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
                 $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES]
             );
 
@@ -223,36 +266,62 @@ class Widget implements ProcessorInterface
                 )
                 ->addStoreFilter($myStoreIds);
 
-            if ($myWidgetInstances->getSize() > 1) {
+            $usagedStores = [];
+
+            if ($myWidgetInstances->getSize() > 0) {
+                foreach ($myWidgetInstances as $myWidgetInstance) {
+                    $usagedStores = $this->dataHelper->mergeTwoArrays($usagedStores, $myWidgetInstance->getStoreIds());
+                    if (!$this->configHelper->isOverwrite()) {
+                        $result['notice_message'] .= __(
+                            'Pull Widget ID: %1 || Status: %2.<br>',
+                            $myWidgetInstance->getId(),
+                            __('Overwrite disabled - Skipped')
+                        );
+                        continue;
+                    }
+
+                    $response = $this->pull($myWidgetInstance->getId());
+                    if (!$response['success']) {
+                        $result['total_failed']++;
+                        $result['error_message'] .= ($response['error_message'] ? __(
+                            'Pull Widget ID: %1 || Status: %2.<br>',
+                            $myWidgetInstance->getId(),
+                            $response['error_message']
+                        ) : '');
+                        $result['notice_message'] .= ($response['notice_message'] ? __(
+                            'Pull Widget ID: %1 || Status: %2.<br>',
+                            $myWidgetInstance->getId(),
+                            $response['notice_message']
+                        ) : '');
+                        continue;
+                    }
+
+                    $result['success_message'] .= __(
+                        'Pull Widget ID: %1 || Status: %2.<br>',
+                        $myWidgetInstance->getId(),
+                        __('Updated Successfully')
+                    );
+                    $result['total_update_success']++;
+                }
+            }
+
+            if (!array_diff($myStoreIds, $usagedStores)) {
                 continue;
             }
 
             try {
                 $myWidgetInstance = $this->instanceFactory->create();
 
-                $myWidgetInstanceId = $myWidgetInstances->getFirstItem()->getId();
-                $myWidgetInstanceStoreIds = [];
+                unset($remoteWidgetInstance[WidgetInstanceInterface::ID]);
+                $myWidgetInstanceStoreIds  = array_diff($myStoreIds, $usagedStores);
 
-                if ($myWidgetInstanceId) {
-                    $myWidgetInstance = $this->getWigetInstance($myWidgetInstanceId);
-                    $myWidgetInstanceStoreIds = $myWidgetInstance->getStoreIds();
-                }
-
-                if (!$this->validateWidgetInstance($remoteWidgetInstance, $myWidgetInstanceStoreIds, $myStoreIds)) {
-                    $result['message'] .= __(
-                        'Pull Widget ID: %1 ||Status: %2.<br>',
-                        $myWidgetInstanceId,
-                        __('Skipped')
-                    );
-                    continue;
-                }
-
-                $myWidgetInstanceStoreIds  = $myWidgetInstanceStoreIds ?: $myStoreIds;
-
-                $data = $this->dataHelper->formatWidgetInstanceParams($remoteWidgetInstance);
+                $data = $this->dataHelper->formatWidgetInstanceParams(
+                    $remoteWidgetInstance,
+                    ApiHelper::REQUEST_SYNC_TYPE_PULL
+                );
 
                 $myWidgetInstance->setData($data);
-                $myWidgetInstance->setStoreIds($myWidgetInstanceStoreIds);
+                $myWidgetInstance->setStoreIds(implode(',', $myWidgetInstanceStoreIds));
                 $myWidgetInstance->setThemeId($myThemeId);
                 $myWidgetInstance->setPageGroups(
                     $this->dataHelper->formatPageGroupsToSave(
@@ -260,46 +329,29 @@ class Widget implements ProcessorInterface
                     )
                 );
 
-                if ($this->configHelper->isOverwrite()) {
-                    $myWidgetInstance->setId($myWidgetInstanceId);
-                    $myWidgetInstance->save();
-                } elseif (!$myWidgetInstanceId) {
-                    $myWidgetInstance->save();
-                } else {
-                    $result['message'] .= __(
-                        'Pull Widget ID: %1 ||Status: %2.<br>',
-                        $myWidgetInstanceId,
-                        __('Skipped')
-                    );
-                    continue;
-                }
+                // @phpstan-ignore-next-line
+                $myWidgetInstance->save();
 
                 if ($this->configHelper->isSyncMedia()) {
-                    foreach ($myWidgetInstance->getWidgetParameters() as $widgetParameter) {
-                        $this->dataHelper->saveAllImageFromCmsContent(
-                            $widgetParameter,
-                            $this->configHelper->isOverwrite()
-                        );
-                    }
+                    $this->dataHelper->saveAllImageFromCmsContent(
+                        json_encode($myWidgetInstance->getWidgetParameters()),
+                        $this->configHelper->isOverwrite()
+                    );
                 }
 
-                if ($myWidgetInstanceId) {
-                    $result['total_update_success']++;
-                    $result['message'] .= __(
-                        'Pull Widget ID: %1 ||Status: %2.<br>',
-                        $myWidgetInstanceId,
-                        __('Updated Successfully')
-                    );
-                } else {
-                    $result['total_create_success']++;
-                    $result['message'] .= __(
-                        'Pull Widget ID: %1 ||Status: %2.<br>',
-                        $myWidgetInstanceId,
-                        __('Created Successfully')
-                    );
-                }
+                $result['total_create_success']++;
+                $result['success_message'] .= __(
+                    'Pull Widget ID: %1 ||Status: %2.<br>',
+                    $myWidgetInstance->getId(),
+                    __('Created Successfully')
+                );
+
             } catch (\Exception $e) {
                 $result['total_failed']++;
+                $result['error_message'] .= __(
+                    'Pull Widget || Status: Create - %1.<br>',
+                    $e->getMessage()
+                );
                 $this->logger->critical($e->getMessage());
             }
         }
@@ -319,17 +371,34 @@ class Widget implements ProcessorInterface
         $result = [
             'success' => false,
             'type' => '',
-            'message' => ''
+            'error_message' => '',
+            'notice_message' => '',
+            'success_message' => '',
         ];
+
         $entity = $this->getWigetInstance($id);
         if ($entity) {
-            $remoteStoreIds = $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($entity->getStoreIds());
-            if (!$remoteStoreIds) {
-                $result['message'] = __('No remote store found by widget id %1', $id);
+            $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
+            if (!$remoteCmsSyncConfigs) {
+                $result['error_message'] = __(
+                    'Something went wrong when trying to get configs of remote host %1',
+                    $this->configHelper->getSiteName()
+                );
                 return $result;
             }
 
-            $data = ['widgetInstance' => $this->dataHelper->formatWidgetInstanceParams($entity)];
+            $isRemoteHostOverWritable = $remoteCmsSyncConfigs[ConfigHelper::XML_CMS_DATA_SYNC_IS_OVERWRITE] ?: 0;
+
+            $remoteStoreIds = $this->dataHelper->getMappedRemoteStoreIdsListByMyStoreIds($entity->getStoreIds());
+            if (!$remoteStoreIds) {
+                $result['error_message'] = __('No remote store found by widget id %1', $id);
+                return $result;
+            }
+
+            $data = [
+                'widgetInstance'
+                => $this->dataHelper->formatWidgetInstanceParams($entity, ApiHelper::REQUEST_SYNC_TYPE_PUSH)
+            ];
             $data['widgetInstance'][WidgetInstanceInterface::PAGE_GROUPS] =
                 $this->dataHelper->formatPageGroupsToParams($entity->getPageGroups());
 
@@ -339,48 +408,166 @@ class Widget implements ProcessorInterface
                 ['store_ids' => implode(',', $remoteStoreIds)]
             );
 
-            $media = [];
-            foreach ($entity->getWidgetParameters() as $widgetParameter) {
-                foreach ($this->dataHelper->getAllImageFromCmsContent($widgetParameter) as $image) {
-                    $media[] = $image;
-                }
-            }
-            $data['widgetInstance'][WidgetInstanceInterface::MEDIA] = $media;
+            $data['widgetInstance'][WidgetInstanceInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
+                json_encode($entity->getWidgetParameters())
+            );
 
             if (!$remoteWidgetInstances) {
                 $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = $remoteStoreIds;
-                $result = $this->apiConnection->request(
+                $response = $this->apiConnection->request(
                     Request::METHOD_POST,
                     self::SUTUNAM_CMS_WIDGET_API_ENDPOINT,
                     [],
                     $data
                 );
-                $result['type'] = 'created';
+
+                if ($response['success']) {
+                    $result['success'] = $response['success'];
+                    $result['type'] = 'created';
+                    $result['success_message'] = __(
+                        'Created new remote widget instance with ID: %1
+                        (My widget instance ID: %2) on remote host %3 successfully',
+                        $response['data'][WidgetInstanceInterface::ID],
+                        $id,
+                        $this->configHelper->getSiteName()
+                    );
+                    return $result;
+                }
+
+                $result['error_message'] = __(
+                    'Created new remote widget instance for my widget instance ID: %1 failed - Reason:%2',
+                    $id,
+                    $response['message']
+                );
+
                 return $result;
             }
 
+            $remoteUsedStoreCodes = [];
+
+            foreach ($remoteWidgetInstances as $remoteWidgetInstance) {
+                $remoteUsedStoreCodes = $this->dataHelper->mergeTwoArrays(
+                    $remoteUsedStoreCodes,
+                    $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES]
+                );
+            }
+
+            $myStoreIdsByRemoteIds
+                = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes($remoteUsedStoreCodes);
+            $checkNumOfInstanceWithIdentifier = $this->instanceCollectionFactory->create()
+                ->addFieldToFilter(
+                    WidgetInstanceInterface::IDENTIFIER,
+                    ['eq' => $entity->getData(WidgetInstanceInterface::IDENTIFIER)]
+                )
+                ->addStoreFilter($myStoreIdsByRemoteIds)
+                ->getSize();
+
+            if ($checkNumOfInstanceWithIdentifier > 1) {
+                $result['error_message'] = __(
+                    'Update remote widget instance for my widget instance ID: %1 failed - Reason:%2',
+                    $id,
+                    'There\'s other CMS widget instance affects
+                    with the same remote CMS widget instance except widget instance ID: ' . $id
+                );
+                return $result;
+            }
+
+            $countRemoteWidgetInstances = count($remoteWidgetInstances);
+            $remoteUsedStoreIds = [];
+
             foreach ($remoteWidgetInstances as $remoteWidgetInstance) {
                 $remoteWidgetInstanceId = $remoteWidgetInstance[WidgetInstanceInterface::ID];
-                $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] =
-                    explode(',', $remoteWidgetInstance[WidgetInstanceInterface::STORE_IDS]);
+                $remoteWidgetInstanceStoreIds = explode(
+                    ',',
+                    $remoteWidgetInstance[WidgetInstanceInterface::STORE_IDS]
+                );
+                $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays(
+                    $remoteUsedStoreIds,
+                    $remoteWidgetInstanceStoreIds
+                );
+
+                if (!$isRemoteHostOverWritable) {
+                    $result['notice_message'] .= __(
+                        'Update remote widget instance for my widget instance ID: %1
+                        (Remote widget instance ID: %2) was skipped - Reason: Overwrite disabled on the remote host %3',
+                        $id,
+                        $remoteWidgetInstanceId,
+                        $this->configHelper->getSiteName()
+                    );
+                    continue;
+                }
+
+                $storeIdsParams = $remoteWidgetInstanceStoreIds;
+                if ($countRemoteWidgetInstances == 1) {
+                    $storeIdsParams = $remoteStoreIds;
+                    $remoteUsedStoreIds = $remoteStoreIds;
+                }
+
+                $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = $this->dataHelper->mergeTwoArrays(
+                    $storeIdsParams,
+                    $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
+                        $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES]
+                    )
+                );
+
                 $data['widgetInstance'][WidgetInstanceInterface::ID] = $remoteWidgetInstanceId;
+
                 $response = $this->apiConnection->request(
                     Request::METHOD_PUT,
                     self::SUTUNAM_CMS_WIDGET_API_ENDPOINT . $remoteWidgetInstanceId,
                     [],
                     $data
                 );
+
                 if ($response['success']) {
                     $result['success'] = true;
-                    $result['type'] = 'updated';
-                    return $result;
+                    $result['success_message'] .= __(
+                        'Update remote widget instance for my widget instance ID: %1
+                        (Remote widget instance ID: %2) on remote host %2 successfully',
+                        $id,
+                        $remoteWidgetInstanceId,
+                        $this->configHelper->getSiteName()
+                    );
+                } else {
+                    $result['error_message'] .= __(
+                        'Update remote widget instance for my widget instance ID: %1
+                        (Remote widget instance ID: %2) failed - Reason:%3',
+                        $id,
+                        $remoteWidgetInstanceId,
+                        $response['message']
+                    );
                 }
-
-                $result['message'] = $response['message'];
             }
 
+            if ($diff = array_diff($remoteStoreIds, $remoteUsedStoreIds)) {
+                $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = $diff;
+                unset($data['widgetInstance'][WidgetInstanceInterface::ID]);
+                $response = $this->apiConnection->request(
+                    Request::METHOD_POST,
+                    self::SUTUNAM_CMS_WIDGET_API_ENDPOINT,
+                    [],
+                    $data
+                );
+
+                if ($response['success']) {
+                    $result['success_message'] .= __(
+                        'Created new remote widget instance with ID: %1
+                        (My widget instance ID: %2) on remote host %3 successfully',
+                        $response['data'][WidgetInstanceInterface::ID],
+                        $id,
+                        $this->configHelper->getSiteName()
+                    );
+                } else {
+                    $result['error_message'] .= __(
+                        'Created new remote widget instance for my widget instance ID: %1 failed - Reason:%2',
+                        $id,
+                        $response['message']
+                    );
+                }
+            }
+            $result['type'] = 'updated';
         } else {
-            $result['message'] = __('Couldn\'t load CMS widget content.');
+            $result['error_message'] = __('Couldn\'t load CMS widget content.');
         }
         return $result;
     }
@@ -396,12 +583,14 @@ class Widget implements ProcessorInterface
             'total_update_success' => 0,
             'total_create_success' => 0,
             'total_failed' => 0,
-            'message' => ''
+            'error_message' => '',
+            'notice_message' => '',
+            'success_message' => '',
         ];
 
         $allWidgetInstanceIds = $this->instanceCollectionFactory->create()->getAllIds();
         if (!$allWidgetInstanceIds) {
-            $result['message'] = __(
+            $result['error_message'] = __(
                 'There is no remote widget instance on the remote host %1',
                 $this->configHelper->getSiteName()
             );
@@ -412,17 +601,22 @@ class Widget implements ProcessorInterface
             $response = $this->push($widgetId);
             if (!$response['success']) {
                 $result['total_failed']++;
-                $result['message'] .= __(
+                $result['error_message'] .= ($response['error_message'] ? __(
                     'Push Widget ID: %1 ||Status: %2.<br>',
                     $widgetId,
-                    $response['message']
-                );
+                    $response['error_message']
+                ) : '');
+                $result['notice_message'] .= ($response['notice_message'] ? __(
+                    'Push Widget ID: %1 ||Status: %2.<br>',
+                    $widgetId,
+                    $response['notice_message']
+                ) : '');
                 continue;
             }
 
             if ($response['type'] == 'created') {
                 $result['total_create_success']++;
-                $result['message'] .= __(
+                $result['success_message'] .= __(
                     'Push Widget ID: %1 ||Status: %2.<br>',
                     $widgetId,
                     __('Created Successfully')
@@ -430,7 +624,7 @@ class Widget implements ProcessorInterface
                 continue;
             }
 
-            $result['message'] .= __(
+            $result['success_message'] .= __(
                 'Push Widget ID: %1 ||Status: %2.<br>',
                 $widgetId,
                 __('Updated Successfully')
@@ -455,33 +649,5 @@ class Widget implements ProcessorInterface
             $this->logger->critical($exception->getMessage());
         }
         return false;
-    }
-
-    /**
-     * Validate widget instance
-     *
-     * @param WidgetInstanceInterface $remoteWidgetInstance
-     * @param array $myWidgetInstanceStoreIds
-     * @param array $mappingStoreIds
-     * @return bool
-     */
-    public function validateWidgetInstance($remoteWidgetInstance, $myWidgetInstanceStoreIds, $mappingStoreIds)
-    {
-        //Get list diff stores id from widget found in collection with list store gotten from remote codes list
-        $diffIds = array_diff($myWidgetInstanceStoreIds, $mappingStoreIds);
-        if ($diffIds) {
-            //Check there's any other remote widget using diff ids
-            $remoteWidgetInstanceUsingDiffIds = $this->apiHelper->getDataByIdentifier(
-                $remoteWidgetInstance[WidgetInstanceInterface::IDENTIFIER],
-                ApiHelper::CMS_TYPE_WIDGET,
-                $this->dataHelper->getRemoteStoreIdsListByMyStoreIds($diffIds)
-            );
-
-            //If yes, skip it
-            if ($remoteWidgetInstanceUsingDiffIds) {
-                return false;
-            }
-        }
-        return true;
     }
 }

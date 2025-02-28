@@ -12,10 +12,11 @@ use Magento\Cms\Model\ResourceModel\Block as ResourceBlock;
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\Api\FilterFactory;
 use Magento\Framework\Api\Search\FilterGroup;
-use Magento\Framework\App\ObjectManager;
+use Magento\Cms\Model\BlockFactory;
 use Magento\Framework\EntityManager\HydratorInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Store\Model\StoreManagerInterface;
+use Sutunam\CmsDataSync\Api\Data\BlockSearchResultsInterface;
 use Sutunam\CmsDataSync\Helper\Data as SutunamDataHelper;
 use Sutunam\CmsDataSync\Helper\Config as SutunamConfigHelper;
 use Sutunam\CmsDataSync\Api\Data\BlockInterfaceFactory as SutunamBlockInterfaceFactory;
@@ -94,13 +95,11 @@ class BlockRepository implements SutunamBlockRepositoryInterface
     private $resource;
 
     /**
-     * @var HydratorInterface|mixed
+     * @var HydratorInterface
      */
     private $hydrator;
 
     /**
-     * Constructor
-     *
      * @param BlockCollectionFactory $blockCollectionFactory
      * @param SutunamBlockSearchResultsInterfaceFactory $sutunamSearchResultsFactory
      * @param SutunamDataHelper $sutunamDataHelper
@@ -112,8 +111,8 @@ class BlockRepository implements SutunamBlockRepositoryInterface
      * @param DataObjectHelper $dataObjectHelper
      * @param StoreManagerInterface $storeManager
      * @param ResourceBlock $resource
-     * @param CollectionProcessorInterface|null $collectionProcessor
-     * @param HydratorInterface|null $hydrator
+     * @param CollectionProcessorInterface $collectionProcessor
+     * @param HydratorInterface $hydrator
      */
     public function __construct(
         BlockCollectionFactory $blockCollectionFactory,
@@ -127,8 +126,8 @@ class BlockRepository implements SutunamBlockRepositoryInterface
         DataObjectHelper $dataObjectHelper,
         StoreManagerInterface $storeManager,
         ResourceBlock $resource,
-        CollectionProcessorInterface $collectionProcessor = null,
-        ?HydratorInterface $hydrator = null
+        CollectionProcessorInterface $collectionProcessor,
+        HydratorInterface $hydrator
     ) {
         $this->blockCollectionFactory = $blockCollectionFactory;
         $this->sutunamSearchResultsFactory = $sutunamSearchResultsFactory;
@@ -141,8 +140,8 @@ class BlockRepository implements SutunamBlockRepositoryInterface
         $this->dataObjectHelper = $dataObjectHelper;
         $this->resource = $resource;
         $this->storeManager = $storeManager;
-        $this->collectionProcessor = $collectionProcessor ?: $this->getCollectionProcessor();
-        $this->hydrator = $hydrator ?? ObjectManager::getInstance()->get(HydratorInterface::class);
+        $this->collectionProcessor = $collectionProcessor;
+        $this->hydrator = $hydrator;
     }
 
     /**
@@ -150,17 +149,18 @@ class BlockRepository implements SutunamBlockRepositoryInterface
      *
      * @param string $blockId
      * @return Block
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function getById($blockId)
     {
         $block = $this->sutunamBlockInterface->create();
         $block->load($blockId);
-        $block->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($block->getStores()));
 
         if (!$block->getId()) {
             throw new NoSuchEntityException(__('The CMS block with the "%1" ID doesn\'t exist.', $blockId));
         }
+        $block->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($block->getStores()));
+
         return $block;
     }
 
@@ -169,7 +169,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
      *
      * @param string $blockIdentifier
      * @param string $storeIds
-     * @return \Sutunam\CmsDataSync\Api\Data\BlockSearchResultsInterface
+     * @return BlockSearchResultsInterface
      */
     public function getByIdentifier($blockIdentifier, $storeIds)
     {
@@ -204,7 +204,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @param SearchCriteriaInterface $criteria
-     * @return \Sutunam\CmsDataSync\Api\Data\BlockSearchResultsInterface
+     * @return BlockSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $criteria)
     {
@@ -234,22 +234,6 @@ class BlockRepository implements SutunamBlockRepositoryInterface
     }
 
     /**
-     * Retrieve collection processor
-     *
-     * @return CollectionProcessorInterface
-     */
-    private function getCollectionProcessor()
-    {
-        //phpcs:disable Magento2.PHP.LiteralNamespaces
-        if (!$this->collectionProcessor) {
-            $this->collectionProcessor = \Magento\Framework\App\ObjectManager::getInstance()->get(
-                'Magento\Cms\Model\Api\SearchCriteria\BlockCollectionProcessor'
-            );
-        }
-        return $this->collectionProcessor;
-    }
-
-    /**
      * Save block data
      *
      * @param SutunamBlockInterface $block
@@ -262,13 +246,10 @@ class BlockRepository implements SutunamBlockRepositoryInterface
         if ($block->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
             throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
         }
+        $block->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($block->getStores()));
 
         if (empty($block->getStoreId())) {
             $block->setStoreId([$this->storeManager->getStore()->getId()]);
-        }
-
-        if ($block->getId() && $block instanceof Block && !$block->getOrigData()) {
-            $block = $this->hydrator->hydrate($this->getById($block->getId()), $this->hydrator->extract($block));
         }
 
         try {

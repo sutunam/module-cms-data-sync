@@ -72,8 +72,11 @@ class MassSync extends Action implements HttpPostActionInterface
                 if (isset($result['success']) && $result['success']) {
                     $success++;
                 }
-                if (!empty($result['message'])) {
-                    $this->messageManager->addErrorMessage($result['message']);
+                if (!empty($result['error_message'])) {
+                    $this->messageManager->addErrorMessage($result['error_message']);
+                }
+                if (!empty($result['notice_message'])) {
+                    $this->messageManager->addNotice($result['notice_message']);
                 }
             }
             if ($success) {

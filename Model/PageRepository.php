@@ -7,7 +7,7 @@
 namespace Sutunam\CmsDataSync\Model;
 
 use Magento\Cms\Api\Data\PageInterface;
-use Magento\Cms\Model\ResourceModel\Block as ResourcePage;
+use Magento\Cms\Model\ResourceModel\Page as ResourcePage;
 use Magento\Cms\Model\ResourceModel\Page\CollectionFactory as PageCollectionFactory;
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\Api\FilterFactory;

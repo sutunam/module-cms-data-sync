@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <cms_data_sync>
+            <connection>
+                <sync_media>0</sync_media>
+                <media_type>jpg,jpeg,png,gif</media_type>
+                <remote_media_rootdir>pub/</remote_media_rootdir>
+                <remote_media_subdir>media/</remote_media_subdir>
+                <is_overwrite>0</is_overwrite>
+            </connection>
+        </cms_data_sync>
+    </default>
+</config>

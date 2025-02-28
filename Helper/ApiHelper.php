@@ -13,6 +13,7 @@ class ApiHelper
     public const REQUEST_STORE_WEBSITE = 'websites';
     public const REQUEST_STORE_GROUPS = 'storeGroups';
     public const REQUEST_STORE_VIEWS = 'storeViews';
+    public const REQUEST_CMS_SYNC_CONFIGS = 'sync/configs';
 
     public const TYPE_CODE = 'code';
     public const TYPE_ID = 'id';
@@ -78,7 +79,7 @@ class ApiHelper
         try {
             $response = $this->api->request(
                 Request::METHOD_GET,
-                "sutunam/cms$cmsType/identifier/" . $identifier,
+                "sync/cms$cmsType/identifier/" . $identifier,
                 $requestParam
             );
 
@@ -110,10 +111,10 @@ class ApiHelper
                 $paramPrefix . '[0][condition_type]' => 'neq',
             ];
 
-            $endpoint = "sutunam/cms$cmsType/search";
+            $endpoint = "sync/cms$cmsType/search";
 
             if ($cmsType == self::CMS_TYPE_WIDGET) {
-                $endpoint = "sutunam/cms$cmsType";
+                $endpoint = "sync/cms$cmsType";
                 $queryParams = [];
             }
 
@@ -150,6 +151,27 @@ class ApiHelper
             foreach ($response['data'] as $item) {
                 $result[$item[$typeKey]] = $item;
             }
+        } catch (\Exception $e) {
+            $this->logger->critical($e->getMessage());
+        }
+        return $result;
+    }
+
+    /**
+     * Get remote cms sync configs info
+     *
+     * @return array
+     */
+    public function getCmsSyncConfigs()
+    {
+        $result = [];
+        try {
+            $response = $this->api->request(Request::METHOD_GET, self::REQUEST_CMS_SYNC_CONFIGS);
+            if (!$response || !$response['success']) {
+                return $result;
+            }
+
+            $result = json_decode($response['data'], true);
         } catch (\Exception $e) {
             $this->logger->critical($e->getMessage());
         }

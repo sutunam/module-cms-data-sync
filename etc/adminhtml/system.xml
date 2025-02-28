@@ -63,15 +63,15 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="remote_media_rootdir" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Remote Media Root Directory</label>
-                    <comment>Enter Root Folder to store Media of target website. E.g: pub/ as default of magento</comment>
+                <field id="media_type" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Media Type</label>
+                    <comment>Media type allowed to be synced(Separated by comma). E.g: jpg,png,jpeg </comment>
                     <depends>
                         <field id="enabled">1</field>
                         <field id="sync_media">1</field>
                     </depends>
                 </field>
-                <field id="remote_media_subdir" type="text" sortOrder="90" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="remote_media_subdir" type="text" sortOrder="100" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Remote Media Sub Directory</label>
                     <comment>Enter Sub  Folder to store Media of target website inside Root Media Directory. E.g: media/</comment>
                     <depends>
@@ -79,7 +79,7 @@
                         <field id="sync_media">1</field>
                     </depends>
                 </field>
-                <field id="is_overwrite" type="select" sortOrder="100" showInDefault="1" showInWebsite="1"
+                <field id="is_overwrite" type="select" sortOrder="110" showInDefault="1" showInWebsite="1"
                        showInStore="0">
                     <label>Is Overwrite</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>

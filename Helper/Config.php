@@ -8,6 +8,7 @@ use Magento\Store\Model\ScopeInterface;
 class Config
 {
     public const API_PREFIX = 'rest/V1/';
+
     public const XML_BASE_PATH = "cms_data_sync/connection/";
 
     public const XML_CMS_DATA_SYNC_ENABLED = "enabled";
@@ -22,7 +23,7 @@ class Config
 
     public const XML_CMS_DATA_SYNC_SYNC_MEDIA = "sync_media";
 
-    public const XML_CMS_DATA_SYNC_REMOTE_MEDIA_ROOTDIR = "remote_media_rootdir";
+    public const XML_CMS_DATA_SYNC_MEDIA_TYPE = "media_type";
 
     public const XML_CMS_DATA_SYNC_REMOTE_MEDIA_SUBDIR = "remote_media_subdir";
 
@@ -122,14 +123,15 @@ class Config
     }
 
     /**
-     * Get remote media root dir
+     * Get media_type config value
      *
      * @param string $scope
      * @return mixed
      */
-    public function getRemoteMediaRootdir($scope = ScopeInterface::SCOPE_WEBSITE)
+    public function getMediaType($scope = ScopeInterface::SCOPE_WEBSITE)
     {
-        return $this->getConfig(self::XML_CMS_DATA_SYNC_REMOTE_MEDIA_ROOTDIR, $scope);
+        return ($mediaType = $this->getConfig(self::XML_CMS_DATA_SYNC_MEDIA_TYPE, $scope)) ?
+            explode(',', $mediaType) : [];
     }
 
     /**
