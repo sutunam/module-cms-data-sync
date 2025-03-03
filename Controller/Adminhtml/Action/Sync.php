@@ -53,8 +53,8 @@ class Sync extends Action implements HttpGetActionInterface
             if ($action == ApiHelper::REQUEST_SYNC_TYPE_PUSH) {
                 $result = $processor->push($id);
             }
-            if (isset($result['success']) && $result['success']) {
-                $this->messageManager->addSuccessMessage(__("Synced successfully"));
+            if (isset($result['success']) && $result['success'] && isset($result['success_message'])) {
+                $this->messageManager->addSuccessMessage($result['success_message']);
             } else {
                 $this->messageManager->addErrorMessage($result['error_message']);
                 $this->messageManager->addNotice($result['notice_message']);

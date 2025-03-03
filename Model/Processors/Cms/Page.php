@@ -379,8 +379,7 @@ class Page implements ProcessorInterface
 
             $remotePages = $this->apiHelper->getDataByIdentifier(
                 $entity->getIdentifier(),
-                ApiHelper::CMS_TYPE_PAGE,
-                ['store_ids' => implode(',', $remoteStoreIds)]
+                ApiHelper::CMS_TYPE_PAGE
             );
 
             $data['page'][SutunamPageInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
