@@ -356,18 +356,7 @@ class Block implements ProcessorInterface
             return $result;
         }
 
-        $data = [
-            "block" => [
-                BlockInterface::IDENTIFIER => $entity->getIdentifier(),
-                BlockInterface::TITLE => $entity->getTitle(),
-                BlockInterface::CONTENT => $this->dataHelper->replaceDomainInContentByAction(
-                    $entity->getContent(),
-                    ApiHelper::REQUEST_SYNC_TYPE_PUSH
-                ),
-                SutunamBlockInterface::ACTIVE => $entity->isActive(),
-                SutunamBlockInterface::MEDIA => $this->dataHelper->getAllImageFromCmsContent($entity->getContent())
-            ]
-        ];
+        $data = $this->preparePageData($entity);
 
         $remoteBlocks = $this->apiHelper->getDataByIdentifier($entity->getIdentifier(), ApiHelper::CMS_TYPE_BLOCK);
 
@@ -382,8 +371,6 @@ class Block implements ProcessorInterface
         $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes($remoteUsedStoreCodes);
         $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
             ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
-            ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => $myStoreIdsByRemoteStoreCodes])
-            ->setPageSize(10)
             ->getSize();
 
         if ($checkNumOfBlockWithIdentifier > 1) {
@@ -457,6 +444,28 @@ class Block implements ProcessorInterface
 
         $result['type'] = 'updated';
         return $result;
+    }
+
+    /**
+     * Prepare Page Data
+     *
+     * @param $entity
+     * @return array
+     */
+    private function preparePageData($entity)
+    {
+        return [
+            'block' => [
+                BlockInterface::IDENTIFIER => $entity->getIdentifier(),
+                BlockInterface::TITLE => $entity->getTitle(),
+                BlockInterface::CONTENT => $this->dataHelper->replaceDomainInContentByAction(
+                    $entity->getContent(),
+                    ApiHelper::REQUEST_SYNC_TYPE_PUSH
+                ),
+                SutunamBlockInterface::ACTIVE => $entity->isActive(),
+                SutunamBlockInterface::MEDIA => $this->dataHelper->getAllImageFromCmsContent($entity->getContent())
+            ]
+        ];
     }
 
     /**

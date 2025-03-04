@@ -266,8 +266,6 @@ class PageRepository implements SutunamPageRepositoryInterface
         }
 
         try {
-            $this->resource->save($page);
-
             if ($page->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
                 foreach ($page->getMedia() as $media) {
                     $this->sutunamDataHelper->saveMediaFromRemoteHost(
@@ -276,6 +274,7 @@ class PageRepository implements SutunamPageRepositoryInterface
                     );
                 }
             }
+            $this->resource->save($page);
         } catch (\Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));
         }
