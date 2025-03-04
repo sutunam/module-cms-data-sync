@@ -145,7 +145,9 @@ class Block implements ProcessorInterface
         // Processing crushing if allowed
         if ($this->configHelper->isOverwrite()) {
             $storeCodesOfRemoteBlock = $remoteBlock[SutunamBlockInterface::STORE_CODE] ?? [];
-            $mappingStoreIdByCodesOfRemoteBlock = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes($storeCodesOfRemoteBlock);
+            $mappingStoreIdByCodesOfRemoteBlock = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
+                $storeCodesOfRemoteBlock
+            );
 
             if ($diff = array_diff($mappingStoreIdByCodesOfRemoteBlock, $blockStoreIds)) {
                 $checkBlockUsingDiffStores = $this->blockCollectionFactory->create()
@@ -155,7 +157,11 @@ class Block implements ProcessorInterface
                     ->getSize();
 
                 if (!$checkBlockUsingDiffStores) {
-                    $blockStoreIds = array_merge($mappingStoreIdByCodesOfRemoteBlock, $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? []);
+                    $blockStoreIds = array_merge(
+                        $mappingStoreIdByCodesOfRemoteBlock,
+                        $mappingStoreIdByCodesOfRemoteBlock,
+                            $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? []
+                    );
                 }
             } else {
                 $blockStoreIds = $mappingStoreIdByCodesOfRemoteBlock;
@@ -368,7 +374,9 @@ class Block implements ProcessorInterface
             return $this->dataHelper->mergeTwoArrays($carry, $block[SutunamBlockInterface::STORE_CODE]);
         }, []);
 
-        $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes($remoteUsedStoreCodes);
+        $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
+            $remoteUsedStoreCodes
+        );
         $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
             ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
             ->getSize();
@@ -449,7 +457,7 @@ class Block implements ProcessorInterface
     /**
      * Prepare Page Data
      *
-     * @param $entity
+     * @param \Magento\Cms\Model\Block $entity
      * @return array
      */
     private function preparePageData($entity)

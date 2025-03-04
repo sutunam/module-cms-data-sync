@@ -135,7 +135,10 @@ class Page implements ProcessorInterface
         );
 
         if (!$remotePages || count($remotePages) !== 1) {
-            return $this->setError($result, __('No unique remote page found with identifier %1', $page->getIdentifier()));
+            return $this->setError(
+                $result,
+                __('No unique remote page found with identifier %1', $page->getIdentifier())
+            );
         }
 
         $remotePage = reset($remotePages);
@@ -172,7 +175,7 @@ class Page implements ProcessorInterface
     /**
      * Store ID update when overwrite mode is enabled
      *
-     * @param $page
+     * @param \Magento\Cms\Model\Page $page
      * @param array $remotePage
      * @param array $remoteStoreIds
      * @param int $id
@@ -488,7 +491,7 @@ class Page implements ProcessorInterface
     /**
      * Prepare Page Data
      *
-     * @param $entity
+     * @param \Magento\Cms\Model\Page $entity
      * @return array
      */
     private function preparePageData($entity)
@@ -522,13 +525,13 @@ class Page implements ProcessorInterface
     /**
      * Create Remote Page
      *
-     * @param $data
-     * @param $remoteStoreIds
-     * @param $id
+     * @param array $data
+     * @param array $remoteStoreIds
+     * @param string|int $id
      * @return array
      * @throws \Exception
      */
-    private function createRemotePage($data, $remoteStoreIds, $id)
+    private function createRemotePage($data, $remoteStoreIds, ?int $id)
     {
         $data['page'][SutunamPageInterface::STORE_ID] = $remoteStoreIds;
         $response = $this->apiConnection->request(
@@ -604,7 +607,9 @@ class Page implements ProcessorInterface
                 continue;
             }
 
-            $statusMessage = ($response['type'] === 'created') ? __('Created Successfully') : __('Updated Successfully');
+            $statusMessage = ($response['type'] === 'created') ?
+                __('Created Successfully') :
+                __('Updated Successfully');
             $successMessages[] = __('Push Page ID: %1 ||Status: %2.', $pageId, $statusMessage);
 
             if ($response['type'] === 'created') {
