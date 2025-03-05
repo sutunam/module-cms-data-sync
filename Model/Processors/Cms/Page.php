@@ -131,7 +131,8 @@ class Page implements ProcessorInterface
 
         $remotePages = $this->apiHelper->getDataByIdentifier(
             $page->getIdentifier(),
-            ApiHelper::CMS_TYPE_PAGE
+            ApiHelper::CMS_TYPE_PAGE,
+            ['store_ids' => implode(',', $mappedStoresIds)]
         );
 
         if (!$remotePages || count($remotePages) !== 1) {
