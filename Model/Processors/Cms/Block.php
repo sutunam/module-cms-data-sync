@@ -177,6 +177,7 @@ class Block implements ProcessorInterface
             $block->setStoreId(array_map('intval', $blockStoreIds));
 
             $block->setId($id);
+            /** @phpstan-ignore-next-line */
             $block->save();
 
             if ($this->configHelper->isSyncMedia()) {

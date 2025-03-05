@@ -156,6 +156,7 @@ class Page implements ProcessorInterface
             ));
             $page->setStoreId(array_map('intval', $pageStoreIds));
             $page->setId($id);
+            /** @phpstan-ignore-next-line */
             $page->save();
 
             if ($this->configHelper->isSyncMedia()) {
