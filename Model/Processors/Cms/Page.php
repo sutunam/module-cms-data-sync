@@ -101,7 +101,7 @@ class Page implements ProcessorInterface
     }
 
     /**
-     * Pull cms page from remote host by my id
+     * Pull CMS page from remote host by ID
      *
      * @param int $id
      * @return array
@@ -117,57 +117,35 @@ class Page implements ProcessorInterface
 
         $page = $this->getPage($id);
         if (!$page) {
-            $result['error_message'] = __('Couldn\'t load CMS page content.');
+            return $this->setError($result, __('Couldn\'t load CMS page content.'));
         }
 
         $pageStoreIds = $page->getStores();
         $pageStoreCodes = $this->dataHelper->getStoreCodesByIds($pageStoreIds);
         $remoteStoreIds = $this->dataHelper->getRemoteStoreIdsListByMyStoreCodes($pageStoreCodes);
-        $mappedStoresIds = $remoteStoreIds[DataHelper::STORES_MAPPED];
+        $mappedStoresIds = $remoteStoreIds[DataHelper::STORES_MAPPED] ?? [];
 
-        if (!$mappedStoresIds) {
-            $result['error_message'] = __('The store scope of page is not match.');
-            return $result;
+        if (empty($mappedStoresIds)) {
+            return $this->setError($result, __('The store scope of page does not match.'));
         }
 
         $remotePages = $this->apiHelper->getDataByIdentifier(
             $page->getIdentifier(),
-            ApiHelper::CMS_TYPE_PAGE,
-            ['store_ids' => implode(',', $mappedStoresIds)]
+            ApiHelper::CMS_TYPE_PAGE
         );
-        if (!$remotePages) {
-            $result['error_message'] = __('There is no remote page with identifier %1', $page->getIdentifier());
-            return $result;
-        }
 
-        if (count($remotePages) != 1) {
-            $result['error_message'] = __('The store scope of page is not match.');
-            return $result;
-        }
-
-        $remotePage = $remotePages[0];
-
-        if ($this->configHelper->isOverwrite()) {
-            $storeCodesOfRemotePage = $remotePage[SutunamPageInterface::STORE_CODE];
-            $mappingStoreIdByCodesOfRemotePage = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
-                $storeCodesOfRemotePage
+        if (!$remotePages || count($remotePages) !== 1) {
+            return $this->setError(
+                $result,
+                __('No unique remote page found with identifier %1', $page->getIdentifier())
             );
+        }
 
-            if ($diff = array_diff($mappingStoreIdByCodesOfRemotePage, $pageStoreIds)) {
-                $checkPageUsingDiffStores = $this->pageCollectionFactory->create()
-                    ->addFieldToFilter(PageInterface::IDENTIFIER, ['eq' => $page->getIdentifier()])
-                    ->addFieldToFilter(SutunamPageInterface::STORE_ID, ['in' => $diff])
-                    ->addFieldToFilter(PageInterface::PAGE_ID, ['neq' => $id])
-                    ->getSize();
-                if (!$checkPageUsingDiffStores) {
-                    $pageStoreIds = $this->dataHelper->mergeTwoArrays(
-                        $mappingStoreIdByCodesOfRemotePage,
-                        $remoteStoreIds[DataHelper::STORES_UNMAPPED]
-                    );
-                }
-            } else {
-                $pageStoreIds = $mappingStoreIdByCodesOfRemotePage;
-            }
+        $remotePage = reset($remotePages);
+
+        // If the Overwrite mode is turned on, update the Store ID for the page
+        if ($this->configHelper->isOverwrite()) {
+            $pageStoreIds = $this->updateStoreIdsForOverwrite($page, $remotePage, $remoteStoreIds, $id);
         }
 
         try {
@@ -177,17 +155,71 @@ class Page implements ProcessorInterface
                 ApiHelper::REQUEST_SYNC_TYPE_PULL
             ));
             $page->setStoreId(array_map('intval', $pageStoreIds));
-
             $page->setId($id);
+            /** @phpstan-ignore-next-line */
             $page->save();
+
             if ($this->configHelper->isSyncMedia()) {
                 $this->dataHelper->saveAllImageFromCmsContent($page->getContent(), true);
             }
+
+            $result['success'] = true;
+            $result['success_message'] = __('Pull Successfully');
         } catch (\Exception $e) {
-            $result['error_message'] = $e->getMessage();
             $this->logger->critical($e->getMessage());
+            return $this->setError($result, $e->getMessage());
         }
-        $result['success'] = true;
+
+        return $result;
+    }
+
+    /**
+     * Store ID update when overwrite mode is enabled
+     *
+     * @param \Magento\Cms\Model\Page $page
+     * @param array $remotePage
+     * @param array $remoteStoreIds
+     * @param int $id
+     * @return array
+     */
+    private function updateStoreIdsForOverwrite($page, array $remotePage, array $remoteStoreIds, int $id)
+    {
+        $storeCodesOfRemotePage = $remotePage[SutunamPageInterface::STORE_CODE] ?? [];
+        $mappingStoreIdByCodesOfRemotePage = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
+            $storeCodesOfRemotePage
+        );
+
+        $pageStoreIds = $page->getStores();
+        $diff = array_diff($mappingStoreIdByCodesOfRemotePage, $pageStoreIds);
+
+        if (!empty($diff)) {
+            $checkPageUsingDiffStores = $this->pageCollectionFactory->create()
+                ->addFieldToFilter(PageInterface::IDENTIFIER, ['eq' => $page->getIdentifier()])
+                ->addFieldToFilter(SutunamPageInterface::STORE_ID, ['in' => $diff])
+                ->addFieldToFilter(PageInterface::PAGE_ID, ['neq' => $id])
+                ->getSize();
+
+            if (!$checkPageUsingDiffStores) {
+                return $this->dataHelper->mergeTwoArrays(
+                    $mappingStoreIdByCodesOfRemotePage,
+                    $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? []
+                );
+            }
+        }
+
+        return $mappingStoreIdByCodesOfRemotePage;
+    }
+
+    /**
+     * Put an error message in the results and return
+     *
+     * @param array $result
+     * @param string $message
+     * @return array
+     */
+    private function setError(array &$result, string $message)
+    {
+        $result['error_message'] = $message;
         return $result;
     }
 
@@ -319,7 +351,7 @@ class Page implements ProcessorInterface
     }
 
     /**
-     * Push cms page to remote host by my id
+     * Push CMS page to remote host by my ID
      *
      * @param int $id
      * @return array
@@ -336,26 +368,137 @@ class Page implements ProcessorInterface
         ];
 
         $entity = $this->getPage($id);
-        if ($entity) {
-            $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
-            if (!$remoteCmsSyncConfigs) {
-                $result['error_message'] = __(
-                    'Something went wrong when trying to get configs of remote host %1',
+        if (!$entity) {
+            $result['error_message'] = __("Couldn't load CMS page content");
+            return $result;
+        }
+        $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
+        if (!$remoteCmsSyncConfigs) {
+            $result['error_message'] = __(
+                'Failed to get remote host configs for %1',
+                $this->configHelper->getSiteName()
+            );
+            return $result;
+        }
+
+        $isRemoteHostOverWritable = $remoteCmsSyncConfigs[ConfigHelper::XML_CMS_DATA_SYNC_IS_OVERWRITE] ?: 0;
+        $remoteStoreIds = $this->dataHelper->getMappedRemoteStoreIdsListByMyStoreIds($entity->getStores());
+
+        if (!$remoteStoreIds) {
+            $result['error_message'] = __('No remote store found by page id %1', $id);
+            return $result;
+        }
+
+        $data = $this->preparePageData($entity);
+
+        $remotePages = $this->apiHelper->getDataByIdentifier(
+            $entity->getIdentifier(),
+            ApiHelper::CMS_TYPE_PAGE
+        );
+
+        if (!$remotePages) {
+            return $this->createRemotePage($data, $remoteStoreIds, $id);
+        }
+
+        $remoteUsedStoreCodes = [];
+
+        foreach ($remotePages as $remotePage) {
+            $remoteUsedStoreCodes = $this->dataHelper->mergeTwoArrays(
+                $remoteUsedStoreCodes,
+                $remotePage[SutunamPageInterface::STORE_CODE]
+            );
+        }
+
+        $myStoreIdsByRemoteStoreCodes
+            = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes($remoteUsedStoreCodes);
+        $checkNumOfPageWithIdentifier = $this->pageCollectionFactory->create()
+            ->addFieldToFilter(PageInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
+            ->getSize();
+        if ($checkNumOfPageWithIdentifier > 1) {
+            $result['error_message'] = __(
+                'Update remote page for my page ID: %1 failed - Reason:%2',
+                $id,
+                'There\'s other CMS page affects with the same remote CMS page except page ID: ' . $id
+            );
+            return $result;
+        }
+
+        $countRemotePages = count($remotePages);
+        $remoteUsedStoreIds = [];
+        foreach ($remotePages as $remotePage) {
+            $remotePageId = $remotePage[SutunamPageInterface::ID];
+            $remotePageStoreIds = $remotePage[SutunamPageInterface::STORE_ID];
+            $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays($remoteUsedStoreIds, $remotePageStoreIds);
+            if (!$isRemoteHostOverWritable) {
+                $result['notice_message'] .= __(
+                    'Update remote page for my page ID: %1 (Remote Page ID: %2) was skipped'
+                    .' - Reason: Overwrite disabled on the remote host %3',
+                    $id,
+                    $remotePageId,
                     $this->configHelper->getSiteName()
                 );
-                return $result;
+                continue;
             }
 
-            $isRemoteHostOverWritable = $remoteCmsSyncConfigs[ConfigHelper::XML_CMS_DATA_SYNC_IS_OVERWRITE] ?: 0;
-
-            $remoteStoreIds = $this->dataHelper->getMappedRemoteStoreIdsListByMyStoreIds($entity->getStores());
-
-            if (!$remoteStoreIds) {
-                $result['error_message'] = __('No remote store found by page id %1', $id);
-                return $result;
+            $storeIdsParams = $remotePageStoreIds;
+            if ($countRemotePages == 1) {
+                $storeIdsParams = $remoteStoreIds;
+                $remoteUsedStoreIds = $remoteStoreIds;
             }
+            $data['page'][SutunamPageInterface::STORE_ID] = $this->dataHelper->mergeTwoArrays(
+                $storeIdsParams,
+                $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
+                    $remotePage[SutunamPageInterface::STORE_CODE]
+                )
+            );
 
-            $data = ["page" => [
+            $data['page'][SutunamPageInterface::ID] = $remotePageId;
+
+            $response = $this->apiConnection->request(
+                Request::METHOD_PUT,
+                self::SUTUNAM_CMS_PAGE_API_ENDPOINT . $remotePageId,
+                [],
+                $data
+            );
+
+            if ($response['success']) {
+                $result['success'] = true;
+                $result['success_message'] .= __(
+                    'Update remote page for my page ID: %1
+                    (Remote page ID: %2) on remote host %2 successfully',
+                    $id,
+                    $remotePageId,
+                    $this->configHelper->getSiteName()
+                );
+            } else {
+                $result['error_message'] .= __(
+                    'Update remote page for my page ID: %1
+                    (Remote Page ID: %2) failed - Reason:%3',
+                    $id,
+                    $remotePageId,
+                    $response['message']
+                );
+            }
+        }
+
+        if ($diff = array_diff($remoteStoreIds, $remoteUsedStoreIds)) {
+            unset($data['page'][SutunamPageInterface::ID]);
+            return $this->createRemotePage($data, $diff, $id);
+        }
+        $result['type'] = 'updated';
+        return $result;
+    }
+
+    /**
+     * Prepare Page Data
+     *
+     * @param \Magento\Cms\Model\Page $entity
+     * @return array
+     */
+    private function preparePageData($entity)
+    {
+        return [
+            'page' => [
                 PageInterface::IDENTIFIER => $entity->getIdentifier(),
                 PageInterface::TITLE => $entity->getTitle(),
                 PageInterface::PAGE_LAYOUT  => $entity->getPageLayout(),
@@ -375,166 +518,55 @@ class Page implements ProcessorInterface
                 PageInterface::CUSTOM_THEME_FROM => $entity->getCustomThemeFrom(),
                 PageInterface::CUSTOM_THEME_TO => $entity->getCustomThemeTo(),
                 SutunamPageInterface::ACTIVE => $entity->isActive(),
-            ]];
-
-            $remotePages = $this->apiHelper->getDataByIdentifier(
-                $entity->getIdentifier(),
-                ApiHelper::CMS_TYPE_PAGE,
-                ['store_ids' => implode(',', $remoteStoreIds)]
-            );
-
-            $data['page'][SutunamPageInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
-                $entity->getContent()
-            );
-
-            if (!$remotePages) {
-                $data['page'][SutunamPageInterface::STORE_ID] = $remoteStoreIds;
-                $response = $this->apiConnection->request(
-                    Request::METHOD_POST,
-                    self::SUTUNAM_CMS_PAGE_API_ENDPOINT,
-                    [],
-                    $data
-                );
-
-                if ($response['success']) {
-                    $result['success'] = $response['success'];
-                    $result['type'] = 'created';
-                    $result['success_message'] = __(
-                        'Created new remote page with ID: %1 (My page ID: %2) on remote host %3 successfully',
-                        $response['data'][SutunamPageInterface::ID],
-                        $id,
-                        $this->configHelper->getSiteName()
-                    );
-                    return $result;
-                }
-
-                $result['error_message'] = __(
-                    'Created new remote page for my page ID: %1 failed - Reason:%2',
-                    $id,
-                    $response['message']
-                );
-
-                return $result;
-            }
-
-            $remoteUsedStoreCodes = [];
-
-            foreach ($remotePages as $remotePage) {
-                $remoteUsedStoreCodes = $this->dataHelper->mergeTwoArrays(
-                    $remoteUsedStoreCodes,
-                    $remotePage[SutunamPageInterface::STORE_CODE]
-                );
-            }
-
-            $myStoreIdsByRemoteStoreCodes
-                = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes($remoteUsedStoreCodes);
-            $checkNumOfPageWithIdentifier = $this->pageCollectionFactory->create()
-                ->addFieldToFilter(PageInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
-                ->addFieldToFilter(SutunamPageInterface::STORE_ID, ['in' => $myStoreIdsByRemoteStoreCodes])
-                ->getSize();
-            if ($checkNumOfPageWithIdentifier > 1) {
-                $result['error_message'] = __(
-                    'Update remote page for my page ID: %1 failed - Reason:%2',
-                    $id,
-                    'There\'s other CMS page affects with the same remote CMS page except page ID: ' . $id
-                );
-                return $result;
-            }
-
-            $countRemotePages = count($remotePages);
-            $remoteUsedStoreIds = [];
-            foreach ($remotePages as $remotePage) {
-                $remotePageId = $remotePage[SutunamPageInterface::ID];
-                $remotePageStoreIds = $remotePage[SutunamPageInterface::STORE_ID];
-                $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays($remoteUsedStoreIds, $remotePageStoreIds);
-                if (!$isRemoteHostOverWritable) {
-                    $result['notice_message'] .= __(
-                        'Update remote page for my page ID: %1 (Remote Page ID: %2) was skipped'
-                        .' - Reason: Overwrite disabled on the remote host %3',
-                        $id,
-                        $remotePageId,
-                        $this->configHelper->getSiteName()
-                    );
-                    continue;
-                }
-
-                $storeIdsParams = $remotePageStoreIds;
-                if ($countRemotePages == 1) {
-                    $storeIdsParams = $remoteStoreIds;
-                    $remoteUsedStoreIds = $remoteStoreIds;
-                }
-                $data['page'][SutunamPageInterface::STORE_ID] = $this->dataHelper->mergeTwoArrays(
-                    $storeIdsParams,
-                    $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
-                        $remotePage[SutunamPageInterface::STORE_CODE]
-                    )
-                );
-
-                $data['page'][SutunamPageInterface::ID] = $remotePageId;
-
-                $response = $this->apiConnection->request(
-                    Request::METHOD_PUT,
-                    self::SUTUNAM_CMS_PAGE_API_ENDPOINT . $remotePageId,
-                    [],
-                    $data
-                );
-
-                if ($response['success']) {
-                    $result['success'] = true;
-                    $result['success_message'] .= __(
-                        'Update remote page for my page ID: %1
-                        (Remote page ID: %2) on remote host %2 successfully',
-                        $id,
-                        $remotePageId,
-                        $this->configHelper->getSiteName()
-                    );
-                } else {
-                    $result['error_message'] .= __(
-                        'Update remote page for my page ID: %1
-                        (Remote Page ID: %2) failed - Reason:%3',
-                        $id,
-                        $remotePageId,
-                        $response['message']
-                    );
-                }
-            }
-
-            if ($diff = array_diff($remoteStoreIds, $remoteUsedStoreIds)) {
-                $data['page'][SutunamPageInterface::STORE_ID] = $diff;
-                unset($data['page'][SutunamPageInterface::ID]);
-                $response = $this->apiConnection->request(
-                    Request::METHOD_POST,
-                    self::SUTUNAM_CMS_PAGE_API_ENDPOINT,
-                    [],
-                    $data
-                );
-
-                if ($response['success']) {
-                    $result['success'] = true;
-                    $result['success_message'] .= __(
-                        'Created new remote page with ID: %1 (
-                        My page ID: %2) on remote host %3 successfully',
-                        $response['data'][SutunamPageInterface::ID],
-                        $id,
-                        $this->configHelper->getSiteName()
-                    );
-                } else {
-                    $result['error_message'] .= __(
-                        'Created new remote page for my page ID: %1 failed - Reason:%2',
-                        $id,
-                        $response['message']
-                    );
-                }
-            }
-            $result['type'] = 'updated';
-        } else {
-            $result['error_message'] = __("Couldn't load CMS page content");
-        }
-        return $result;
+                SutunamPageInterface::MEDIA => $this->dataHelper->getAllImageFromCmsContent($entity->getContent()),
+            ]
+        ];
     }
 
     /**
-     * Push all cms page to remote host
+     * Create Remote Page
+     *
+     * @param array $data
+     * @param array $remoteStoreIds
+     * @param string|int $id
+     * @return array
+     * @throws \Exception
+     */
+    private function createRemotePage($data, $remoteStoreIds, ?int $id)
+    {
+        $data['page'][SutunamPageInterface::STORE_ID] = $remoteStoreIds;
+        $response = $this->apiConnection->request(
+            Request::METHOD_POST,
+            self::SUTUNAM_CMS_PAGE_API_ENDPOINT,
+            [],
+            $data
+        );
+
+        if ($response['success']) {
+            return [
+                'success' => true,
+                'type' => 'created',
+                'success_message' => __(
+                    'Created new remote page with ID: %1 (My page ID: %2) on remote host %3 successfully',
+                    $response['data'][SutunamPageInterface::ID],
+                    $id,
+                    $this->configHelper->getSiteName()
+                )
+            ];
+        }
+
+        return [
+            'success' => false,
+            'error_message' => __(
+                'Failed to create remote page for my page ID: %1 - Reason: %2',
+                $id,
+                $response['message']
+            )
+        ];
+    }
+
+    /**
+     * Push all CMS pages to remote host
      *
      * @return array
      */
@@ -550,7 +582,7 @@ class Page implements ProcessorInterface
         ];
 
         $allPageIds = $this->pageCollectionFactory->create()->getAllIds();
-        if (!$allPageIds) {
+        if (empty($allPageIds)) {
             $result['error_message'] = __(
                 'There is no remote page on the remote host %1',
                 $this->configHelper->getSiteName()
@@ -558,41 +590,40 @@ class Page implements ProcessorInterface
             return $result;
         }
 
+        $errorMessages = [];
+        $noticeMessages = [];
+        $successMessages = [];
+
         foreach ($allPageIds as $pageId) {
             $response = $this->push($pageId);
+
             if (!$response['success']) {
                 $result['total_failed']++;
-                $result['error_message'] .= ($response['error_message'] ? __(
-                    'Push Page ID: %1 ||Status: %2.<br>',
-                    $pageId,
-                    $response['error_message']
-                ) : '');
-                $result['notice_message'] .= ($response['notice_message'] ? __(
-                    'Push Page ID: %1 ||Status: %2.<br>',
-                    $pageId,
-                    $response['notice_message']
-                ) : '');
+                if (!empty($response['error_message'])) {
+                    $errorMessages[] = __('Push Page ID: %1 ||Status: %2.', $pageId, $response['error_message']);
+                }
+                if (!empty($response['notice_message'])) {
+                    $noticeMessages[] = __('Push Page ID: %1 ||Status: %2.', $pageId, $response['notice_message']);
+                }
                 continue;
             }
 
-            if ($response['type'] == 'created') {
+            $statusMessage = ($response['type'] === 'created') ?
+                __('Created Successfully') :
+                __('Updated Successfully');
+            $successMessages[] = __('Push Page ID: %1 ||Status: %2.', $pageId, $statusMessage);
+
+            if ($response['type'] === 'created') {
                 $result['total_create_success']++;
-                $result['success_message'] .= __(
-                    'Push Page ID: %1 ||Status: %2.<br>',
-                    $pageId,
-                    __('Created Successfully')
-                );
-                continue;
+            } else {
+                $result['total_update_success']++;
             }
-
-            $result['success_message'] .= __(
-                'Push Page ID: %1 ||Status: %2.<br>',
-                $pageId,
-                __('Updated Successfully')
-            );
-            $result['total_update_success']++;
-
         }
+
+        $result['error_message'] = implode('<br>', $errorMessages);
+        $result['notice_message'] = implode('<br>', $noticeMessages);
+        $result['success_message'] = implode('<br>', $successMessages);
+
         return $result;
     }
 

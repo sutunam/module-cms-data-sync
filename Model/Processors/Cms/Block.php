@@ -100,45 +100,51 @@ class Block implements ProcessorInterface
      */
     public function pull($id)
     {
-        $result = [
-            'success' => false,
-        ];
+        $result = ['success' => false];
 
         $block = $this->getBlock($id);
         if (!$block) {
-            $result['error_message'] = __('Couldn\'t load CMS block content.');
-            return $result;
+            return ['success' => false, 'error_message' => __('Couldn\'t load CMS block content.')];
         }
 
+        // Get Store ID and Map to Store Code
         $blockStoreIds = $block->getStores();
         $blockStoreCodes = $this->dataHelper->getStoreCodesByIds($blockStoreIds);
         $remoteStoreIds = $this->dataHelper->getRemoteStoreIdsListByMyStoreCodes($blockStoreCodes);
+        $mappedStoresIds = $remoteStoreIds[DataHelper::STORES_MAPPED] ?? [];
 
-        $mappedStoresIds = $remoteStoreIds[DataHelper::STORES_MAPPED];
         if (!$mappedStoresIds) {
-            $result['error_message'] = __('The store scope of block is not match.');
-            return $result;
+            return ['success' => false, 'error_message' => __('The store scope of block is not match.')];
         }
 
+        // Get data remote block
         $remoteBlocks = $this->apiHelper->getDataByIdentifier(
             $block->getIdentifier(),
             ApiHelper::CMS_TYPE_BLOCK,
             ['store_ids' => implode(',', $mappedStoresIds)]
         );
+
         if (!$remoteBlocks) {
-            $result['error_message'] = __('There is no remote block with identifier %1', $block->getIdentifier());
-            return $result;
+            return [
+                'success' => false,
+                'error_message' => __('There is no remote block with identifier %1', $block->getIdentifier()),
+                'notice_message' => ''
+            ];
         }
 
-        if (count($remoteBlocks) != 1) {
-            $result['error_message'] = __('The store scope of block is not match.');
-            return $result;
+        if (count($remoteBlocks) !== 1) {
+            return [
+                'success' => false,
+                'error_message' => __('The store scope of block is not match.'),
+                'notice_message' => ''
+            ];
         }
 
         $remoteBlock = $remoteBlocks[0];
 
+        // Processing crushing if allowed
         if ($this->configHelper->isOverwrite()) {
-            $storeCodesOfRemoteBlock = $remoteBlock[SutunamBlockInterface::STORE_CODE];
+            $storeCodesOfRemoteBlock = $remoteBlock[SutunamBlockInterface::STORE_CODE] ?? [];
             $mappingStoreIdByCodesOfRemoteBlock = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
                 $storeCodesOfRemoteBlock
             );
@@ -149,10 +155,12 @@ class Block implements ProcessorInterface
                     ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => $diff])
                     ->addFieldToFilter(BlockInterface::BLOCK_ID, ['neq' => $id])
                     ->getSize();
+
                 if (!$checkBlockUsingDiffStores) {
-                    $blockStoreIds = $this->dataHelper->mergeTwoArrays(
+                    $blockStoreIds = array_merge(
                         $mappingStoreIdByCodesOfRemoteBlock,
-                        $remoteStoreIds[DataHelper::STORES_UNMAPPED]
+                        $mappingStoreIdByCodesOfRemoteBlock,
+                        $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? []
                     );
                 }
             } else {
@@ -169,17 +177,22 @@ class Block implements ProcessorInterface
             $block->setStoreId(array_map('intval', $blockStoreIds));
 
             $block->setId($id);
-            // @phpstan-ignore-next-line
+            /** @phpstan-ignore-next-line */
             $block->save();
+
             if ($this->configHelper->isSyncMedia()) {
                 $this->dataHelper->saveAllImageFromCmsContent($block->getContent(), true);
             }
+
+            return [
+                'success' => true,
+                'success_message' => __('Update block identifier %1', $block->getIdentifier())
+            ];
+
         } catch (\Exception $e) {
-            $result['error_message'] = $e->getMessage();
             $this->logger->critical($e->getMessage());
+            return ['success' => false, 'error_message' => $e->getMessage()];
         }
-        $result['success'] = true;
-        return $result;
     }
 
     /**
@@ -329,188 +342,176 @@ class Block implements ProcessorInterface
         ];
 
         $entity = $this->getBlock($id);
-        if ($entity) {
-            $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
-            if (!$remoteCmsSyncConfigs) {
-                $result['error_message'] = __(
-                    'Something went wrong when trying to get configs of remote host %1',
+        if (!$entity) {
+            $result['error_message'] = __("Couldn't load CMS block content.");
+            return $result;
+        }
+
+        $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
+        if (!$remoteCmsSyncConfigs) {
+            $result['error_message'] = __(
+                'Something went wrong when trying to get configs of remote host %1',
+                $this->configHelper->getSiteName()
+            );
+            return $result;
+        }
+
+        $isRemoteHostOverWritable = $remoteCmsSyncConfigs[ConfigHelper::XML_CMS_DATA_SYNC_IS_OVERWRITE] ?: 0;
+        $remoteStoreIds = $this->dataHelper->getMappedRemoteStoreIdsListByMyStoreIds($entity->getStores());
+        if (!$remoteStoreIds) {
+            $result['error_message'] = __('No remote store found by block id %1', $id);
+            return $result;
+        }
+
+        $data = $this->preparePageData($entity);
+
+        $remoteBlocks = $this->apiHelper->getDataByIdentifier($entity->getIdentifier(), ApiHelper::CMS_TYPE_BLOCK);
+
+        if (!$remoteBlocks) {
+            return $this->createRemoteBlock($data, $id, $result);
+        }
+
+        $remoteUsedStoreCodes = array_reduce($remoteBlocks, function ($carry, $block) {
+            return $this->dataHelper->mergeTwoArrays($carry, $block[SutunamBlockInterface::STORE_CODE]);
+        }, []);
+
+        $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
+            $remoteUsedStoreCodes
+        );
+        $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
+            ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
+            ->getSize();
+
+        if ($checkNumOfBlockWithIdentifier > 1) {
+            $result['error_message'] = __(
+                'Update remote block for my block ID: %1 failed - Reason:%2',
+                $id,
+                'There\'s another CMS block affecting the same remote CMS block except block ID: ' . $id
+            );
+            return $result;
+        }
+
+        $remoteUsedStoreIds = [];
+        $countRemoteBlocks = count($remoteBlocks);
+        foreach ($remoteBlocks as $remoteBlock) {
+            $remoteBlockId = $remoteBlock[SutunamBlockInterface::ID];
+            $remoteBlockStoreIds = $remoteBlock[SutunamBlockInterface::STORE_ID];
+            $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays($remoteUsedStoreIds, $remoteBlockStoreIds);
+
+            if (!$isRemoteHostOverWritable) {
+                $result['notice_message'] .= __(
+                    '<br>Update remote block for my block ID: %1 (Remote Block ID: %2) was skipped'
+                    . ' - Reason: Overwrite disabled on the remote host %3',
+                    $id,
+                    $remoteBlockId,
                     $this->configHelper->getSiteName()
                 );
-                return $result;
+                continue;
             }
 
-            $isRemoteHostOverWritable = $remoteCmsSyncConfigs[ConfigHelper::XML_CMS_DATA_SYNC_IS_OVERWRITE] ?: 0;
+            $data['block'][SutunamBlockInterface::STORE_ID] = ($countRemoteBlocks == 1)
+                ? $remoteStoreIds
+                : $this->dataHelper->mergeTwoArrays(
+                    $remoteBlockStoreIds,
+                    $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
+                        $remoteBlock[SutunamBlockInterface::STORE_CODE]
+                    )
+                );
 
-            $remoteStoreIds = $this->dataHelper->getMappedRemoteStoreIdsListByMyStoreIds($entity->getStores());
-            if (!$remoteStoreIds) {
-                $result['error_message'] = __('No remote store found by block id %1', $id);
-                return $result;
+            $data['block'][SutunamBlockInterface::ID] = $remoteBlockId;
+
+            $response = $this->apiConnection->request(
+                Request::METHOD_PUT,
+                self::SUTUNAM_CMS_BLOCK_API_ENDPOINT . $remoteBlockId,
+                [],
+                $data
+            );
+
+            if ($response['success']) {
+                $result['success'] = true;
+                $result['success_message'] .= __(
+                    'Update remote block for my block ID: %1 (Remote block ID: %2) on remote host %3 successfully',
+                    $id,
+                    $remoteBlockId,
+                    $this->configHelper->getSiteName()
+                );
+            } else {
+                $result['error_message'] .= __(
+                    'Update remote block for my block ID: %1 (Remote Block ID: %2) failed - Reason: %3',
+                    $id,
+                    $remoteBlockId,
+                    $response['message']
+                );
             }
+        }
 
-            $data = ["block" => [
+        if ($diff = array_diff($remoteStoreIds, $remoteUsedStoreIds)) {
+            $data['block'][SutunamBlockInterface::STORE_ID] = $diff;
+            unset($data['block'][SutunamBlockInterface::ID]);
+            return $this->createRemoteBlock($data, $id, $result);
+        }
+
+        $result['type'] = 'updated';
+        return $result;
+    }
+
+    /**
+     * Prepare Page Data
+     *
+     * @param \Magento\Cms\Model\Block $entity
+     * @return array
+     */
+    private function preparePageData($entity)
+    {
+        return [
+            'block' => [
                 BlockInterface::IDENTIFIER => $entity->getIdentifier(),
                 BlockInterface::TITLE => $entity->getTitle(),
                 BlockInterface::CONTENT => $this->dataHelper->replaceDomainInContentByAction(
                     $entity->getContent(),
                     ApiHelper::REQUEST_SYNC_TYPE_PUSH
                 ),
-                SutunamBlockInterface::ACTIVE => $entity->isActive()
-            ]];
+                SutunamBlockInterface::ACTIVE => $entity->isActive(),
+                SutunamBlockInterface::MEDIA => $this->dataHelper->getAllImageFromCmsContent($entity->getContent())
+            ]
+        ];
+    }
 
-            $remoteBlocks = $this->apiHelper->getDataByIdentifier(
-                $entity->getIdentifier(),
-                ApiHelper::CMS_TYPE_BLOCK,
-                ['store_ids' => implode(',', $remoteStoreIds)]
+    /**
+     * Create Remote Block
+     *
+     * @param array $data
+     * @param int $id
+     * @param array $result
+     * @return array
+     * @throws \Exception
+     */
+    private function createRemoteBlock(array $data, $id, array &$result)
+    {
+        $response = $this->apiConnection->request(
+            Request::METHOD_POST,
+            self::SUTUNAM_CMS_BLOCK_API_ENDPOINT,
+            [],
+            $data
+        );
+
+        if ($response['success']) {
+            $result['success'] = true;
+            $result['type'] = 'created';
+            $result['success_message'] = __(
+                'Created new remote block with ID: %1 (My block ID: %2) on remote host %3 successfully',
+                $response['data'][SutunamBlockInterface::ID],
+                $id,
+                $this->configHelper->getSiteName()
             );
-
-            $data['block'][SutunamBlockInterface::MEDIA] = $this->dataHelper->getAllImageFromCmsContent(
-                $entity->getContent()
-            );
-
-            if (!$remoteBlocks) {
-                $data['block'][SutunamBlockInterface::STORE_ID] = $remoteStoreIds;
-                $response = $this->apiConnection->request(
-                    Request::METHOD_POST,
-                    self::SUTUNAM_CMS_BLOCK_API_ENDPOINT,
-                    [],
-                    $data
-                );
-
-                if ($response['success']) {
-                    $result['success'] = $response['success'];
-                    $result['type'] = 'created';
-                    $result['success_message'] = __(
-                        'Created new remote block with ID: %1 (My block ID: %2) on remote host %3 successfully',
-                        $response['data'][SutunamBlockInterface::ID],
-                        $id,
-                        $this->configHelper->getSiteName()
-                    );
-                    return $result;
-                }
-
-                $result['error_message'] = __(
-                    'Created new remote block for my block ID: %1 failed - Reason:%2',
-                    $id,
-                    $response['message']
-                );
-                return $result;
-            }
-
-            // Check what remote stores were used already.
-            $remoteUsedStoreCodes = [];
-
-            foreach ($remoteBlocks as $remoteBlock) {
-                $remoteUsedStoreCodes = $this->dataHelper->mergeTwoArrays(
-                    $remoteUsedStoreCodes,
-                    $remoteBlock[SutunamBlockInterface::STORE_CODE]
-                );
-            }
-
-            $myStoreIdsByRemoteStoreCodes
-                = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes($remoteUsedStoreCodes);
-            $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
-                ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
-                ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => $myStoreIdsByRemoteStoreCodes])
-                ->getSize();
-            if ($checkNumOfBlockWithIdentifier > 1) {
-                $result['error_message'] = __(
-                    'Update remote block for my block ID: %1 failed - Reason:%2',
-                    $id,
-                    'There\'s other CMS block affects with the same remote CMS block except block ID: ' . $id
-                );
-                return $result;
-            }
-
-            $countRemoteBlocks = count($remoteBlocks);
-            $remoteUsedStoreIds = [];
-            foreach ($remoteBlocks as $remoteBlock) {
-                $remoteBlockId = $remoteBlock[SutunamBlockInterface::ID];
-                $remoteBlockStoreIds = $remoteBlock[SutunamBlockInterface::STORE_ID];
-                $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays($remoteUsedStoreIds, $remoteBlockStoreIds);
-
-                if (!$isRemoteHostOverWritable) {
-                    $result['notice_message'] .= __(
-                        '<br>Update remote block for my block ID: %1 (Remote Block ID: %2) was skipped'
-                        .' - Reason: Overwrite disabled on the remote host %3',
-                        $id,
-                        $remoteBlockId,
-                        $this->configHelper->getSiteName()
-                    );
-                    continue;
-                }
-
-                $storeIdsParams = $remoteBlockStoreIds;
-                if ($countRemoteBlocks == 1) {
-                    $storeIdsParams = $remoteStoreIds;
-                    $remoteUsedStoreIds = $remoteStoreIds;
-                }
-                $data['block'][SutunamBlockInterface::STORE_ID] = $this->dataHelper->mergeTwoArrays(
-                    $storeIdsParams,
-                    $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
-                        $remoteBlock[SutunamBlockInterface::STORE_CODE]
-                    )
-                );
-
-                $data['block'][SutunamBlockInterface::ID] = $remoteBlockId;
-
-                $response = $this->apiConnection->request(
-                    Request::METHOD_PUT,
-                    self::SUTUNAM_CMS_BLOCK_API_ENDPOINT . $remoteBlockId,
-                    [],
-                    $data
-                );
-
-                if ($response['success']) {
-                    $result['success'] = true;
-                    $result['success_message'] .= __(
-                        'Update remote block for my block ID: %1
-                        (Remote block ID: %2) on remote host %2 successfully',
-                        $id,
-                        $remoteBlockId,
-                        $this->configHelper->getSiteName()
-                    );
-                } else {
-                    $result['error_message'] .= __(
-                        'Update remote block for my block ID: %1
-                        (Remote Block ID: %2) failed - Reason:%3',
-                        $id,
-                        $remoteBlockId,
-                        $response['message']
-                    );
-                }
-            }
-
-            if ($diff = array_diff($remoteStoreIds, $remoteUsedStoreIds)) {
-                $data['block'][SutunamBlockInterface::STORE_ID] = $diff;
-                unset($data['block'][SutunamBlockInterface::ID]);
-                $response = $this->apiConnection->request(
-                    Request::METHOD_POST,
-                    self::SUTUNAM_CMS_BLOCK_API_ENDPOINT,
-                    [],
-                    $data
-                );
-
-                if ($response['success']) {
-                    $result['success'] = true;
-                    $result['success_message'] .= __(
-                        'Created new remote block with ID: %1
-                        (My block ID: %2) on remote host %3 successfully',
-                        $response['data'][SutunamBlockInterface::ID],
-                        $id,
-                        $this->configHelper->getSiteName()
-                    );
-                } else {
-                    $result['error_message'] .= __(
-                        'Created new remote block for my block ID: %1 failed - Reason:%2',
-                        $id,
-                        $response['message']
-                    );
-                }
-            }
-            $result['type'] = 'updated';
         } else {
-            $result['error_message'] = __("Couldn't load CMS block content.");
+            $result['error_message'] = __(
+                'Created new remote block for my block ID: %1 failed - Reason:%2',
+                $id,
+                $response['message']
+            );
         }
+
         return $result;
     }
 
@@ -532,47 +533,53 @@ class Block implements ProcessorInterface
 
         $allBlockIds = $this->blockCollectionFactory->create()->getAllIds();
         if (!$allBlockIds) {
-            $result['error_message'] = __(
-                'There is no remote block on the remote host %1',
-                $this->configHelper->getSiteName()
-            );
-            return $result;
+            return array_merge($result, [
+                'error_message' => __(
+                    'There is no remote block on the remote host %1',
+                    $this->configHelper->getSiteName()
+                )
+            ]);
         }
 
         foreach ($allBlockIds as $blockId) {
             $response = $this->push($blockId);
+
             if (!$response['success']) {
                 $result['total_failed']++;
-                $result['error_message'] .= ($response['error_message'] ? __(
-                    'Push Block ID: %1 ||Status: %2.<br>',
-                    $blockId,
-                    $response['error_message']
-                ) : '');
-                $result['notice_message'] .= ($response['notice_message'] ? __(
-                    'Push Block ID: %1 ||Status: %2.<br>',
-                    $blockId,
-                    $response['notice_message']
-                ) : '');
+                if (!empty($response['error_message'])) {
+                    $result['error_message'] .= __(
+                        'Push Block ID: %1 || Status: %2.<br>',
+                        $blockId,
+                        $response['error_message']
+                    );
+                }
+                if (!empty($response['notice_message'])) {
+                    $result['notice_message'] .= __(
+                        'Push Block ID: %1 || Status: %2.<br>',
+                        $blockId,
+                        $response['notice_message']
+                    );
+                }
                 continue;
             }
 
-            if ($response['type'] == 'created') {
-                $result['total_create_success']++;
-                $result['success_message'] .= __(
-                    'Push Block ID: %1 ||Status: %2.<br>',
-                    $blockId,
-                    __('Created Successfully')
-                );
-                continue;
+            $statusMessage = __('Updated Successfully');
+            switch ($response['type']) {
+                case 'created':
+                    $result['total_create_success']++;
+                    $statusMessage = __('Created Successfully');
+                    break;
+                default:
+                    $result['total_update_success']++;
             }
 
             $result['success_message'] .= __(
-                'Push Block ID: %1 ||Status: %2.<br>',
+                'Push Block ID: %1 || Status: %2.<br>',
                 $blockId,
-                __('Updated Successfully')
+                $statusMessage
             );
-            $result['total_update_success']++;
         }
+
         return $result;
     }
 

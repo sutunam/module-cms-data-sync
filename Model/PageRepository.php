@@ -172,7 +172,7 @@ class PageRepository implements SutunamPageRepositoryInterface
     {
         $searchedCollection = $this->pageCollectionFactory->create()
             ->addFieldToFilter(PageInterface::IDENTIFIER, ['eq' => $pageIdentifier])
-            ->addFieldToFilter(SutunamPageInterface::STORE_ID, ['in' => explode(',', $storeIds)]);
+            ->setPageSize(1);
 
         $items = [];
         foreach ($searchedCollection->getItems() as $block) {
@@ -259,17 +259,13 @@ class PageRepository implements SutunamPageRepositoryInterface
             throw new CouldNotSaveException(__('The CMS page cannot be overwritten.'));
         }
 
+        $page->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($page->getStores()));
+
         if (empty($page->getStoreId())) {
             $page->setStoreId([$this->storeManager->getStore()->getId()]);
         }
 
-        if ($page->getId() && $page instanceof Page && !$page->getOrigData()) {
-            $page = $this->hydrator->hydrate($this->getById($page->getId()), $this->hydrator->extract($page));
-        }
-
         try {
-            $this->resource->save($page);
-
             if ($page->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
                 foreach ($page->getMedia() as $media) {
                     $this->sutunamDataHelper->saveMediaFromRemoteHost(
@@ -278,6 +274,7 @@ class PageRepository implements SutunamPageRepositoryInterface
                     );
                 }
             }
+            $this->resource->save($page);
         } catch (\Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));
         }
