@@ -391,6 +391,11 @@ class Page implements ProcessorInterface
         }
 
         $data = $this->preparePageData($entity);
+        if ($data['page'][PageInterface::CONTENT]) {
+            $data['page'][PageInterface::CONTENT] = $this->dataHelper->replaceContentWithNewBlockId(
+                $data['page'][PageInterface::CONTENT]
+            );
+        }
 
         $remotePages = $this->apiHelper->getDataByIdentifier(
             $entity->getIdentifier(),

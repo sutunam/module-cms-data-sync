@@ -47,6 +47,11 @@ class ApiHelper
     protected $logger;
 
     /**
+     * @var array
+     */
+    protected $allRemoteBlocks = [];
+
+    /**
      * Constructor
      *
      * @param \Sutunam\CmsDataSync\Helper\ApiConnection $api
@@ -104,32 +109,32 @@ class ApiHelper
     public function getAllCms($cmsType)
     {
         try {
-            $paramPrefix = 'searchCriteria[filter_groups][0][filters]';
-            $queryParams = [
-                $paramPrefix . '[0][field]' => 'identifier',
-                $paramPrefix . '[0][value]' => null,
-                $paramPrefix . '[0][condition_type]' => 'neq',
-            ];
+            if (!isset($this->allRemoteBlocks[$cmsType]) || empty($this->allRemoteBlocks[$cmsType])) {
+                $paramPrefix = 'searchCriteria[filter_groups][0][filters]';
+                $queryParams = [
+                    $paramPrefix . '[0][field]' => 'identifier',
+                    $paramPrefix . '[0][value]' => null,
+                    $paramPrefix . '[0][condition_type]' => 'neq',
+                ];
 
-            $endpoint = "sync/cms$cmsType/search";
+                $endpoint = "sync/cms$cmsType/search";
 
-            if ($cmsType == self::CMS_TYPE_WIDGET) {
-                $endpoint = "sync/cms$cmsType";
-                $queryParams = [];
+                if ($cmsType == self::CMS_TYPE_WIDGET) {
+                    $endpoint = "sync/cms$cmsType";
+                    $queryParams = [];
+                }
+
+                $response = $this->api->request(Request::METHOD_GET, $endpoint, $queryParams);
+
+                if (!$response || !$response['success']) {
+                    return [];
+                }
+                $this->allRemoteBlocks[$cmsType] = $response['data']['items'];
             }
-
-            $response = $this->api->request(Request::METHOD_GET, $endpoint, $queryParams);
-
-            if (!$response || !$response['success']) {
-                return [];
-            }
-
-            return $response['data']['items'];
-
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
         }
-        return [];
+        return $this->allRemoteBlocks[$cmsType];
     }
 
     /**

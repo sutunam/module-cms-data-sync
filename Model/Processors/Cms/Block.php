@@ -363,33 +363,43 @@ class Block implements ProcessorInterface
             return $result;
         }
 
-        $data = $this->preparePageData($entity);
+        $data = $this->preparePageData($entity, $remoteStoreIds);
+        if ($data['block'][BlockInterface::CONTENT]) {
+            $data['block'][BlockInterface::CONTENT] = $this->dataHelper->replaceContentWithNewBlockId(
+                $data['block'][BlockInterface::CONTENT]
+            );
+        }
 
-        $remoteBlocks = $this->apiHelper->getDataByIdentifier($entity->getIdentifier(), ApiHelper::CMS_TYPE_BLOCK);
-
+        // Get Store ID and Map to Store Code
+        $remoteBlocks = $this->apiHelper->getDataByIdentifier(
+            $entity->getIdentifier(),
+            ApiHelper::CMS_TYPE_BLOCK,
+            ['store_ids' => implode(',', $remoteStoreIds)]
+        );
         if (!$remoteBlocks) {
             return $this->createRemoteBlock($data, $id, $result);
         }
 
-        $remoteUsedStoreCodes = array_reduce($remoteBlocks, function ($carry, $block) {
-            return $this->dataHelper->mergeTwoArrays($carry, $block[SutunamBlockInterface::STORE_CODE]);
-        }, []);
-
-        $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
-            $remoteUsedStoreCodes
-        );
-        $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
-            ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
-            ->getSize();
-
-        if ($checkNumOfBlockWithIdentifier > 1) {
-            $result['error_message'] = __(
-                'Update remote block for my block ID: %1 failed - Reason:%2',
-                $id,
-                'There\'s another CMS block affecting the same remote CMS block except block ID: ' . $id
-            );
-            return $result;
-        }
+//        $remoteUsedStoreCodes = array_reduce($remoteBlocks, function ($carry, $block) {
+//            return $this->dataHelper->mergeTwoArrays($carry, $block[SutunamBlockInterface::STORE_CODE]);
+//        }, []);
+//
+//        $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
+//            $remoteUsedStoreCodes
+//        );
+//        $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
+//            ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
+//            ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => $myStoreIdsByRemoteStoreCodes])
+//            ->getSize();
+//
+//        if ($checkNumOfBlockWithIdentifier > 1) {
+//            $result['error_message'] = __(
+//                'Update remote block for my block ID: %1 failed - Reason:%2',
+//                $id,
+//                'There\'s another CMS block affecting the same remote CMS block except block ID: ' . $id
+//            );
+//            return $result;
+//        }
 
         $remoteUsedStoreIds = [];
         $countRemoteBlocks = count($remoteBlocks);
@@ -459,9 +469,10 @@ class Block implements ProcessorInterface
      * Prepare Page Data
      *
      * @param \Magento\Cms\Model\Block $entity
-     * @return array
+     * @param array $remoteStoreIds
+     * @return array[]
      */
-    private function preparePageData($entity)
+    private function preparePageData(\Magento\Cms\Model\Block $entity, array $remoteStoreIds)
     {
         return [
             'block' => [
@@ -472,7 +483,8 @@ class Block implements ProcessorInterface
                     ApiHelper::REQUEST_SYNC_TYPE_PUSH
                 ),
                 SutunamBlockInterface::ACTIVE => $entity->isActive(),
-                SutunamBlockInterface::MEDIA => $this->dataHelper->getAllImageFromCmsContent($entity->getContent())
+                SutunamBlockInterface::MEDIA => $this->dataHelper->getAllImageFromCmsContent($entity->getContent()),
+                SutunamBlockInterface::STORE_ID => $remoteStoreIds,
             ]
         ];
     }
