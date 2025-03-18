@@ -242,7 +242,8 @@ class Block implements ProcessorInterface
             // if there's no cms mapped -> create the new cms
             if ($myBlocks->getSize() > 0) {
                 foreach ($myBlocks as $myBlock) {
-                    $usagedStores = $this->dataHelper->mergeTwoArrays($usagedStores, $myBlock->getStores());
+                    // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                    $usagedStores = array_merge($myBlock->getStores(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
                             'Pull Block ID: %1 || Status: %2.<br>',
@@ -363,16 +364,25 @@ class Block implements ProcessorInterface
             return $result;
         }
 
-        $data = $this->preparePageData($entity);
+        $data = $this->preparePageData($entity, $remoteStoreIds);
+        if (isset($data['block'][BlockInterface::CONTENT])) {
+            $data['block'][BlockInterface::CONTENT] = $this->dataHelper->replaceContentWithRemoteBlockId(
+                $data['block'][BlockInterface::CONTENT]
+            );
+        }
 
-        $remoteBlocks = $this->apiHelper->getDataByIdentifier($entity->getIdentifier(), ApiHelper::CMS_TYPE_BLOCK);
-
+        // Get Store ID and Map to Store Code
+        $remoteBlocks = $this->apiHelper->getDataByIdentifier(
+            $entity->getIdentifier(),
+            ApiHelper::CMS_TYPE_BLOCK,
+            ['store_ids' => implode(',', $remoteStoreIds)]
+        );
         if (!$remoteBlocks) {
             return $this->createRemoteBlock($data, $id, $result);
         }
 
         $remoteUsedStoreCodes = array_reduce($remoteBlocks, function ($carry, $block) {
-            return $this->dataHelper->mergeTwoArrays($carry, $block[SutunamBlockInterface::STORE_CODE]);
+            return array_merge($block[SutunamBlockInterface::STORE_CODE], $carry);
         }, []);
 
         $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
@@ -380,6 +390,7 @@ class Block implements ProcessorInterface
         );
         $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
             ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
+            ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => $myStoreIdsByRemoteStoreCodes])
             ->getSize();
 
         if ($checkNumOfBlockWithIdentifier > 1) {
@@ -396,7 +407,8 @@ class Block implements ProcessorInterface
         foreach ($remoteBlocks as $remoteBlock) {
             $remoteBlockId = $remoteBlock[SutunamBlockInterface::ID];
             $remoteBlockStoreIds = $remoteBlock[SutunamBlockInterface::STORE_ID];
-            $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays($remoteUsedStoreIds, $remoteBlockStoreIds);
+            // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+            $remoteUsedStoreIds = array_merge($remoteBlockStoreIds, $remoteUsedStoreIds);
 
             if (!$isRemoteHostOverWritable) {
                 $result['notice_message'] .= __(
@@ -411,11 +423,13 @@ class Block implements ProcessorInterface
 
             $data['block'][SutunamBlockInterface::STORE_ID] = ($countRemoteBlocks == 1)
                 ? $remoteStoreIds
-                : $this->dataHelper->mergeTwoArrays(
-                    $remoteBlockStoreIds,
+                :
+                // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                array_merge(
                     $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
                         $remoteBlock[SutunamBlockInterface::STORE_CODE]
-                    )
+                    ),
+                    $remoteBlockStoreIds
                 );
 
             $data['block'][SutunamBlockInterface::ID] = $remoteBlockId;
@@ -459,9 +473,10 @@ class Block implements ProcessorInterface
      * Prepare Page Data
      *
      * @param \Magento\Cms\Model\Block $entity
-     * @return array
+     * @param array $remoteStoreIds
+     * @return array[]
      */
-    private function preparePageData($entity)
+    private function preparePageData(\Magento\Cms\Model\Block $entity, array $remoteStoreIds)
     {
         return [
             'block' => [
@@ -472,7 +487,8 @@ class Block implements ProcessorInterface
                     ApiHelper::REQUEST_SYNC_TYPE_PUSH
                 ),
                 SutunamBlockInterface::ACTIVE => $entity->isActive(),
-                SutunamBlockInterface::MEDIA => $this->dataHelper->getAllImageFromCmsContent($entity->getContent())
+                SutunamBlockInterface::MEDIA => $this->dataHelper->getAllImageFromCmsContent($entity->getContent()),
+                SutunamBlockInterface::STORE_ID => $remoteStoreIds,
             ]
         ];
     }
