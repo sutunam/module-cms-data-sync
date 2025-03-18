@@ -16,6 +16,7 @@ use Magento\Store\Model\StoreRepository;
 use Magento\Theme\Model\ResourceModel\Theme;
 use Magento\Theme\Model\ThemeFactory;
 use Magento\Widget\Model\Widget\Instance;
+use Sutunam\CmsDataSync\Api\Data\BlockInterface as SutunamBlockInterface;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
@@ -524,48 +525,83 @@ class Data
     }
 
     /**
-     * Replace Content With Remote BlockId
+     * Replace Content BlockId
      *
      * @param string $html
+     * @param string $action
      * @return string
+     * @phpcs:disable Generic.Metrics.NestingLevel.TooHigh
      */
-    public function replaceContentWithRemoteBlockId(string $html)
+    public function replaceContentBlockId(string $html, string $action): string
     {
         try {
             // Load HTML to DOMDocument
             $dom = new \DOMDocument('1.0', 'UTF-8');
             libxml_use_internal_errors(true);
             $dom->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR);
-
             $xpath = new \DOMXPath($dom);
-
             $nodes = $xpath->query('//div[@data-content-type="block"]');
 
-            foreach ($nodes as $node) {
-                $widgetText = $node->textContent;
-                if (preg_match('/block_id="([^"]+)"/', $widgetText, $matches)) {
-                    $blockInContent = $this->blockCollectionFactory->create()
-                        ->addFieldToFilter(BlockInterface::BLOCK_ID, $matches[1])
-                        ->setPageSize(1)->getFirstItem();
-                    $remoteBlock = $this->apiHelper->getDataByIdentifier(
-                        $blockInContent->getIdentifier(),
-                        ApiHelper::CMS_TYPE_BLOCK,
-                        ['store_ids' => implode(',', $blockInContent->getStores())]
-                    );
+            $search = [];
+            $replace = [];
 
-                    if ($remoteBlock && isset($remoteBlock[0])) {
-                        $newBlockId = $remoteBlock[0]['id'];
-                        $html = str_replace(
-                            'block_id="' . $matches[1] . '"',
-                            'block_id="' . $newBlockId . '"',
-                            $html
-                        );
+            foreach ($nodes as $node) {
+                $widgetText = $dom->saveXML($node);
+
+                if (preg_match('/block_id="([^"]+)"/', $widgetText, $matches)) {
+                    $oldBlockId = $matches[1];
+
+                    if ($action === ApiHelper::REQUEST_SYNC_TYPE_PUSH) {
+                        $blockInContent = $this->blockCollectionFactory->create()
+                            ->addFieldToFilter(BlockInterface::BLOCK_ID, $oldBlockId)
+                            ->setPageSize(1)->getFirstItem();
+
+                        if ($blockInContent->getId()) {
+                            $remoteBlock = $this->apiHelper->getDataByIdentifier(
+                                $blockInContent->getIdentifier(),
+                                ApiHelper::CMS_TYPE_BLOCK,
+                                ['store_ids' => implode(',', $blockInContent->getStores())]
+                            );
+
+                            if (!empty($remoteBlock[0]['id'])) {
+                                $newBlockId = $remoteBlock[0]['id'];
+                                $search[] = 'block_id="' . $oldBlockId . '"';
+                                $replace[] = 'block_id="' . $newBlockId . '"';
+                            }
+                        }
+                    } elseif ($action === ApiHelper::REQUEST_SYNC_TYPE_PULL) {
+                        $allRemoteBlocks = $this->apiHelper->getAllCms(ApiHelper::CMS_TYPE_BLOCK);
+
+                        foreach ($allRemoteBlocks as $block) {
+                            if ($block['id'] == $oldBlockId && isset($block[BlockInterface::IDENTIFIER])) {
+                                $mappedStoreIds = $this->getMyMappedStoreIdsListByRemoteStoreCodes(
+                                    $block[SutunamBlockInterface::STORE_CODE] ?? []
+                                );
+
+                                $blockInContent = $this->blockCollectionFactory->create()
+                                    ->addFieldToFilter(BlockInterface::IDENTIFIER, $block[BlockInterface::IDENTIFIER])
+                                    ->addFieldToFilter(
+                                        SutunamBlockInterface::STORE_ID,
+                                        ['in' => implode(',', $mappedStoreIds)]
+                                    )->setPageSize(1)->getFirstItem();
+
+                                if ($blockInContent->getId()) {
+                                    $search[] = 'block_id="' . $oldBlockId . '"';
+                                    $replace[] = 'block_id="' . $blockInContent->getId() . '"';
+                                }
+                            }
+                        }
                     }
                 }
+            }
+
+            if (!empty($search)) {
+                $html = str_replace($search, $replace, $html);
             }
         } catch (NoSuchEntityException $exception) {
             return $html;
         }
+
         return $html;
     }
 
@@ -590,7 +626,8 @@ class Data
                 str_replace('/', '\/', $remoteSiteUrl),
                 $cmsContent
             ) : $cmsContent);
-            return ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
+
+            $cmsContent = ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
                 $remoteSiteUrl,
                 $mySiteUrl,
                 $cmsContent
@@ -599,6 +636,8 @@ class Data
                 $remoteSiteUrl,
                 $cmsContent
             ) : $cmsContent);
+
+            return $this->replaceContentBlockId($cmsContent, $action);
         } catch (NoSuchEntityException $exception) {
             return null;
         }

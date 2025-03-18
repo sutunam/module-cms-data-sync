@@ -58,6 +58,10 @@ class Block implements ProcessorInterface
      * @var Logger
      */
     protected $logger;
+    /**
+     * @var array
+     */
+    protected $allCmsBlocksRemote;
 
     /**
      * Constructor
@@ -158,7 +162,6 @@ class Block implements ProcessorInterface
 
                 if (!$checkBlockUsingDiffStores) {
                     $blockStoreIds = array_merge(
-                        $mappingStoreIdByCodesOfRemoteBlock,
                         $mappingStoreIdByCodesOfRemoteBlock,
                         $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? []
                     );
@@ -365,11 +368,6 @@ class Block implements ProcessorInterface
         }
 
         $data = $this->preparePageData($entity, $remoteStoreIds);
-        if (isset($data['block'][BlockInterface::CONTENT])) {
-            $data['block'][BlockInterface::CONTENT] = $this->dataHelper->replaceContentWithRemoteBlockId(
-                $data['block'][BlockInterface::CONTENT]
-            );
-        }
 
         // Get Store ID and Map to Store Code
         $remoteBlocks = $this->apiHelper->getDataByIdentifier(

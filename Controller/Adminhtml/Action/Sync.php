@@ -56,8 +56,8 @@ class Sync extends Action implements HttpGetActionInterface
             if (isset($result['success']) && $result['success'] && isset($result['success_message'])) {
                 $this->messageManager->addSuccessMessage($result['success_message']);
             } else {
-                $this->messageManager->addErrorMessage($result['error_message']);
-                $this->messageManager->addNotice($result['notice_message']);
+                isset($result['error_message']) ?? $this->messageManager->addNotice($result['error_message']);
+                isset($result['notice_message']) ?? $this->messageManager->addNotice($result['notice_message']);
             }
         } else {
             $this->messageManager->addErrorMessage(__("Some error occurred. Please try again"));

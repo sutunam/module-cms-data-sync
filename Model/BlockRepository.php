@@ -176,7 +176,6 @@ class BlockRepository implements SutunamBlockRepositoryInterface
         $searchedCollection = $this->blockCollectionFactory->create()
             ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $blockIdentifier])
             ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => explode(',', $storeIds)]);
-        ;
 
         $items = [];
         foreach ($searchedCollection->getItems() as $block) {
