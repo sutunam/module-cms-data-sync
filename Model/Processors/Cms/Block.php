@@ -163,7 +163,8 @@ class Block implements ProcessorInterface
                 if (!$checkBlockUsingDiffStores) {
                     $blockStoreIds = array_merge(
                         $mappingStoreIdByCodesOfRemoteBlock,
-                        $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? []);
+                        $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? []
+                    );
                 }
             } else {
                 $blockStoreIds = $mappingStoreIdByCodesOfRemoteBlock;

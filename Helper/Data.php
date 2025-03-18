@@ -528,9 +528,10 @@ class Data
      * Replace Content BlockId
      *
      * @param string $html
-     * @return string
+     * @param string $action
+     * @return array|string|string[]
      */
-    public function replaceContentBlockId(string $html, $action)
+    public function replaceContentBlockId(string $html, string $action)
     {
         try {
             // Load HTML to DOMDocument
