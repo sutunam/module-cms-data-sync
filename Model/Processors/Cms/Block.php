@@ -242,7 +242,7 @@ class Block implements ProcessorInterface
             // if there's no cms mapped -> create the new cms
             if ($myBlocks->getSize() > 0) {
                 foreach ($myBlocks as $myBlock) {
-                    $usagedStores = $this->dataHelper->mergeTwoArrays($usagedStores, $myBlock->getStores());
+                    $usagedStores = array_merge($myBlock->getStores(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
                             'Pull Block ID: %1 || Status: %2.<br>',
@@ -364,8 +364,8 @@ class Block implements ProcessorInterface
         }
 
         $data = $this->preparePageData($entity, $remoteStoreIds);
-        if ($data['block'][BlockInterface::CONTENT]) {
-            $data['block'][BlockInterface::CONTENT] = $this->dataHelper->replaceContentWithNewBlockId(
+        if (isset($data['block'][BlockInterface::CONTENT])) {
+            $data['block'][BlockInterface::CONTENT] = $this->dataHelper->replaceContentWithRemoteBlockId(
                 $data['block'][BlockInterface::CONTENT]
             );
         }
@@ -380,33 +380,33 @@ class Block implements ProcessorInterface
             return $this->createRemoteBlock($data, $id, $result);
         }
 
-//        $remoteUsedStoreCodes = array_reduce($remoteBlocks, function ($carry, $block) {
-//            return $this->dataHelper->mergeTwoArrays($carry, $block[SutunamBlockInterface::STORE_CODE]);
-//        }, []);
-//
-//        $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
-//            $remoteUsedStoreCodes
-//        );
-//        $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
-//            ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
-//            ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => $myStoreIdsByRemoteStoreCodes])
-//            ->getSize();
-//
-//        if ($checkNumOfBlockWithIdentifier > 1) {
-//            $result['error_message'] = __(
-//                'Update remote block for my block ID: %1 failed - Reason:%2',
-//                $id,
-//                'There\'s another CMS block affecting the same remote CMS block except block ID: ' . $id
-//            );
-//            return $result;
-//        }
+        $remoteUsedStoreCodes = array_reduce($remoteBlocks, function ($carry, $block) {
+            return array_merge($block[SutunamBlockInterface::STORE_CODE], $carry);
+        }, []);
+
+        $myStoreIdsByRemoteStoreCodes = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
+            $remoteUsedStoreCodes
+        );
+        $checkNumOfBlockWithIdentifier = $this->blockCollectionFactory->create()
+            ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $entity->getIdentifier()])
+            ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => $myStoreIdsByRemoteStoreCodes])
+            ->getSize();
+
+        if ($checkNumOfBlockWithIdentifier > 1) {
+            $result['error_message'] = __(
+                'Update remote block for my block ID: %1 failed - Reason:%2',
+                $id,
+                'There\'s another CMS block affecting the same remote CMS block except block ID: ' . $id
+            );
+            return $result;
+        }
 
         $remoteUsedStoreIds = [];
         $countRemoteBlocks = count($remoteBlocks);
         foreach ($remoteBlocks as $remoteBlock) {
             $remoteBlockId = $remoteBlock[SutunamBlockInterface::ID];
             $remoteBlockStoreIds = $remoteBlock[SutunamBlockInterface::STORE_ID];
-            $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays($remoteUsedStoreIds, $remoteBlockStoreIds);
+            $remoteUsedStoreIds = array_merge($remoteBlockStoreIds, $remoteUsedStoreIds);
 
             if (!$isRemoteHostOverWritable) {
                 $result['notice_message'] .= __(
@@ -421,11 +421,11 @@ class Block implements ProcessorInterface
 
             $data['block'][SutunamBlockInterface::STORE_ID] = ($countRemoteBlocks == 1)
                 ? $remoteStoreIds
-                : $this->dataHelper->mergeTwoArrays(
-                    $remoteBlockStoreIds,
+                : array_merge(
                     $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
                         $remoteBlock[SutunamBlockInterface::STORE_CODE]
-                    )
+                    ),
+                    $remoteBlockStoreIds
                 );
 
             $data['block'][SutunamBlockInterface::ID] = $remoteBlockId;

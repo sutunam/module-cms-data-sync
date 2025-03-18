@@ -175,9 +175,9 @@ class Widget implements ProcessorInterface
                     ->addStoreFilter($diff)
                     ->getSize();
                 if (!$checkInstanceUsingDiffStores) {
-                    $widgetInstanceStoreIds = $this->dataHelper->mergeTwoArrays(
-                        $mappingStoreIdByCodesOfRemoteWidget,
-                        $remoteStoreIds[DataHelper::STORES_UNMAPPED]
+                    $widgetInstanceStoreIds = array_merge(
+                        $remoteStoreIds[DataHelper::STORES_UNMAPPED],
+                        $mappingStoreIdByCodesOfRemoteWidget
                     );
                 }
             } else {
@@ -270,7 +270,7 @@ class Widget implements ProcessorInterface
 
             if ($myWidgetInstances->getSize() > 0) {
                 foreach ($myWidgetInstances as $myWidgetInstance) {
-                    $usagedStores = $this->dataHelper->mergeTwoArrays($usagedStores, $myWidgetInstance->getStoreIds());
+                    $usagedStores = array_merge($myWidgetInstance->getStoreIds(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
                             'Pull Widget ID: %1 || Status: %2.<br>',
@@ -446,9 +446,9 @@ class Widget implements ProcessorInterface
             $remoteUsedStoreCodes = [];
 
             foreach ($remoteWidgetInstances as $remoteWidgetInstance) {
-                $remoteUsedStoreCodes = $this->dataHelper->mergeTwoArrays(
-                    $remoteUsedStoreCodes,
-                    $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES]
+                $remoteUsedStoreCodes = array_merge(
+                    $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES],
+                    $remoteUsedStoreCodes
                 );
             }
 
@@ -481,10 +481,7 @@ class Widget implements ProcessorInterface
                     ',',
                     $remoteWidgetInstance[WidgetInstanceInterface::STORE_IDS]
                 );
-                $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays(
-                    $remoteUsedStoreIds,
-                    $remoteWidgetInstanceStoreIds
-                );
+                $remoteUsedStoreIds = array_merge($remoteWidgetInstanceStoreIds, $remoteUsedStoreIds);
 
                 if (!$isRemoteHostOverWritable) {
                     $result['notice_message'] .= __(
@@ -503,11 +500,11 @@ class Widget implements ProcessorInterface
                     $remoteUsedStoreIds = $remoteStoreIds;
                 }
 
-                $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = $this->dataHelper->mergeTwoArrays(
-                    $storeIdsParams,
+                $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = array_merge(
                     $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
                         $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES]
-                    )
+                    ),
+                    $storeIdsParams
                 );
 
                 $data['widgetInstance'][WidgetInstanceInterface::ID] = $remoteWidgetInstanceId;

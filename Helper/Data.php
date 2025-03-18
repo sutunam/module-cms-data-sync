@@ -355,7 +355,7 @@ class Data
             return [];
         }
 
-        return isset($matches[1]) ? $matches[1] : [];
+        return isset($matches[1]) ? array_unique($matches[1]) : [];
     }
 
     /**
@@ -382,7 +382,7 @@ class Data
      */
     public function saveAllImageFromCmsContent($cmsContent, $isOverwrite = false)
     {
-        $allImages = array_unique($this->getAllImageFromCmsContent($cmsContent));
+        $allImages = $this->getAllImageFromCmsContent($cmsContent);
         foreach ($allImages as $imagePath) {
             $this->saveMediaFromRemoteHost($imagePath, $isOverwrite);
         }
@@ -523,40 +523,46 @@ class Data
     }
 
     /**
-     * @param $html
-     * @return array
+     * Replace Content With Remote BlockId
+     *
+     * @param string $html
+     * @return string
      */
-    public function replaceContentWithNewBlockId($html) {
-        // Load HTML to DOMDocument
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-        libxml_use_internal_errors(true);
-        $dom->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR);
+    public function replaceContentWithRemoteBlockId(string $html) {
+        try {
+            // Load HTML to DOMDocument
+            $dom = new \DOMDocument('1.0', 'UTF-8');
+            libxml_use_internal_errors(true);
+            $dom->loadHTML($html, LIBXML_NOWARNING | LIBXML_NOERROR);
 
-        $xpath = new \DOMXPath($dom);
+            $xpath = new \DOMXPath($dom);
 
-        $nodes = $xpath->query('//div[@data-content-type="block"]');
+            $nodes = $xpath->query('//div[@data-content-type="block"]');
 
-        foreach ($nodes as $node) {
-            $widgetText = $node->textContent;
-            if (preg_match('/block_id="([^"]+)"/', $widgetText, $matches)) {
-                $blockInContent = $this->blockCollectionFactory->create()->addFieldToFilter(
-                    BlockInterface::BLOCK_ID, $matches[1]
-                )->setPageSize(1)->getFirstItem();
-                $remoteBlock = $this->apiHelper->getDataByIdentifier(
-                    $blockInContent->getIdentifier(),
-                    ApiHelper::CMS_TYPE_BLOCK,
-                    ['store_ids' => implode(',', $blockInContent->getStores())]
-                );
-
-                if ($remoteBlock && isset($remoteBlock[0])) {
-                    $newBlockId = $remoteBlock[0]['id'];
-                    $html = str_replace(
-                        'block_id="' . $matches[1] . '"',
-                        'block_id="' . $newBlockId . '"',
-                        $html
+            foreach ($nodes as $node) {
+                $widgetText = $node->textContent;
+                if (preg_match('/block_id="([^"]+)"/', $widgetText, $matches)) {
+                    $blockInContent = $this->blockCollectionFactory->create()->addFieldToFilter(
+                        BlockInterface::BLOCK_ID, $matches[1]
+                    )->setPageSize(1)->getFirstItem();
+                    $remoteBlock = $this->apiHelper->getDataByIdentifier(
+                        $blockInContent->getIdentifier(),
+                        ApiHelper::CMS_TYPE_BLOCK,
+                        ['store_ids' => implode(',', $blockInContent->getStores())]
                     );
+
+                    if ($remoteBlock && isset($remoteBlock[0])) {
+                        $newBlockId = $remoteBlock[0]['id'];
+                        $html = str_replace(
+                            'block_id="' . $matches[1] . '"',
+                            'block_id="' . $newBlockId . '"',
+                            $html
+                        );
+                    }
                 }
             }
+        } catch (NoSuchEntityException $exception) {
+            return $html;
         }
         return $html;
     }
@@ -594,20 +600,5 @@ class Data
         } catch (NoSuchEntityException $exception) {
             return null;
         }
-    }
-
-    /**
-     * Merge two array function instead of using array_merge
-     *
-     * @param array $array1
-     * @param array $array2
-     * @return array
-     */
-    public function mergeTwoArrays(array $array1, array $array2)
-    {
-        foreach ($array2 as $item) {
-            $array1[] = $item;
-        }
-        return $array1;
     }
 }

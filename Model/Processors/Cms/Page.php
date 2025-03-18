@@ -201,9 +201,9 @@ class Page implements ProcessorInterface
                 ->getSize();
 
             if (!$checkPageUsingDiffStores) {
-                return $this->dataHelper->mergeTwoArrays(
-                    $mappingStoreIdByCodesOfRemotePage,
-                    $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? []
+                return array_merge(
+                    $remoteStoreIds[DataHelper::STORES_UNMAPPED] ?? [],
+                    $mappingStoreIdByCodesOfRemotePage
                 );
             }
         }
@@ -270,7 +270,7 @@ class Page implements ProcessorInterface
 
             if ($myPages->getSize() > 0) {
                 foreach ($myPages as $myPage) {
-                    $usagedStores = $this->dataHelper->mergeTwoArrays($usagedStores, $myPage->getStores());
+                    $usagedStores = array_merge($myPage->getStores(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
                             'Pull Page ID: %1 || Status: %2.<br>',
@@ -391,8 +391,8 @@ class Page implements ProcessorInterface
         }
 
         $data = $this->preparePageData($entity);
-        if ($data['page'][PageInterface::CONTENT]) {
-            $data['page'][PageInterface::CONTENT] = $this->dataHelper->replaceContentWithNewBlockId(
+        if (isset($data['page'][PageInterface::CONTENT])) {
+            $data['page'][PageInterface::CONTENT] = $this->dataHelper->replaceContentWithRemoteBlockId(
                 $data['page'][PageInterface::CONTENT]
             );
         }
@@ -409,10 +409,7 @@ class Page implements ProcessorInterface
         $remoteUsedStoreCodes = [];
 
         foreach ($remotePages as $remotePage) {
-            $remoteUsedStoreCodes = $this->dataHelper->mergeTwoArrays(
-                $remoteUsedStoreCodes,
-                $remotePage[SutunamPageInterface::STORE_CODE]
-            );
+            $remoteUsedStoreCodes = array_merge($remotePage[SutunamPageInterface::STORE_CODE], $remoteUsedStoreCodes);
         }
 
         $myStoreIdsByRemoteStoreCodes
@@ -434,7 +431,7 @@ class Page implements ProcessorInterface
         foreach ($remotePages as $remotePage) {
             $remotePageId = $remotePage[SutunamPageInterface::ID];
             $remotePageStoreIds = $remotePage[SutunamPageInterface::STORE_ID];
-            $remoteUsedStoreIds = $this->dataHelper->mergeTwoArrays($remoteUsedStoreIds, $remotePageStoreIds);
+            $remoteUsedStoreIds = array_merge($remotePageStoreIds, $remoteUsedStoreIds);
             if (!$isRemoteHostOverWritable) {
                 $result['notice_message'] .= __(
                     'Update remote page for my page ID: %1 (Remote Page ID: %2) was skipped'
@@ -451,12 +448,13 @@ class Page implements ProcessorInterface
                 $storeIdsParams = $remoteStoreIds;
                 $remoteUsedStoreIds = $remoteStoreIds;
             }
-            $data['page'][SutunamPageInterface::STORE_ID] = $this->dataHelper->mergeTwoArrays(
-                $storeIdsParams,
+            $data['page'][SutunamPageInterface::STORE_ID] = array_merge(
                 $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
                     $remotePage[SutunamPageInterface::STORE_CODE]
-                )
+                ),
+                $storeIdsParams
             );
+
 
             $data['page'][SutunamPageInterface::ID] = $remotePageId;
 
