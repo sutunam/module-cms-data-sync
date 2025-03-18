@@ -175,7 +175,8 @@ class BlockRepository implements SutunamBlockRepositoryInterface
     {
         $searchedCollection = $this->blockCollectionFactory->create()
             ->addFieldToFilter(BlockInterface::IDENTIFIER, ['eq' => $blockIdentifier])
-            ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => explode(',', $storeIds)]);;
+            ->addFieldToFilter(SutunamBlockInterface::STORE_ID, ['in' => explode(',', $storeIds)]);
+        ;
 
         $items = [];
         foreach ($searchedCollection->getItems() as $block) {
@@ -256,9 +257,9 @@ class BlockRepository implements SutunamBlockRepositoryInterface
             if ($block->getMedia() && $this->sutunamConfigHelper->isSyncMedia()) {
                 foreach ($block->getMedia() as $media) {
                      $this->sutunamDataHelper->saveMediaFromRemoteHost(
-                        $media,
-                        $this->sutunamConfigHelper->isOverwrite()
-                    );
+                         $media,
+                         $this->sutunamConfigHelper->isOverwrite()
+                     );
                 }
             }
             $this->resource->save($block);

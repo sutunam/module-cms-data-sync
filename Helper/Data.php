@@ -102,6 +102,7 @@ class Data
      * @param ApiHelper $apiHelper
      * @param StoreManagerInterface $storeManager
      * @param CollectionFactory $storeCollectionFactory
+     * @param BlockCollectionFactory $blockCollectionFactory
      * @param StoreRepository $storeRepository
      * @param Filesystem $fileSystem
      * @param Config $configHelper
@@ -528,7 +529,8 @@ class Data
      * @param string $html
      * @return string
      */
-    public function replaceContentWithRemoteBlockId(string $html) {
+    public function replaceContentWithRemoteBlockId(string $html)
+    {
         try {
             // Load HTML to DOMDocument
             $dom = new \DOMDocument('1.0', 'UTF-8');
@@ -542,9 +544,9 @@ class Data
             foreach ($nodes as $node) {
                 $widgetText = $node->textContent;
                 if (preg_match('/block_id="([^"]+)"/', $widgetText, $matches)) {
-                    $blockInContent = $this->blockCollectionFactory->create()->addFieldToFilter(
-                        BlockInterface::BLOCK_ID, $matches[1]
-                    )->setPageSize(1)->getFirstItem();
+                    $blockInContent = $this->blockCollectionFactory->create()
+                        ->addFieldToFilter(BlockInterface::BLOCK_ID, $matches[1])
+                        ->setPageSize(1)->getFirstItem();
                     $remoteBlock = $this->apiHelper->getDataByIdentifier(
                         $blockInContent->getIdentifier(),
                         ApiHelper::CMS_TYPE_BLOCK,

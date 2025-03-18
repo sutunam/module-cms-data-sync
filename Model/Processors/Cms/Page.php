@@ -270,6 +270,7 @@ class Page implements ProcessorInterface
 
             if ($myPages->getSize() > 0) {
                 foreach ($myPages as $myPage) {
+                    // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
                     $usagedStores = array_merge($myPage->getStores(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
@@ -409,6 +410,7 @@ class Page implements ProcessorInterface
         $remoteUsedStoreCodes = [];
 
         foreach ($remotePages as $remotePage) {
+            // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
             $remoteUsedStoreCodes = array_merge($remotePage[SutunamPageInterface::STORE_CODE], $remoteUsedStoreCodes);
         }
 
@@ -431,6 +433,7 @@ class Page implements ProcessorInterface
         foreach ($remotePages as $remotePage) {
             $remotePageId = $remotePage[SutunamPageInterface::ID];
             $remotePageStoreIds = $remotePage[SutunamPageInterface::STORE_ID];
+            // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
             $remoteUsedStoreIds = array_merge($remotePageStoreIds, $remoteUsedStoreIds);
             if (!$isRemoteHostOverWritable) {
                 $result['notice_message'] .= __(
@@ -448,13 +451,13 @@ class Page implements ProcessorInterface
                 $storeIdsParams = $remoteStoreIds;
                 $remoteUsedStoreIds = $remoteStoreIds;
             }
+            // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
             $data['page'][SutunamPageInterface::STORE_ID] = array_merge(
                 $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
                     $remotePage[SutunamPageInterface::STORE_CODE]
                 ),
                 $storeIdsParams
             );
-
 
             $data['page'][SutunamPageInterface::ID] = $remotePageId;
 

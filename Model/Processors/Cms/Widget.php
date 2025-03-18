@@ -270,6 +270,7 @@ class Widget implements ProcessorInterface
 
             if ($myWidgetInstances->getSize() > 0) {
                 foreach ($myWidgetInstances as $myWidgetInstance) {
+                    // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
                     $usagedStores = array_merge($myWidgetInstance->getStoreIds(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
@@ -446,6 +447,7 @@ class Widget implements ProcessorInterface
             $remoteUsedStoreCodes = [];
 
             foreach ($remoteWidgetInstances as $remoteWidgetInstance) {
+                // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
                 $remoteUsedStoreCodes = array_merge(
                     $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES],
                     $remoteUsedStoreCodes
@@ -481,6 +483,7 @@ class Widget implements ProcessorInterface
                     ',',
                     $remoteWidgetInstance[WidgetInstanceInterface::STORE_IDS]
                 );
+                // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
                 $remoteUsedStoreIds = array_merge($remoteWidgetInstanceStoreIds, $remoteUsedStoreIds);
 
                 if (!$isRemoteHostOverWritable) {
@@ -499,7 +502,7 @@ class Widget implements ProcessorInterface
                     $storeIdsParams = $remoteStoreIds;
                     $remoteUsedStoreIds = $remoteStoreIds;
                 }
-
+                // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
                 $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = array_merge(
                     $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
                         $remoteWidgetInstance[WidgetInstanceInterface::STORE_CODES]

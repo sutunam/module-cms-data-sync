@@ -242,6 +242,7 @@ class Block implements ProcessorInterface
             // if there's no cms mapped -> create the new cms
             if ($myBlocks->getSize() > 0) {
                 foreach ($myBlocks as $myBlock) {
+                    // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
                     $usagedStores = array_merge($myBlock->getStores(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
@@ -406,6 +407,7 @@ class Block implements ProcessorInterface
         foreach ($remoteBlocks as $remoteBlock) {
             $remoteBlockId = $remoteBlock[SutunamBlockInterface::ID];
             $remoteBlockStoreIds = $remoteBlock[SutunamBlockInterface::STORE_ID];
+            // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
             $remoteUsedStoreIds = array_merge($remoteBlockStoreIds, $remoteUsedStoreIds);
 
             if (!$isRemoteHostOverWritable) {
@@ -421,7 +423,9 @@ class Block implements ProcessorInterface
 
             $data['block'][SutunamBlockInterface::STORE_ID] = ($countRemoteBlocks == 1)
                 ? $remoteStoreIds
-                : array_merge(
+                :
+                // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                array_merge(
                     $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
                         $remoteBlock[SutunamBlockInterface::STORE_CODE]
                     ),
