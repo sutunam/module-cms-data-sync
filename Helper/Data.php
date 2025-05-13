@@ -341,23 +341,34 @@ class Data
     public function getAllImageFromCmsContent($cmsContent)
     {
         try {
+            $mediaPaths = [];
             $cmsContentDecode = $this->decodingCmsContent($cmsContent);
-            $regex = '/["\']*[^"\'\s]+["\']*\s*[:=]\s*["\']*(?:(?:' .
-                str_replace(
-                    '/',
-                    '\/',
-                    $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA)
-                ) .
-                '|{{media\s+url=)([^"\']+\.(?:' .
-                implode('|', $this->configHelper->getMediaType()) .
-                ')))["\']*/';
+            preg_match_all('/{{\s*media\s+url\s*=\s*(wysiwyg\/[^}\s]+)\s*}}/', $cmsContentDecode, $matches1);
+            $mediaPaths = array_merge($mediaPaths, $matches1[1]);
 
-            preg_match_all($regex, $cmsContentDecode, $matches);
+            preg_match_all('/src=["\'].*?wysiwyg\/([^"\']+\.(?:jpg|jpeg|png|gif|webp))["\']/', $cmsContentDecode, $matches2);
+            $mediaPaths = array_merge($mediaPaths, array_map(function ($val) {
+                return 'wysiwyg/' . $val;
+            }, $matches2[1]));
+
+            preg_match_all('/data-background-images\s*=\s*"([^"]+)"/', $cmsContentDecode, $jsonMatches);
+
+            foreach ($jsonMatches[1] as $jsonString) {
+                $jsonDecoded = json_decode(htmlspecialchars_decode($jsonString), true);
+                if (!is_array($jsonDecoded)) {
+                    continue;
+                }
+                foreach ($jsonDecoded as $imgPath) {
+                    if (preg_match('/{{\s*media\s+url\s*=\s*(wysiwyg\/[^}\s]+)\s*}}/', $imgPath, $match)) {
+                        $mediaPaths[] = $match[1];
+                    }
+                }
+            }
+
+            return array_values(array_unique($mediaPaths));
         } catch (NoSuchEntityException $e) {
             return [];
         }
-
-        return isset($matches[1]) ? array_unique($matches[1]) : [];
     }
 
     /**
