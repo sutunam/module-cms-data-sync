@@ -343,13 +343,15 @@ class Data
         try {
             $mediaPaths = [];
             $cmsContentDecode = $this->decodingCmsContent($cmsContent);
-            preg_match_all('/{{\s*media\s+url\s*=\s*(wysiwyg\/[^}\s]+)\s*}}/',
+            preg_match_all(
+                '/{{\s*media\s+url\s*=\s*(wysiwyg\/[^}\s]+)\s*}}/',
                 $cmsContentDecode,
                 $matches1
             );
             $mediaPaths = array_merge($mediaPaths, $matches1[1]);
 
-            preg_match_all('/src=["\'].*?wysiwyg\/([^"\']+\.(?:jpg|jpeg|png|gif|webp))["\']/',
+            preg_match_all(
+                '/src=["\'].*?wysiwyg\/([^"\']+\.(?:jpg|jpeg|png|gif|webp))["\']/',
                 $cmsContentDecode,
                 $matches2
             );
@@ -357,7 +359,8 @@ class Data
                 return 'wysiwyg/' . $val;
             }, $matches2[1]));
 
-            preg_match_all('/data-background-images\s*=\s*"([^"]+)"/',
+            preg_match_all(
+                '/data-background-images\s*=\s*"([^"]+)"/',
                 $cmsContentDecode,
                 $jsonMatches
             );
@@ -368,10 +371,11 @@ class Data
                     continue;
                 }
                 foreach ($jsonDecoded as $imgPath) {
-                    if (preg_match('/{{\s*media\s+url\s*=\s*(wysiwyg\/[^}\s]+)\s*}}/',
+                    if (preg_match(
+                        '/{{\s*media\s+url\s*=\s*(wysiwyg\/[^}\s]+)\s*}}/',
                         $imgPath,
-                        $match
-                    )) {
+                        $match)
+                    ) {
                         $mediaPaths[] = $match[1];
                     }
                 }
@@ -422,7 +426,8 @@ class Data
     public function generateIdentifier($title)
     {
         $checkDuplicatedTitle = $this->instanceCollectionFactory->create()->addFieldToFilter(
-            'title', ['eq' => $title]
+            'title',
+            ['eq' => $title]
         );
         $lowercaseTitle = strtolower($title);
         if ($checkDuplicatedTitle->getSize() > 1) {
@@ -603,10 +608,10 @@ class Data
                                     $block[SutunamBlockInterface::STORE_CODE] ?? []
                                 );
 
-                                $blockInContent = $this->blockCollectionFactory->create()
-                                    ->addFieldToFilter(BlockInterface::IDENTIFIER,
-                                        $block[BlockInterface::IDENTIFIER])
-                                    ->addFieldToFilter(
+                                $blockInContent = $this->blockCollectionFactory->create()->addFieldToFilter(
+                                        BlockInterface::IDENTIFIER,
+                                        $block[BlockInterface::IDENTIFIER]
+                                    )->addFieldToFilter(
                                         SutunamBlockInterface::STORE_ID,
                                         ['in' => implode(',', $mappedStoreIds)]
                                     )->setPageSize(1)->getFirstItem();
