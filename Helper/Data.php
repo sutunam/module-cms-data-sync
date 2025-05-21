@@ -374,8 +374,8 @@ class Data
                     if (preg_match(
                         '/{{\s*media\s+url\s*=\s*(wysiwyg\/[^}\s]+)\s*}}/',
                         $imgPath,
-                        $match)
-                    ) {
+                        $match
+                    )) {
                         $mediaPaths[] = $match[1];
                     }
                 }
@@ -609,12 +609,12 @@ class Data
                                 );
 
                                 $blockInContent = $this->blockCollectionFactory->create()->addFieldToFilter(
-                                        BlockInterface::IDENTIFIER,
-                                        $block[BlockInterface::IDENTIFIER]
-                                    )->addFieldToFilter(
-                                        SutunamBlockInterface::STORE_ID,
-                                        ['in' => implode(',', $mappedStoreIds)]
-                                    )->setPageSize(1)->getFirstItem();
+                                    BlockInterface::IDENTIFIER,
+                                    $block[BlockInterface::IDENTIFIER]
+                                )->addFieldToFilter(
+                                    SutunamBlockInterface::STORE_ID,
+                                    ['in' => implode(',', $mappedStoreIds)]
+                                )->setPageSize(1)->getFirstItem();
 
                                 if ($blockInContent->getId()) {
                                     $search[] = 'block_id="' . $oldBlockId . '"';
