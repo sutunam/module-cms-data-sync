@@ -91,7 +91,7 @@
             <parameter name="storeIds" />
         </data>
     </route>
-    <route url="/V1/sync/cmsWidget" method="POST">
+    <route url="/V1/sync/cmsWidget" method="PUT">
         <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="save"/>
         <resources>
             <resource ref="Magento_Widget::widget_instance"/>
