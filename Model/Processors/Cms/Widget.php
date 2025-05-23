@@ -416,7 +416,7 @@ class Widget implements ProcessorInterface
             if (!$remoteWidgetInstances) {
                 $data['widgetInstance'][WidgetInstanceInterface::STORE_IDS] = $remoteStoreIds;
                 $response = $this->apiConnection->request(
-                    Request::METHOD_PUT,
+                    Request::METHOD_POST,
                     self::SUTUNAM_CMS_WIDGET_API_ENDPOINT,
                     [],
                     $data

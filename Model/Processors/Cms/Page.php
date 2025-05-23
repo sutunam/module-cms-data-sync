@@ -538,7 +538,7 @@ class Page implements ProcessorInterface
     {
         $data['page'][SutunamPageInterface::STORE_ID] = $remoteStoreIds;
         $response = $this->apiConnection->request(
-            Request::METHOD_PUT,
+            Request::METHOD_POST,
             self::SUTUNAM_CMS_PAGE_API_ENDPOINT,
             [],
             $data
