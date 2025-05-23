@@ -503,7 +503,7 @@ class Block implements ProcessorInterface
     private function createRemoteBlock(array $data, $id, array &$result)
     {
         $response = $this->apiConnection->request(
-            Request::METHOD_PUT,
+            Request::METHOD_POST,
             self::SUTUNAM_CMS_BLOCK_API_ENDPOINT,
             [],
             $data
