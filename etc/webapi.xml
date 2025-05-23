@@ -23,13 +23,13 @@
             <parameter name="storeIds" />
         </data>
     </route>
-    <route url="/V1/sync/cmsPage" method="PUT">
+    <route url="/V1/sync/cmsPage" method="POST">
         <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="save"/>
         <resources>
             <resource ref="Magento_Cms::save"/>
         </resources>
     </route>
-    <route url="/V1/sync/cmsPage/:id" method="POST">
+    <route url="/V1/sync/cmsPage/:id" method="PUT">
         <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="save"/>
         <resources>
             <resource ref="Magento_Cms::save"/>
