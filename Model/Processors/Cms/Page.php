@@ -19,6 +19,7 @@ use Sutunam\CmsDataSync\Logger\Logger;
 class Page implements ProcessorInterface
 {
     public const SUTUNAM_CMS_PAGE_API_ENDPOINT = "sync/cmsPage/";
+    public const PAGE = "page";
 
     /**
      * @var PageRepository
@@ -393,6 +394,16 @@ class Page implements ProcessorInterface
 
         $data = $this->preparePageData($entity);
 
+        if ($entity->getImage()) {
+            $data[$this::PAGE][SutunamPageInterface::IMAGE] = preg_replace('#^/media/#', '', $entity->getImage());
+            if(!empty($data[$this::PAGE][SutunamPageInterface::MEDIA])) {
+                array_merge(
+                    $data[$this::PAGE][SutunamPageInterface::MEDIA],
+                    preg_replace('#^/media/#', '', $entity->getImage())
+                );
+            }
+        }
+
         $remotePages = $this->apiHelper->getDataByIdentifier(
             $entity->getIdentifier(),
             ApiHelper::CMS_TYPE_PAGE
@@ -447,14 +458,14 @@ class Page implements ProcessorInterface
                 $remoteUsedStoreIds = $remoteStoreIds;
             }
             // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
-            $data['page'][SutunamPageInterface::STORE_ID] = array_merge(
+            $data[$this::PAGE][SutunamPageInterface::STORE_ID] = array_merge(
                 $this->dataHelper->getUnmappedRemoteStoreIdsByRemoteStoreCodes(
                     $remotePage[SutunamPageInterface::STORE_CODE]
                 ),
                 $storeIdsParams
             );
 
-            $data['page'][SutunamPageInterface::ID] = $remotePageId;
+            $data[$this::PAGE][SutunamPageInterface::ID] = $remotePageId;
 
             $response = $this->apiConnection->request(
                 Request::METHOD_PUT,
@@ -484,7 +495,7 @@ class Page implements ProcessorInterface
         }
 
         if ($diff = array_diff($remoteStoreIds, $remoteUsedStoreIds)) {
-            unset($data['page'][SutunamPageInterface::ID]);
+            unset($data[$this::PAGE][SutunamPageInterface::ID]);
             return $this->createRemotePage($data, $diff, $id);
         }
         $result['type'] = 'updated';
@@ -500,7 +511,7 @@ class Page implements ProcessorInterface
     private function preparePageData($entity)
     {
         return [
-            'page' => [
+            $this::PAGE => [
                 PageInterface::IDENTIFIER => $entity->getIdentifier(),
                 PageInterface::TITLE => $entity->getTitle(),
                 PageInterface::PAGE_LAYOUT  => $entity->getPageLayout(),
@@ -536,7 +547,7 @@ class Page implements ProcessorInterface
      */
     private function createRemotePage($data, $remoteStoreIds, ?int $id)
     {
-        $data['page'][SutunamPageInterface::STORE_ID] = $remoteStoreIds;
+        $data[$this::PAGE][SutunamPageInterface::STORE_ID] = $remoteStoreIds;
         $response = $this->apiConnection->request(
             Request::METHOD_POST,
             self::SUTUNAM_CMS_PAGE_API_ENDPOINT,

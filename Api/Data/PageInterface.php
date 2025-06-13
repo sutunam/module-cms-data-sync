@@ -24,6 +24,7 @@ interface PageInterface extends \Magento\Cms\Api\Data\PageInterface
     public const STORE_CODE = 'store_code';
 
     public const MEDIA = 'media';
+    public const IMAGE = 'image';
 
     /**#@-*/
 
