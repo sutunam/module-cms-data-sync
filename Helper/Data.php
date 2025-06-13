@@ -350,8 +350,9 @@ class Data
             );
             $mediaPaths = array_merge($mediaPaths, $matches1[1]);
 
+            $mediaExtensions = implode('|', $this->configHelper->getMediaType());
             preg_match_all(
-                '/src=["\'].*?wysiwyg\/([^"\']+\.(?:jpg|jpeg|png|gif|webp))["\']/',
+                '/src=["\'].*?wysiwyg\/([^"\']+\.(?:' . $mediaExtensions . '))["\']/i',
                 $cmsContentDecode,
                 $matches2
             );
@@ -381,8 +382,34 @@ class Data
                 }
             }
 
+            $unescapedContent = str_replace('\/', '/', $cmsContentDecode);
+            $mediaUrlBase = preg_quote(
+                $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA),
+                '/'
+            );
+
+            $regex = '/["\']*[^"\'\s]+["\']*\s*[:=]\s*["\']*(?:' . $mediaUrlBase .
+                '|{{\s*media\s+url\s*=\s*)?(wysiwyg\/[^"\'}]+\.(?:' . $mediaExtensions . '))["\']*/i';
+
+            preg_match_all($regex, $unescapedContent, $matches3);
+            $mediaPaths = array_merge($mediaPaths, $matches3[1]);
+
+            preg_match_all(
+                '/`image`\s*:\s*`wysiwyg\|([^`]+)`/',
+                $cmsContentDecode,
+                $matches4
+            );
+
+            $mediaPaths = array_merge($mediaPaths, array_map(function ($val) {
+                $parts = explode('|', $val);
+                $parts = array_map(function ($p) {
+                    return trim($p, '/');
+                }, $parts);
+                return 'wysiwyg/' . implode('/', $parts);
+            }, $matches4[1]));
+
             return array_values(array_unique($mediaPaths));
-        } catch (NoSuchEntityException $e) {
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
             return [];
         }
     }
