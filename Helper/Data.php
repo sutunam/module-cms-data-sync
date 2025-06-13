@@ -394,6 +394,20 @@ class Data
             preg_match_all($regex, $unescapedContent, $matches3);
             $mediaPaths = array_merge($mediaPaths, $matches3[1]);
 
+            preg_match_all(
+                '/`image`\s*:\s*`wysiwyg\|([^`]+)`/',
+                $cmsContentDecode,
+                $matches4
+            );
+
+            $mediaPaths = array_merge($mediaPaths, array_map(function ($val) {
+                $parts = explode('|', $val);
+                $parts = array_map(function ($p) {
+                    return trim($p, '/');
+                }, $parts);
+                return 'wysiwyg/' . implode('/', $parts);
+            }, $matches4[1]));
+
             return array_values(array_unique($mediaPaths));
         } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
             return [];
