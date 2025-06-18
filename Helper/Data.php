@@ -675,6 +675,10 @@ class Data
         try {
             $remoteSiteUrl = $this->configHelper->getSiteUrl();
             $mySiteUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_WEB);
+            if (empty($mySiteUrl) || empty($remoteSiteUrl) || empty($cmsContent)) {
+                return null;
+            }
+
             $cmsContent = ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
                 str_replace('/', '\/', $remoteSiteUrl),
                 str_replace('/', '\/', $mySiteUrl),
