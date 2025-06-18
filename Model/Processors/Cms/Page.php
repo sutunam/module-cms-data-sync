@@ -394,16 +394,6 @@ class Page implements ProcessorInterface
 
         $data = $this->preparePageData($entity);
 
-        if ($entity->getImage()) {
-            $data[$this::PAGE][SutunamPageInterface::IMAGE] = preg_replace('#^/media/#', '', $entity->getImage());
-            if (!empty($data[$this::PAGE][SutunamPageInterface::MEDIA])) {
-                array_merge(
-                    $data[$this::PAGE][SutunamPageInterface::MEDIA],
-                    preg_replace('#^/media/#', '', $entity->getImage())
-                );
-            }
-        }
-
         $remotePages = $this->apiHelper->getDataByIdentifier(
             $entity->getIdentifier(),
             ApiHelper::CMS_TYPE_PAGE

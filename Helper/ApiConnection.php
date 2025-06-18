@@ -118,7 +118,7 @@ class ApiConnection
         $options = [
             'adapter'   => Curl::class,
             'curloptions' => [CURLOPT_FOLLOWLOCATION => true],
-            'timeout' => 30
+            'timeout' => 180
         ];
 
         $client = new Client(

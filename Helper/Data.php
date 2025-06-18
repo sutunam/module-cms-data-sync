@@ -675,29 +675,32 @@ class Data
         try {
             $remoteSiteUrl = $this->configHelper->getSiteUrl();
             $mySiteUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_WEB);
-            $cmsContent = ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
-                str_replace('/', '\/', $remoteSiteUrl),
-                str_replace('/', '\/', $mySiteUrl),
-                $cmsContent
-            ) : (($action == ApiHelper::REQUEST_SYNC_TYPE_PUSH) ? str_replace(
-                str_replace('/', '\/', $mySiteUrl),
-                str_replace('/', '\/', $remoteSiteUrl),
-                $cmsContent
-            ) : $cmsContent);
+            if ($mySiteUrl && $remoteSiteUrl && $cmsContent) {
+                $cmsContent = ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
+                    str_replace('/', '\/', $remoteSiteUrl),
+                    str_replace('/', '\/', $mySiteUrl),
+                    $cmsContent
+                ) : (($action == ApiHelper::REQUEST_SYNC_TYPE_PUSH) ? str_replace(
+                    str_replace('/', '\/', $mySiteUrl),
+                    str_replace('/', '\/', $remoteSiteUrl),
+                    $cmsContent
+                ) : $cmsContent);
 
-            $cmsContent = ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
-                $remoteSiteUrl,
-                $mySiteUrl,
-                $cmsContent
-            ) : (($action == ApiHelper::REQUEST_SYNC_TYPE_PUSH) ? str_replace(
-                $mySiteUrl,
-                $remoteSiteUrl,
-                $cmsContent
-            ) : $cmsContent);
+                $cmsContent = ($action == ApiHelper::REQUEST_SYNC_TYPE_PULL) ? str_replace(
+                    $remoteSiteUrl,
+                    $mySiteUrl,
+                    $cmsContent
+                ) : (($action == ApiHelper::REQUEST_SYNC_TYPE_PUSH) ? str_replace(
+                    $mySiteUrl,
+                    $remoteSiteUrl,
+                    $cmsContent
+                ) : $cmsContent);
+                return $this->replaceContentBlockId($cmsContent, $action);
 
-            return $this->replaceContentBlockId($cmsContent, $action);
+            }
         } catch (NoSuchEntityException $exception) {
             return null;
         }
+        return null;
     }
 }
