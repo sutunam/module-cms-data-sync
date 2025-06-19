@@ -4,6 +4,7 @@ namespace Sutunam\CmsDataSync\Setup\Patch\Data;
 
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\App\ResourceConnection;
 use Psr\Log\LoggerInterface;
 
 class InitIdentifierForExistedCMS implements DataPatchInterface
@@ -14,9 +15,9 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
     protected $dataHelper;
 
     /**
-     * @var \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory
+     * @var ResourceConnection
      */
-    protected $instanceCollectionFactory;
+     protected $resourceConnection;
 
     /**
      * @var ModuleDataSetupInterface
@@ -29,41 +30,62 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
     protected $logger;
 
     /**
-     * Construct
-     *
      * @param \Sutunam\CmsDataSync\Helper\Data $dataHelper
-     * @param \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory
+     * @param ResourceConnection $resourceConnection
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param LoggerInterface $logger
      */
     public function __construct(
         \Sutunam\CmsDataSync\Helper\Data $dataHelper,
-        \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory,
+        ResourceConnection $resourceConnection,
         ModuleDataSetupInterface $moduleDataSetup,
         LoggerInterface $logger
     ) {
         $this->dataHelper = $dataHelper;
-        $this->instanceCollectionFactory = $instanceCollectionFactory;
+        $this->resourceConnection = $resourceConnection;
         $this->moduleDataSetup = $moduleDataSetup;
         $this->logger = $logger;
     }
 
     /**
-     * Apply
+     * Set identifier to rthe widget empty identifier
      *
      * @return void
      */
     public function apply()
     {
         $this->moduleDataSetup->getConnection()->startSetup();
-        $collection = $this->instanceCollectionFactory->create()->addFieldToFilter('identifier', ['null' => true]);
-        foreach ($collection->getItems() as $item) {
-            try {
-                $item->setIdentifier($this->dataHelper->generateIdentifier($item->getTitle()));
-                $item->save();
-            } catch (\Exception $e) {
-                $this->logger->critical($e->getMessage());
+
+        $connection = $this->resourceConnection->getConnection();
+        $tableName = $this->resourceConnection->getTableName('widget_instance');
+
+        try {
+            $select = $connection->select()
+                ->from($tableName, ['instance_id', 'title'])
+                ->where('identifier IS NULL');
+
+            $widgets = $connection->fetchAll($select);
+
+            if (empty($widgets)) {
+                $this->logger->critical('No widget instances need updating.');
+                return;
             }
+            $updateData = [];
+            foreach ($widgets as $widget) {
+                $id = (int)$widget['instance_id'];
+                $title = $widget['title'];
+                $updateData[] = [
+                    'instance_id' => $id,
+                    'identifier'  => $this->dataHelper->generateIdentifier($title)
+                ];
+            }
+            $connection->insertOnDuplicate(
+                $tableName,
+                $updateData,
+                ['identifier']
+            );
+        } catch (\Exception $e) {
+            $this->logger->critical('Error updating widget identifiers: ' . $e->getMessage());
         }
         $this->moduleDataSetup->getConnection()->endSetup();
     }

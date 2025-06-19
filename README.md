@@ -57,3 +57,9 @@ In edit page:
 ![](https://i.imgur.com/dI29nze.png)
 
 <i>Note: The cms page management is the same as the block ui listing page</i>
+
+# Change log
+    1.0.0
+        Init extension
+    1.0.1
+        Fix bug missing data table layout_update,layout_link and widget_instance_page_layout when setting module
