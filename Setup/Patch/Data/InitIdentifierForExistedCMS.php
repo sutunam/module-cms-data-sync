@@ -59,6 +59,7 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
         $collection = $this->instanceCollectionFactory->create()->addFieldToFilter('identifier', ['null' => true]);
         foreach ($collection->getItems() as $item) {
             try {
+                $item = $item->load($item->getId());
                 $item->setIdentifier($this->dataHelper->generateIdentifier($item->getTitle()));
                 $item->save();
             } catch (\Exception $e) {
