@@ -4,7 +4,7 @@ namespace Sutunam\CmsDataSync\Setup\Patch\Data;
 
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use \Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\ResourceConnection;
 use Psr\Log\LoggerInterface;
 
 class InitIdentifierForExistedCMS implements DataPatchInterface
@@ -15,9 +15,9 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
     protected $dataHelper;
 
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var ResourceConnection
      */
-     protected  $resourceConnection;
+     protected $resourceConnection;
 
     /**
      * @var ModuleDataSetupInterface
@@ -30,10 +30,8 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
     protected $logger;
 
     /**
-     * Construct
-     *
      * @param \Sutunam\CmsDataSync\Helper\Data $dataHelper
-     * @param \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory
+     * @param ResourceConnection $resourceConnection
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param LoggerInterface $logger
      */
@@ -83,6 +81,7 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
                 $ids[] = $id;
             }
             $idsList = implode(',', $ids);
+            // phpcs:ignore Magento2.SQL.RawQuery.FoundRawSql
             $sql = "UPDATE {$tableName}
                 SET identifier = CASE instance_id
                     {$caseSql}
