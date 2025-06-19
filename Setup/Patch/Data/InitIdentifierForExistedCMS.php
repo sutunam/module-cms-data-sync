@@ -70,25 +70,20 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
                 $this->logger->critical('No widget instances need updating.');
                 return;
             }
-            $caseSql = '';
-            $ids = [];
+            $updateData = [];
             foreach ($widgets as $widget) {
                 $id = (int)$widget['instance_id'];
                 $title = $widget['title'];
-                $escapedIdentifier = $connection->quote($this->dataHelper->generateIdentifier($title));
-
-                $caseSql .= "WHEN {$id} THEN {$escapedIdentifier} ";
-                $ids[] = $id;
+                $updateData[] = [
+                    'instance_id' => $id,
+                    'identifier'  => $this->dataHelper->generateIdentifier($title)
+                ];
             }
-            $idsList = implode(',', $ids);
-            // phpcs:ignore Magento2.SQL.RawQuery.FoundRawSql
-            $sql = "UPDATE {$tableName}
-                SET identifier = CASE instance_id
-                    {$caseSql}
-                END
-                WHERE instance_id IN ({$idsList})";
-
-            $connection->query($sql);
+            $connection->insertOnDuplicate(
+                $tableName,
+                $updateData,
+                ['identifier']
+            );
         } catch (\Exception $e) {
             $this->logger->critical('Error updating widget identifiers: ' . $e->getMessage());
         }
