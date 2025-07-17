@@ -63,3 +63,5 @@ In edit page:
         Init extension
     1.0.1
         Fix bug missing data table layout_update,layout_link and widget_instance_page_layout when setting module
+    1.0.2
+        Compatible to m2.4.8

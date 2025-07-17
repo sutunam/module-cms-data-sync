@@ -124,7 +124,7 @@ class PageRepository implements SutunamPageRepositoryInterface
         DataObjectHelper                         $dataObjectHelper,
         StoreManagerInterface                    $storeManager,
         ResourcePage                             $resource,
-        CollectionProcessorInterface             $collectionProcessor = null,
+        ?CollectionProcessorInterface            $collectionProcessor = null,
         ?HydratorInterface                       $hydrator = null
     ) {
         $this->pageCollectionFactory = $pageCollectionFactory;
