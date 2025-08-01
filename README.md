@@ -65,3 +65,5 @@ In edit page:
         Fix bug missing data table layout_update,layout_link and widget_instance_page_layout when setting module
     1.0.2
         Compatible to m2.4.8
+    1.0.3
+        Fix phpcs
