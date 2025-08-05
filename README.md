@@ -1,19 +1,23 @@
 # CMS Data Sync - Magento 2 Extension
+
 This extension will be extremely useful if it takes too much time of yours to
 reproduce all cms block/ page from the testing site to your production site.
 CMS within lots of configuration, lots of media, addition style, blocks ?
 No matter how much it is, just only 1-2 click(s) and blinking, we will do the rest with the best.
 
 # Feature:
+
 - Pull All/ Pull each item(s) from the remote site to our site
 - Push All/ Push each item(s) from your site, and update it to the remote site.
 - Syncing media during sync data in 2 sites
 
 # Configurations:
+
 Go to Stores > Configuration > Sutunam > Cms Data Sync
 ![Go to Stores > Configuration > Sutunam > Cms Data Sync](https://i.imgur.com/SxoWoWH.png)
 
 Descriptions of configurations:
+
 - Enable: enabled/disabled this extension.
 - Website name: remote host site name
 - Website url: remote host site url(using to get url api endpoint)
@@ -32,21 +36,23 @@ Descriptions of configurations:
 - Just click on it, the CMS data will be synced.
 
 ## Some common cases:
+
 ### 1. What it would be when the "Sync Media" configuration is on/off?
 
 The media will be synced or not corresponding on this config. On is synced and Off is skipping sync media.
 
 ### 2. what it would be when the "Is Overwrite" configuration is Enabled/disabled?
+
 - Enabled:
   All the content of CMS block/page will be overwritten by the content of remote host, within media as well if "Sync Media" config is On.
   In this case, we will meet 2 main cases. One is the case that block is not exist on the target site and the other is exist.
-    - If it's exist, the content will be updated with the new content of remote host
-    - If it's not exit, there's a block creating by corresponding CMS data of remote host.
+
+  - If it's exist, the content will be updated with the new content of remote host
+  - If it's not exit, there's a block creating by corresponding CMS data of remote host.
 
 - Disabled:
   All the CMS block/page that was exist on remote host will be skipped during syncing data.
   Any block which is not exist yet, It will be create the new one on the target host.
-
 
 # Screenshot:
 
@@ -59,6 +65,7 @@ In edit page:
 <i>Note: The cms page management is the same as the block ui listing page</i>
 
 # Change log
+
     1.0.0
         Init extension
     1.0.1
@@ -67,3 +74,5 @@ In edit page:
         Compatible to m2.4.8
     1.0.3
         Fix phpcs
+    1.0.4
+        Encrypt password in database
