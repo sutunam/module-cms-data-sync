@@ -5,11 +5,38 @@ reproduce all cms block/ page from the testing site to your production site.
 CMS within lots of configuration, lots of media, addition style, blocks ?
 No matter how much it is, just only 1-2 click(s) and blinking, we will do the rest with the best.
 
-# Feature:
+# Installation
+## Composer
 
-- Pull All/ Pull each item(s) from the remote site to our site
-- Push All/ Push each item(s) from your site, and update it to the remote site.
-- Syncing media during sync data in 2 sites
+Add Sutunam Composer repository:
+
+```json
+"repositories": {
+    "sutunam": {
+        "type": "composer",
+        "url": "https://composer.sutunam.com/m2/"
+    }
+}
+```
+Require the package:
+
+```bash
+composer require sutunam/module-cms-data-sync
+```
+Then, execute the following Magento commands:
+
+```bash
+bin/magento module:enable Sutunam_CmsDataSync
+bin/magento setup:upgrade
+bin/magento cache:flush
+```
+
+If you are in production mode, also run:
+
+```bash
+bin/magento setup:di:compile
+bin/magento setup:static-content:deploy -f
+```
 
 # Configurations:
 
@@ -65,7 +92,6 @@ In edit page:
 <i>Note: The cms page management is the same as the block ui listing page</i>
 
 # Change log
-
     1.0.0
         Init extension
     1.0.1
@@ -76,3 +102,5 @@ In edit page:
         Fix phpcs
     1.0.4
         Encrypt password in database
+    1.0.5
+        Update README.md
