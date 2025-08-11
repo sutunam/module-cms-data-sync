@@ -1,9 +1,12 @@
 # CMS Data Sync - Magento 2 Extension
 
-This extension will be extremely useful if it takes too much time of yours to
-reproduce all cms block/ page from the testing site to your production site.
-CMS within lots of configuration, lots of media, addition style, blocks ?
-No matter how much it is, just only 1-2 click(s) and blinking, we will do the rest with the best.
+
+- Description:
+This extension streamlines the process of copying all CMS blocks and pages from your testing site to your production site. It works seamlessly with any number of configurations, media files, styles, or blocks, reducing the need for manual work.
+
+
+- Goal:
+Save time and effort by enabling users to migrate CMS content with just one or two clicks, ensuring accurate and efficient transfer between environments.
 
 # Installation
 ## Composer
@@ -43,50 +46,75 @@ bin/magento setup:static-content:deploy -f
 Go to Stores > Configuration > Sutunam > Cms Data Sync
 ![Go to Stores > Configuration > Sutunam > Cms Data Sync](https://i.imgur.com/SxoWoWH.png)
 
-Descriptions of configurations:
+**Descriptions of configurations:**
 
-- Enable: enabled/disabled this extension.
-- Website name: remote host site name
-- Website url: remote host site url(using to get url api endpoint)
-- Username: admin username account of the remote site
-- Password: admin password account of the remote site
-- Sync media: enable to sync media during syncing
-- Root dir and sub dir(depending on sync media config): mapping with remote directory where stores media of remtoe host
-- Is Overwrite(should be disabled): the content will be overwritten via syncing
+- Enable – Turn the extension on or off.
+
+- Website Name – Name of the remote site you want to copy content from.
+
+- Website URL – The web address of the remote site, used to connect to its API.
+
+- Username – Admin login name for the remote site.
+
+- Password – Admin password for the remote site.
+
+- Sync Media – Turn this on if you also want to copy images and other media files.
+
+- Root Directory / Subdirectory – The folder location on the remote site where its media files are stored (used only if Sync Media is on).
+
+- Overwrite Content (recommended: keep off) – If on, it will replace existing content on your site with the remote site’s content.
 
 # Usage:
 
 ### Note:
 
-- We have 3 positions that you can use to sync CMS data, namely ui listing primary button(Sync All), mass action and the button on the edit detail screen.
-- The CMS block/page will be synced by Identifier + Store Views.
-- Just click on it, the CMS data will be synced.
+You can sync CMS data using any of the three available options:
+
+- Primary “Sync All” button in the UI listing.
+
+- Mass Action option in the CMS listing view.
+
+- Sync button on the CMS block/page edit screen.
+
+The CMS block or page is matched and synced based on its Identifier and Store Views.
+Simply click the desired sync option, and the CMS data will be transferred automatically.
 
 ## Some common cases:
 
-### 1. What it would be when the "Sync Media" configuration is on/off?
+1. “Sync Media” Setting
+- On – Media files are synced along with CMS content.
 
-The media will be synced or not corresponding on this config. On is synced and Off is skipping sync media.
 
-### 2. what it would be when the "Is Overwrite" configuration is Enabled/disabled?
+- Off – Media files are skipped during syncing.
 
-- Enabled:
-  All the content of CMS block/page will be overwritten by the content of remote host, within media as well if "Sync Media" config is On.
-  In this case, we will meet 2 main cases. One is the case that block is not exist on the target site and the other is exist.
+2. “Overwrite Content” Setting
 
-  - If it's exist, the content will be updated with the new content of remote host
-  - If it's not exit, there's a block creating by corresponding CMS data of remote host.
+**Enabled**
 
-- Disabled:
-  All the CMS block/page that was exist on remote host will be skipped during syncing data.
-  Any block which is not exist yet, It will be create the new one on the target host.
+- All CMS blocks/pages are replaced with the remote host’s content.
+
+- If Sync Media is also On, associated media files are replaced as well.
+
+- Two scenarios:
+
+- [ ] Block/Page exists → Content is updated with the remote host’s version.
+
+- [ ] Block/Page does not exist → A new block/page is created using the remote host’s data.
+
+**Disabled**
+
+- Existing CMS blocks/pages on the target site are skipped during syncing.
+
+- Any CMS block/page that does not exist on the target site is created using the remote host’s data.
 
 # Screenshot:
 
-In listing page:
+
+1. In listing page:
 ![](https://i.imgur.com/G3tuKMv.png)
 
-In edit page:
+
+1. In each page:
 ![](https://i.imgur.com/dI29nze.png)
 
 <i>Note: The cms page management is the same as the block ui listing page</i>
