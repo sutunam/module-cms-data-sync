@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * @author    Sutunam
+ * @copyright Copyright (c) 2025 Sutunam (http://www.sutunam.com/)
+ */
+-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="buttons" xsi:type="array">
+            <item name="sync_cms_block_push" xsi:type="string">PushBlockButton</item>
+            <item name="sync_cms_block_pull" xsi:type="string">PullBlockButton</item>
+        </item>
+    </argument>
+</form>

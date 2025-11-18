@@ -19,14 +19,14 @@
     ],
     "autoload": {
         "psr-4": {
-            "Sutunam\\CmsDataSync\\": ""
+            "Sutunam\\CmsDataSync\\": "src"
         },
         "files": [
-            "registration.php"
+            "src/registration.php"
         ]
     },
     "type": "magento2-module",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "repositories": {
         "magento": {
             "type": "composer",

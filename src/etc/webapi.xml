@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author    Sutunam
+ * @copyright Copyright (c) 2025 Sutunam (http://www.sutunam.com/)
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <!-- Cms Page -->
+    <route url="/V1/sync/cmsPage/:pageId" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Magento_Cms::page"/>
+        </resources>
+    </route>
+    <route url="/V1/sync/cmsPage/identifier/:identifier" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="getByIdentifier"/>
+        <resources>
+            <resource ref="Magento_Cms::page"/>
+        </resources>
+        <data>
+            <parameter name="storeIds" />
+        </data>
+    </route>
+    <route url="/V1/sync/cmsPage" method="POST">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Cms::save"/>
+        </resources>
+    </route>
+    <route url="/V1/sync/cmsPage/:id" method="PUT">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Cms::save"/>
+        </resources>
+    </route>
+    <route url="/V1/sync/cmsPage/search" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\PageRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Magento_Cms::page"/>
+        </resources>
+    </route>
+    <!-- Cms Block -->
+    <route url="/V1/sync/cmsBlock/:blockId" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/sync/cmsBlock/identifier/:identifier" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="getByIdentifier"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+        <data>
+            <parameter name="storeIds" />
+        </data>
+    </route>
+    <route url="/V1/sync/cmsBlock" method="POST">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Cms::save"/>
+        </resources>
+    </route>
+    <route url="/V1/sync/cmsBlock/:id" method="PUT">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Cms::save"/>
+        </resources>
+    </route>
+    <route url="/V1/sync/cmsBlock/search" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\BlockRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <!-- Cms Widget -->
+    <route url="/V1/sync/cmsWidget" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="getAll"/>
+        <resources>
+            <resource ref="Magento_Widget::widget_instance"/>
+        </resources>
+    </route>
+    <route url="/V1/sync/cmsWidget/identifier/:identifier" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="getByIdentifier"/>
+        <resources>
+            <resource ref="Magento_Widget::widget_instance"/>
+        </resources>
+        <data>
+            <parameter name="storeIds" />
+        </data>
+    </route>
+    <route url="/V1/sync/cmsWidget" method="POST">
+        <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Widget::widget_instance"/>
+        </resources>
+    </route>
+    <route url="/V1/sync/cmsWidget/:id" method="PUT">
+        <service class="Sutunam\CmsDataSync\Api\WidgetRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magento_Widget::widget_instance"/>
+        </resources>
+    </route>
+    <!-- Get Cms Data Sync Config of target host -->
+    <route url="/V1/sync/configs" method="GET">
+        <service class="Sutunam\CmsDataSync\Api\ConfigsRepositoryInterface" method="getSyncCmsConfigs"/>
+        <resources>
+            <resource ref="Magento_Config::config"/>
+        </resources>
+    </route>
+</routes>
