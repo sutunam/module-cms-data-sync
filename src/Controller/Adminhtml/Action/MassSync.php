@@ -94,6 +94,7 @@ class MassSync extends Action implements HttpPostActionInterface
         } else {
             $this->messageManager->addErrorMessage(__("Some error occurred. Please try again"));
         }
+        /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         $resultRedirect->setUrl($this->_redirect->getRefererUrl());
         return $resultRedirect;

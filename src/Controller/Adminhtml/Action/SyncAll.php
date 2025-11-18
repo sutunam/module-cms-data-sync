@@ -45,6 +45,7 @@ class SyncAll extends Action implements HttpGetActionInterface
     {
         $type = $this->getRequest()->getParam('type');
         $action = $this->getRequest()->getParam('action');
+        /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
         if (!$type || !$action) {

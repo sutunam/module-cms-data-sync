@@ -6,9 +6,7 @@
 
 namespace Sutunam\CmsDataSync\Block\Adminhtml\System\Config;
 
-use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field;
-use Magento\Framework\View\Helper\SecureHtmlRenderer;
 
 class TestConnection extends Field
 {
@@ -37,7 +35,7 @@ class TestConnection extends Field
      */
     public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
-        $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue();
+        $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue(); // @phpstan-ignore-line
         return parent::render($element);
     }
 
@@ -49,7 +47,7 @@ class TestConnection extends Field
      */
     protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
-        $originalData = $element->getOriginalData();
+        $originalData = $element->getOriginalData(); // @phpstan-ignore-line
         $this->addData(
             [
                 'button_label' => __($originalData['button_label']),

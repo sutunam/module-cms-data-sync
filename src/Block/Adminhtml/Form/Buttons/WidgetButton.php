@@ -87,7 +87,7 @@ class WidgetButton extends Container
             [
                 "type" => $this->params['type'],
                 "action" => $this->params['action'],
-                "id" => $this->templateContext->getRequest()->getParam('instance_id')
+                "id" => $this->getRequest()->getParam('instance_id')
             ]
         );
     }
