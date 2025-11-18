@@ -132,3 +132,5 @@ Simply click the desired sync option, and the CMS data will be transferred autom
         Encrypt password in database
     1.0.5
         Update README.md
+    1.0.6
+        Improve coding, fix phpcs issues

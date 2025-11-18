@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author    Sutunam
+ * @copyright Copyright (c) 2025 Sutunam https://www.sutunam.com/
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="adminhtml_widget_instance_block"/>
+    <body>
+        <referenceContainer name="content">
+            <referenceBlock name="adminhtml.widget.instance.grid.container"
+                            class="Sutunam\CmsDataSync\Block\Adminhtml\Widget\Instance"/>
+        </referenceContainer>
+    </body>
+</page>

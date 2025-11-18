@@ -41,6 +41,14 @@ phpcs-php8.2:
   image: registry.sutunam.com/sutunam/ci/php_ci:8.2
   extends: .phpcs
 
+phpcs-php8.3:
+  image: registry.sutunam.com/sutunam/ci/php_ci:8.3
+  extends: .phpcs
+
+phpcs-php8.4:
+  image: registry.sutunam.com/sutunam/ci/php_ci:8.4
+  extends: .phpcs
+
 ### PHPSTAN
 phpstan-php8.1:
   image: registry.sutunam.com/sutunam/ci/php_ci:8.1
@@ -48,4 +56,12 @@ phpstan-php8.1:
 
 phpstan-php8.2:
   image: registry.sutunam.com/sutunam/ci/php_ci:8.2
+  extends: .phpstan
+
+phpstan-php8.3:
+  image: registry.sutunam.com/sutunam/ci/php_ci:8.3
+  extends: .phpstan
+
+phpstan-php8.4:
+  image: registry.sutunam.com/sutunam/ci/php_ci:8.4
   extends: .phpstan

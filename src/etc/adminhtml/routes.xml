@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author    Sutunam
+ * @copyright Copyright (c) 2025 Sutunam (http://www.sutunam.com/)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="cms_data_sync" frontName="cms_data_sync">
+            <module name="Sutunam_CmsDataSync" before="Magento_Backend" />
+        </route>
+    </router>
+</config>
