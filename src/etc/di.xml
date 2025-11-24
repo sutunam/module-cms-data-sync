@@ -32,9 +32,6 @@
 
     <type name="Sutunam\CmsDataSync\Model\BlockRepository">
         <arguments>
-            <argument name="hydrator" xsi:type="object">
-                Magento\Framework\EntityManager\AbstractModelHydrator
-            </argument>
             <argument name="collectionProcessor" xsi:type="object">
                 Magento\Cms\Model\Api\SearchCriteria\BlockCollectionProcessor
             </argument>
@@ -43,9 +40,6 @@
 
     <type name="Sutunam\CmsDataSync\Model\PageRepository">
         <arguments>
-            <argument name="hydrator" xsi:type="object">
-                Magento\Framework\EntityManager\AbstractModelHydrator
-            </argument>
             <argument name="collectionProcessor" xsi:type="object">
                 Magento\Cms\Model\Api\SearchCriteria\PageCollectionProcessor
             </argument>
@@ -75,17 +69,21 @@
     </type>
 
     <!-- Log Api request -->
-    <type name="Sutunam\CmsDataSync\Logger\Logger">
+    <virtualType name="CmsSyncDebugLog" type="Magento\Framework\Logger\Handler\Base">
         <arguments>
-            <argument name="name" xsi:type="string">""</argument>
+            <argument name="fileName" xsi:type="string">/var/log/cms-sync.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="CmsSyncCustomLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
             <argument name="handlers" xsi:type="array">
-                <item name="log" xsi:type="object">Sutunam\CmsDataSync\Logger\Handler</item>
+                <item name="debug" xsi:type="object">CmsSyncDebugLog</item>
             </argument>
         </arguments>
-    </type>
-    <type name="Sutunam\CmsDataSync\Logger\Handler">
+    </virtualType>
+    <type name="Sutunam\CmsDataSync\Helper\Data">
         <arguments>
-            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+            <argument name="logger" xsi:type="object">CmsSyncCustomLogger</argument>
         </arguments>
     </type>
 </config>

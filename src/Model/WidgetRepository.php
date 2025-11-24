@@ -10,6 +10,7 @@ use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\EntityManager\HydratorInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Widget\Model\Widget\Instance;
@@ -112,6 +113,7 @@ class WidgetRepository implements WidgetRepositoryInterface
      * Get all widget
      *
      * @return \Sutunam\CmsDataSync\Api\Data\WidgetInstanceSearchResultsInterface
+     * @throws NoSuchEntityException
      */
     public function getAll()
     {
@@ -159,21 +161,23 @@ class WidgetRepository implements WidgetRepositoryInterface
      * Save widget data
      *
      * @param WidgetInstanceInterface $widgetInstance
-     * @return object|WidgetInstanceInterface
+     * @return Instance
      * @throws CouldNotSaveException
      * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
     public function save(WidgetInstanceInterface $widgetInstance)
     {
+        /** @var WidgetInstance $widgetInstance */
         if ($widgetInstance->getId() && !$this->configHelper->isOverwrite()) {
             throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
         }
 
+        /** @var WidgetInstance $instance */
         $instance = $this->instance->create();
 
         if ($widgetInstance->getId()) {
-            /** @phpstan-ignore-next-line */
-            $instance->load($widgetInstance->getId());
+            $instance->load($widgetInstance->getId()); /** @phpstan-ignore-line */
         }
 
         if ($widgetInstance->getCode() && !$this->dataHelper->getThemeIdByCode($widgetInstance->getThemeCode())) {
@@ -186,15 +190,14 @@ class WidgetRepository implements WidgetRepositoryInterface
                 $instance->setThemeId($this->dataHelper->getThemeIdByCode($widgetInstance->getThemeCode()));
 
                 if (empty($widgetInstance->getStoreIds())) {
-                    $instance->setStoreIds(implode(',', $this->storeManager->getStore()->getId()));
+                    $instance->setStoreIds([$this->storeManager->getStore()->getId()]);
                 }
 
                 if (!empty($widgetInstance->getPageGroups())) {
                     $pageGroupsArr = $this->dataHelper->formatPageGroupsToSave($widgetInstance->getPageGroups());
                     $instance->setPageGroups($pageGroupsArr);
                 }
-                /** @phpstan-ignore-next-line */
-                $instance->save();
+                $instance->save(); /** @phpstan-ignore-line */
 
                 if ($widgetInstance->getMedia() && $this->configHelper->isSyncMedia()) {
                     foreach ($widgetInstance->getMedia() as $media) {
@@ -218,9 +221,10 @@ class WidgetRepository implements WidgetRepositoryInterface
      */
     public function convertInstanceToDTO($instanceId)
     {
+        /** @var WidgetInstance $widgetDTO */
         $widgetDTO = $this->widgetInstanceInterface->create();
-        /** @phpstan-ignore-next-line */
-        $loadInstance = $this->instance->create()->load($instanceId);
+        /** @var WidgetInstance $loadInstance */
+        $loadInstance = $this->instance->create()->load($instanceId); /** @phpstan-ignore-line */
 
         $this->dataObjectHelper->populateWithArray(
             $widgetDTO,

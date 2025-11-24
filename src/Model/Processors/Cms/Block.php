@@ -17,8 +17,7 @@ use Sutunam\CmsDataSync\Helper\ApiHelper;
 use Sutunam\CmsDataSync\Helper\Data as DataHelper;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 use Laminas\Http\Request;
-use Sutunam\CmsDataSync\Logger\Logger;
-use Twilio\Rest\Api;
+use Psr\Log\LoggerInterface;
 
 class Block implements ProcessorInterface
 {
@@ -60,7 +59,7 @@ class Block implements ProcessorInterface
     protected $blockCollectionFactory;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
     /**
@@ -78,7 +77,7 @@ class Block implements ProcessorInterface
      * @param DataHelper $dataHelper
      * @param ConfigHelper $configHelper
      * @param BlockCollectionFactory $blockCollectionFactory
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(
         BlockRepository $blockRepository,
@@ -88,7 +87,7 @@ class Block implements ProcessorInterface
         DataHelper $dataHelper,
         ConfigHelper $configHelper,
         BlockCollectionFactory $blockCollectionFactory,
-        Logger $logger
+        LoggerInterface $logger
     ) {
         $this->blockFactory = $blockFactory;
         $this->blockRepository = $blockRepository;
@@ -103,9 +102,8 @@ class Block implements ProcessorInterface
     /**
      * Pull cms block from remote host by my id
      *
-     * @param int $id
+     * @param string $id
      * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function pull($id)
     {
@@ -182,7 +180,7 @@ class Block implements ProcessorInterface
             ));
             $block->setStoreId(array_map('intval', $blockStoreIds));
 
-            $block->setId($id);
+            $block->setId((int) $id);
             /** @phpstan-ignore-next-line */
             $block->save();
 
@@ -334,7 +332,7 @@ class Block implements ProcessorInterface
     /**
      * Push cms block to remote host by my id
      *
-     * @param int $id
+     * @param string $id
      * @return array
      * @throws \Exception
      */
@@ -498,7 +496,7 @@ class Block implements ProcessorInterface
      * Create Remote Block
      *
      * @param array $data
-     * @param int $id
+     * @param string $id
      * @param array $result
      * @return array
      * @throws \Exception
@@ -603,7 +601,7 @@ class Block implements ProcessorInterface
     /**
      * Get block by id
      *
-     * @param int $id
+     * @param string $id
      * @return false|\Magento\Cms\Model\Block
      */
     protected function getBlock($id)

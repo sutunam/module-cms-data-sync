@@ -10,11 +10,12 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\App\ResourceConnection;
 use Psr\Log\LoggerInterface;
+use Sutunam\CmsDataSync\Helper\Data;
 
 class InitIdentifierForExistedCMS implements DataPatchInterface
 {
     /**
-     * @var \Sutunam\CmsDataSync\Helper\Data
+     * @var Data
      */
     protected $dataHelper;
 
@@ -34,13 +35,13 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
     protected $logger;
 
     /**
-     * @param \Sutunam\CmsDataSync\Helper\Data $dataHelper
+     * @param Data $dataHelper
      * @param ResourceConnection $resourceConnection
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param LoggerInterface $logger
      */
     public function __construct(
-        \Sutunam\CmsDataSync\Helper\Data $dataHelper,
+        Data $dataHelper,
         ResourceConnection $resourceConnection,
         ModuleDataSetupInterface $moduleDataSetup,
         LoggerInterface $logger
@@ -52,9 +53,7 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
     }
 
     /**
-     * Set identifier to rthe widget empty identifier
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function apply()
     {
@@ -72,7 +71,7 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
 
             if (empty($widgets)) {
                 $this->logger->critical('No widget instances need updating.');
-                return;
+                return $this;
             }
             $updateData = [];
             foreach ($widgets as $widget) {
@@ -92,6 +91,7 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
             $this->logger->critical('Error updating widget identifiers: ' . $e->getMessage());
         }
         $this->moduleDataSetup->getConnection()->endSetup();
+        return $this;
     }
 
     /**

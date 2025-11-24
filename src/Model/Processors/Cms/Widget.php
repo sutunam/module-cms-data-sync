@@ -10,6 +10,7 @@ use Laminas\Http\Request;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory;
+use Magento\Widget\Model\Widget\Instance;
 use Magento\Widget\Model\Widget\InstanceFactory;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
@@ -19,7 +20,8 @@ use Sutunam\CmsDataSync\Helper\ApiConnection;
 use Sutunam\CmsDataSync\Helper\ApiHelper;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 use Sutunam\CmsDataSync\Helper\Data as DataHelper;
-use Sutunam\CmsDataSync\Logger\Logger;
+use Sutunam\CmsDataSync\Model\WidgetInstance;
+use Psr\Log\LoggerInterface;
 
 class Widget implements ProcessorInterface
 {
@@ -67,7 +69,7 @@ class Widget implements ProcessorInterface
     protected $storeManager;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -82,7 +84,7 @@ class Widget implements ProcessorInterface
      * @param ConfigHelper $configHelper
      * @param CollectionFactory $instanceCollectionFactory
      * @param StoreManagerInterface $storeManager
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(
         WidgetRepositoryInterface $widgetRepository,
@@ -93,7 +95,7 @@ class Widget implements ProcessorInterface
         ConfigHelper $configHelper,
         CollectionFactory $instanceCollectionFactory,
         StoreManagerInterface $storeManager,
-        Logger $logger
+        LoggerInterface $logger
     ) {
         $this->instanceFactory = $instanceFactory;
         $this->widgetRepository = $widgetRepository;
@@ -109,7 +111,7 @@ class Widget implements ProcessorInterface
     /**
      * Pull cms widget instance from remote host by my id
      *
-     * @param int $id
+     * @param string $id
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
@@ -121,9 +123,10 @@ class Widget implements ProcessorInterface
             'error_message' => ''
         ];
 
+        /** @var WidgetInstance $widgetInstance */
         $widgetInstance = $this->getWigetInstance($id);
         if (!$widgetInstance) {
-            $result['notice_message'] = __('Couldn\'t load CMS widget content.');
+            $result['notice_message'] = __('Could\'t load CMS widget content.');
         }
 
         $widgetInstanceStoreIds = $widgetInstance->getStoreIds();
@@ -196,13 +199,12 @@ class Widget implements ProcessorInterface
             );
             $widgetInstance->setData($data);
             $widgetInstance->setThemeId($myThemeId);
-            $widgetInstance->setStoreIds(implode(',', $widgetInstanceStoreIds));
+            $widgetInstance->setStoreIds($widgetInstanceStoreIds);
             $widgetInstance->setPageGroups(
                 $this->dataHelper->formatPageGroupsToSave($remoteWidgetInstance[WidgetInstanceInterface::PAGE_GROUPS])
             );
-
             $widgetInstance->setId($id);
-            $widgetInstance->save();
+            $widgetInstance->save(); /** @phpstan-ignore-line */
             if ($this->configHelper->isSyncMedia()) {
                 $this->dataHelper->saveAllImageFromCmsContent(
                     json_encode($widgetInstance->getWidgetParameters()),
@@ -367,7 +369,7 @@ class Widget implements ProcessorInterface
     /**
      * Push cms widget to remote host by my id
      *
-     * @param int $id
+     * @param string $id
      * @return array
      * @throws \Exception
      */
@@ -642,7 +644,7 @@ class Widget implements ProcessorInterface
      * Get Widget Instance by ID
      *
      * @param int|string $id
-     * @return false|\Magento\Widget\Model\Widget\Instance
+     * @return false|Instance
      */
     protected function getWigetInstance($id)
     {

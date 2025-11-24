@@ -11,7 +11,7 @@ interface ProcessorInterface
     /**
      * Pull entity.
      *
-     * @param int $id
+     * @param string $id
      * @return array
      */
     public function pull($id);
@@ -26,7 +26,7 @@ interface ProcessorInterface
     /**
      * Push entity.
      *
-     * @param int $id
+     * @param string $id
      * @return array
      */
     public function push($id);

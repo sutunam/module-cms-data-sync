@@ -24,7 +24,7 @@ use Sutunam\CmsDataSync\Api\Data\BlockInterface as SutunamBlockInterface;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstanceInterface;
 use Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
-use Sutunam\CmsDataSync\Logger\Logger;
+use Psr\Log\LoggerInterface;
 
 class Data
 {
@@ -97,7 +97,7 @@ class Data
     protected $themeResource;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -115,7 +115,7 @@ class Data
      * @param \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory
      * @param ThemeFactory $theme
      * @param Theme $themeResource
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(
         ApiHelper $apiHelper,
@@ -129,7 +129,7 @@ class Data
         \Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory $instanceCollectionFactory,
         ThemeFactory $theme,
         Theme $themeResource,
-        Logger $logger
+        LoggerInterface $logger
     ) {
         $this->apiHelper = $apiHelper;
         $this->storeManager = $storeManager;

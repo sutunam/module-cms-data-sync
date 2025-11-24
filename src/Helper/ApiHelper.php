@@ -8,9 +8,8 @@ namespace Sutunam\CmsDataSync\Helper;
 
 use Laminas\Http\Request;
 use Magento\Framework\App\Request\DataPersistor;
-use Sutunam\CmsDataSync\Helper\ApiConnection;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
-use Sutunam\CmsDataSync\Logger\Logger;
+use Psr\Log\LoggerInterface;
 
 class ApiHelper
 {
@@ -46,7 +45,7 @@ class ApiHelper
     protected $dataPersistor;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -61,13 +60,13 @@ class ApiHelper
      * @param \Sutunam\CmsDataSync\Helper\ApiConnection $api
      * @param Config $configHelper
      * @param DataPersistor $dataPersistor
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(
         ApiConnection $api,
         ConfigHelper  $configHelper,
         DataPersistor $dataPersistor,
-        Logger $logger
+        LoggerInterface $logger
     ) {
         $this->api = $api;
         $this->configHelper = $configHelper;

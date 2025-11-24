@@ -19,7 +19,7 @@ use Sutunam\CmsDataSync\Helper\ApiHelper;
 use Sutunam\CmsDataSync\Helper\Data as DataHelper;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
 use Laminas\Http\Request;
-use Sutunam\CmsDataSync\Logger\Logger;
+use Psr\Log\LoggerInterface;
 
 class Page implements ProcessorInterface
 {
@@ -67,7 +67,7 @@ class Page implements ProcessorInterface
     protected $storeManager;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -82,7 +82,7 @@ class Page implements ProcessorInterface
      * @param ConfigHelper $configHelper
      * @param PageCollectionFactory $pageCollectionFactory
      * @param StoreManagerInterface $storeManager
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(
         PageRepository $pageRepository,
@@ -93,7 +93,7 @@ class Page implements ProcessorInterface
         ConfigHelper $configHelper,
         PageCollectionFactory $pageCollectionFactory,
         StoreManagerInterface $storeManager,
-        Logger $logger
+        LoggerInterface $logger
     ) {
         $this->pageFactory = $pageFactory;
         $this->pageRepository = $pageRepository;
@@ -109,9 +109,8 @@ class Page implements ProcessorInterface
     /**
      * Pull CMS page from remote host by ID
      *
-     * @param int $id
+     * @param string $id
      * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function pull($id)
     {
@@ -162,7 +161,7 @@ class Page implements ProcessorInterface
                 ApiHelper::REQUEST_SYNC_TYPE_PULL
             ));
             $page->setStoreId(array_map('intval', $pageStoreIds));
-            $page->setId($id);
+            $page->setId((int) $id);
             /** @phpstan-ignore-next-line */
             $page->save();
 
@@ -186,10 +185,10 @@ class Page implements ProcessorInterface
      * @param \Magento\Cms\Model\Page $page
      * @param array $remotePage
      * @param array $remoteStoreIds
-     * @param int $id
+     * @param string $id
      * @return array
      */
-    private function updateStoreIdsForOverwrite($page, array $remotePage, array $remoteStoreIds, int $id)
+    private function updateStoreIdsForOverwrite($page, $remotePage, $remoteStoreIds, $id)
     {
         $storeCodesOfRemotePage = $remotePage[SutunamPageInterface::STORE_CODE] ?? [];
         $mappingStoreIdByCodesOfRemotePage = $this->dataHelper->getMyMappedStoreIdsListByRemoteStoreCodes(
@@ -361,7 +360,7 @@ class Page implements ProcessorInterface
     /**
      * Push CMS page to remote host by my ID
      *
-     * @param int $id
+     * @param string $id
      * @return array
      * @throws \Exception
      */
@@ -536,11 +535,11 @@ class Page implements ProcessorInterface
      *
      * @param array $data
      * @param array $remoteStoreIds
-     * @param string|int $id
+     * @param string|null $id
      * @return array
      * @throws \Exception
      */
-    private function createRemotePage($data, $remoteStoreIds, ?int $id)
+    private function createRemotePage($data, $remoteStoreIds, $id)
     {
         $data[$this::PAGE][SutunamPageInterface::STORE_ID] = $remoteStoreIds;
         $response = $this->apiConnection->request(
@@ -638,7 +637,7 @@ class Page implements ProcessorInterface
     /**
      * Get page by id
      *
-     * @param int $id
+     * @param string $id
      * @return false|\Magento\Cms\Model\Page
      */
     protected function getPage($id)

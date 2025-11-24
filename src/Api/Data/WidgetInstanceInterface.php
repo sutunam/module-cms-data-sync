@@ -6,8 +6,6 @@
 
 namespace Sutunam\CmsDataSync\Api\Data;
 
-use \Sutunam\CmsDataSync\Api\Data\WidgetInstancePageInterface;
-
 interface WidgetInstanceInterface
 {
     public const ID = 'id';
@@ -139,7 +137,7 @@ interface WidgetInstanceInterface
     /**
      * Set theme id
      *
-     * @param int $themeId
+     * @param string $themeId
      * @return WidgetInstanceInterface
      */
     public function setThemeId($themeId);

@@ -7,6 +7,7 @@
 namespace Sutunam\CmsDataSync\Block\Adminhtml\System\Config;
 
 use Magento\Config\Block\System\Config\Form\Field;
+use Magento\Framework\Data\Form\Element\AbstractElement;
 
 class TestConnection extends Field
 {
@@ -30,24 +31,24 @@ class TestConnection extends Field
     /**
      * Unset some non-related element parameters
      *
-     * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
+     * @param AbstractElement $element
      * @return string
      */
-    public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element)
+    public function render(AbstractElement $element)
     {
-        $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue(); // @phpstan-ignore-line
+        $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue();
         return parent::render($element);
     }
 
     /**
      * Get the button and scripts contents
      *
-     * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
+     * @param AbstractElement $element
      * @return string
      */
-    protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
+    protected function _getElementHtml(AbstractElement $element)
     {
-        $originalData = $element->getOriginalData(); // @phpstan-ignore-line
+        $originalData = $element->getOriginalData();
         $this->addData(
             [
                 'button_label' => __($originalData['button_label']),

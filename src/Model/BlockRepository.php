@@ -7,13 +7,8 @@
 namespace Sutunam\CmsDataSync\Model;
 
 use Magento\Cms\Api\Data\BlockInterface;
-use Magento\Cms\Model\Block;
 use Magento\Cms\Model\ResourceModel\Block as ResourceBlock;
 use Magento\Framework\Api\DataObjectHelper;
-use Magento\Framework\Api\FilterFactory;
-use Magento\Framework\Api\Search\FilterGroup;
-use Magento\Cms\Model\BlockFactory;
-use Magento\Framework\EntityManager\HydratorInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Store\Model\StoreManagerInterface;
 use Sutunam\CmsDataSync\Api\Data\BlockSearchResultsInterface;
@@ -65,21 +60,6 @@ class BlockRepository implements SutunamBlockRepositoryInterface
     private $sutunamBlockInterface;
 
     /**
-     * @var SearchCriteriaInterface
-     */
-    private $searchCriteria;
-
-    /**
-     * @var FilterFactory
-     */
-    private $filterFactory;
-
-    /**
-     * @var FilterGroup
-     */
-    private $filterGroup;
-
-    /**
      * @var DataObjectHelper
      */
     private $dataObjectHelper;
@@ -95,9 +75,9 @@ class BlockRepository implements SutunamBlockRepositoryInterface
     private $resource;
 
     /**
-     * @var HydratorInterface
+     * @var BlockFactory
      */
-    private $hydrator;
+    private $blockFactory;
 
     /**
      * @param BlockCollectionFactory $blockCollectionFactory
@@ -105,14 +85,11 @@ class BlockRepository implements SutunamBlockRepositoryInterface
      * @param SutunamDataHelper $sutunamDataHelper
      * @param SutunamConfigHelper $sutunamConfigHelper
      * @param SutunamBlockInterfaceFactory $sutunamBlockInterface
-     * @param SearchCriteriaInterface $searchCriteria
-     * @param FilterFactory $filterFactory
-     * @param FilterGroup $filterGroup
      * @param DataObjectHelper $dataObjectHelper
      * @param StoreManagerInterface $storeManager
      * @param ResourceBlock $resource
      * @param CollectionProcessorInterface $collectionProcessor
-     * @param HydratorInterface $hydrator
+     * @param BlockFactory $blockFactory
      */
     public function __construct(
         BlockCollectionFactory $blockCollectionFactory,
@@ -120,28 +97,22 @@ class BlockRepository implements SutunamBlockRepositoryInterface
         SutunamDataHelper $sutunamDataHelper,
         SutunamConfigHelper $sutunamConfigHelper,
         SutunamBlockInterfaceFactory $sutunamBlockInterface,
-        SearchCriteriaInterface $searchCriteria,
-        FilterFactory $filterFactory,
-        FilterGroup $filterGroup,
         DataObjectHelper $dataObjectHelper,
         StoreManagerInterface $storeManager,
         ResourceBlock $resource,
         CollectionProcessorInterface $collectionProcessor,
-        HydratorInterface $hydrator
+        BlockFactory $blockFactory
     ) {
         $this->blockCollectionFactory = $blockCollectionFactory;
         $this->sutunamSearchResultsFactory = $sutunamSearchResultsFactory;
         $this->sutunamDataHelper = $sutunamDataHelper;
         $this->sutunamConfigHelper = $sutunamConfigHelper;
         $this->sutunamBlockInterface = $sutunamBlockInterface;
-        $this->searchCriteria = $searchCriteria;
-        $this->filterFactory = $filterFactory;
-        $this->filterGroup = $filterGroup;
         $this->dataObjectHelper = $dataObjectHelper;
         $this->resource = $resource;
         $this->storeManager = $storeManager;
         $this->collectionProcessor = $collectionProcessor;
-        $this->hydrator = $hydrator;
+        $this->blockFactory = $blockFactory;
     }
 
     /**
@@ -153,8 +124,8 @@ class BlockRepository implements SutunamBlockRepositoryInterface
      */
     public function getById($blockId)
     {
-        $block = $this->sutunamBlockInterface->create();
-        $block->load($blockId);
+        $block = $this->blockFactory->create();
+        $this->resource->load($block, $blockId);
 
         if (!$block->getId()) {
             throw new NoSuchEntityException(__('The CMS block with the "%1" ID doesn\'t exist.', $blockId));
@@ -179,6 +150,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
 
         $items = [];
         foreach ($searchedCollection->getItems() as $block) {
+            /** @var Block $blockDto */
             $blockDto = $this->sutunamBlockInterface->create();
             $this->dataObjectHelper->populateWithArray(
                 $blockDto,
@@ -214,6 +186,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
 
         $items = [];
         foreach ($collection->getItems() as $block) {
+            /** @var Block $blockDto */
             $blockDto = $this->sutunamBlockInterface->create();
             $this->dataObjectHelper->populateWithArray(
                 $blockDto,
@@ -243,6 +216,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
      */
     public function save(SutunamBlockInterface $block)
     {
+        /** @var Block $block */
         if ($block->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
             throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
         }

@@ -13,7 +13,7 @@ use Magento\Framework\App\Request\DataPersistor;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\UrlInterface;
 use Sutunam\CmsDataSync\Helper\Config as ConfigHelper;
-use Sutunam\CmsDataSync\Logger\Logger;
+use Psr\Log\LoggerInterface;
 
 class ApiConnection
 {
@@ -46,7 +46,7 @@ class ApiConnection
     protected $dataPersistor;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -57,14 +57,14 @@ class ApiConnection
      * @param ManagerInterface $messageManager
      * @param UrlInterface $url
      * @param DataPersistor $dataPersistor
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(
         ConfigHelper $configHelper,
         ManagerInterface $messageManager,
         UrlInterface $url,
         DataPersistor $dataPersistor,
-        Logger $logger
+        LoggerInterface $logger
     ) {
         $this->configHelper = $configHelper;
         $this->messageManager = $messageManager;

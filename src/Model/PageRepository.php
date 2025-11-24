@@ -11,20 +11,20 @@ use Magento\Cms\Model\ResourceModel\Page as ResourcePage;
 use Magento\Cms\Model\ResourceModel\Page\CollectionFactory as PageCollectionFactory;
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\Api\FilterFactory;
-use Magento\Framework\Api\Search\FilterGroup;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\App\ObjectManager;
-use Magento\Framework\EntityManager\HydratorInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
+use Sutunam\CmsDataSync\Api\Data\PageSearchResultsInterface;
 use Sutunam\CmsDataSync\Api\PageRepositoryInterface as SutunamPageRepositoryInterface;
 use Sutunam\CmsDataSync\Api\Data\PageInterface as SutunamPageInterface;
 use Sutunam\CmsDataSync\Api\Data\PageInterfaceFactory as SutunamPageInterfaceFactory;
 use Sutunam\CmsDataSync\Api\Data\PageSearchResultsInterfaceFactory as SutunamPageSearchResultsInterfaceFactory;
 use Sutunam\CmsDataSync\Helper\Config as SutunamConfigHelper;
 use Sutunam\CmsDataSync\Helper\Data as SutunamDataHelper;
+use Magento\Cms\Model\Api\SearchCriteria\PageCollectionProcessor;
 
 /**
  * Default page repo impl.
@@ -63,21 +63,6 @@ class PageRepository implements SutunamPageRepositoryInterface
     private $sutunamPageInterface;
 
     /**
-     * @var SearchCriteriaInterface
-     */
-    private $searchCriteria;
-
-    /**
-     * @var FilterFactory
-     */
-    private $filterFactory;
-
-    /**
-     * @var FilterGroup
-     */
-    private $filterGroup;
-
-    /**
      * @var DataObjectHelper
      */
     private $dataObjectHelper;
@@ -93,9 +78,9 @@ class PageRepository implements SutunamPageRepositoryInterface
     private $resource;
 
     /**
-     * @var HydratorInterface|mixed
+     * @var PageFactory
      */
-    private $hydrator;
+    private $pageFactory;
 
     /**
      * @param PageCollectionFactory $pageCollectionFactory
@@ -103,14 +88,11 @@ class PageRepository implements SutunamPageRepositoryInterface
      * @param SutunamDataHelper $sutunamDataHelper
      * @param SutunamConfigHelper $sutunamConfigHelper
      * @param SutunamPageInterfaceFactory $sutunamPageInterface
-     * @param SearchCriteriaInterface $searchCriteria
-     * @param FilterFactory $filterFactory
-     * @param FilterGroup $filterGroup
      * @param DataObjectHelper $dataObjectHelper
      * @param StoreManagerInterface $storeManager
      * @param ResourcePage $resource
      * @param CollectionProcessorInterface|null $collectionProcessor
-     * @param HydratorInterface|null $hydrator
+     * @param PageFactory $pageFactory
      */
     public function __construct(
         PageCollectionFactory                    $pageCollectionFactory,
@@ -118,28 +100,22 @@ class PageRepository implements SutunamPageRepositoryInterface
         SutunamDataHelper                        $sutunamDataHelper,
         SutunamConfigHelper                      $sutunamConfigHelper,
         SutunamPageInterfaceFactory              $sutunamPageInterface,
-        SearchCriteriaInterface                  $searchCriteria,
-        FilterFactory                            $filterFactory,
-        FilterGroup                              $filterGroup,
         DataObjectHelper                         $dataObjectHelper,
         StoreManagerInterface                    $storeManager,
         ResourcePage                             $resource,
+        PageFactory                              $pageFactory,
         ?CollectionProcessorInterface            $collectionProcessor = null,
-        ?HydratorInterface                       $hydrator = null
     ) {
         $this->pageCollectionFactory = $pageCollectionFactory;
         $this->sutunamSearchResultsFactory = $sutunamSearchResultsFactory;
         $this->sutunamDataHelper = $sutunamDataHelper;
         $this->sutunamConfigHelper = $sutunamConfigHelper;
         $this->sutunamPageInterface = $sutunamPageInterface;
-        $this->searchCriteria = $searchCriteria;
-        $this->filterFactory = $filterFactory;
-        $this->filterGroup = $filterGroup;
         $this->dataObjectHelper = $dataObjectHelper;
         $this->resource = $resource;
         $this->storeManager = $storeManager;
+        $this->pageFactory = $pageFactory;
         $this->collectionProcessor = $collectionProcessor ?: $this->getCollectionProcessor();
-        $this->hydrator = $hydrator ?? ObjectManager::getInstance()->get(HydratorInterface::class);
     }
 
     /**
@@ -147,12 +123,12 @@ class PageRepository implements SutunamPageRepositoryInterface
      *
      * @param string $pageId
      * @return Page
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function getById($pageId)
     {
-        $page = $this->sutunamPageInterface->create();
-        $page->load($pageId);
+        $page = $this->pageFactory->create();
+        $page->load((int) $pageId); /** @phpstan-ignore-line */
         $page->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($page->getStores()));
 
         if (!$page->getId()) {
@@ -166,7 +142,7 @@ class PageRepository implements SutunamPageRepositoryInterface
      *
      * @param string $pageIdentifier
      * @param string $storeIds
-     * @return \Sutunam\CmsDataSync\Api\Data\PageSearchResultsInterface
+     * @return PageSearchResultsInterface
      */
     public function getByIdentifier($pageIdentifier, $storeIds)
     {
@@ -175,17 +151,18 @@ class PageRepository implements SutunamPageRepositoryInterface
             ->setPageSize(1);
 
         $items = [];
-        foreach ($searchedCollection->getItems() as $block) {
-            $blockDto = $this->sutunamPageInterface->create();
+        foreach ($searchedCollection->getItems() as $page) {
+            /** @var Page $pageDto */
+            $pageDto = $this->sutunamPageInterface->create();
             $this->dataObjectHelper->populateWithArray(
-                $blockDto,
-                $block->getData(),
+                $pageDto,
+                $page->getData(),
                 SutunamPageInterface::class
             );
-            $blockDto->setData($block->getData());
-            $blockDto->setId($block->getId());
-            $blockDto->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($block->getStores()));
-            $items[] = $blockDto;
+            $pageDto->setData($page->getData());
+            $pageDto->setId($page->getId());
+            $pageDto->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($page->getStores()));
+            $items[] = $pageDto;
         }
 
         $searchResults = $this->sutunamSearchResultsFactory->create();
@@ -201,7 +178,7 @@ class PageRepository implements SutunamPageRepositoryInterface
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @param SearchCriteriaInterface $criteria
-     * @return \Sutunam\CmsDataSync\Api\Data\PageSearchResultsInterface
+     * @return PageSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $criteria)
     {
@@ -236,11 +213,9 @@ class PageRepository implements SutunamPageRepositoryInterface
      */
     private function getCollectionProcessor()
     {
-        //phpcs:disable Magento2.PHP.LiteralNamespaces
         if (!$this->collectionProcessor) {
-            $this->collectionProcessor = \Magento\Framework\App\ObjectManager::getInstance()->get(
-                'Magento\Cms\Model\Api\SearchCriteria\PageCollectionProcessor'
-            );
+            // @phpstan-ignore-next-line
+            $this->collectionProcessor = ObjectManager::getInstance()->get(PageCollectionProcessor::class);
         }
         return $this->collectionProcessor;
     }
@@ -255,6 +230,7 @@ class PageRepository implements SutunamPageRepositoryInterface
      */
     public function save(SutunamPageInterface $page)
     {
+        /** @var Page $page */
         if ($page->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
             throw new CouldNotSaveException(__('The CMS page cannot be overwritten.'));
         }
