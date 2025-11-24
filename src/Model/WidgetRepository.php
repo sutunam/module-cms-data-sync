@@ -238,20 +238,7 @@ class WidgetRepository implements WidgetRepositoryInterface
         $widgetDTO->setThemeCode($this->dataHelper->getThemeCodeById(
             $loadInstance->getData(WidgetInstanceInterface::THEME_ID)
         ));
-
-        if ($loadInstance->getPageGroups()) {
-            $pageGroupsData = [];
-            foreach ($loadInstance->getPageGroups() as $pageGroup) {
-                $pageGroupData = $this->widgetInstancePageInterface->create();
-                $this->dataObjectHelper->populateWithArray(
-                    $pageGroupData,
-                    $pageGroup,
-                    WidgetInstancePageInterface::class
-                );
-                $pageGroupsData[] = $pageGroupData;
-            }
-            $widgetDTO->setPageGroups($pageGroupsData);
-        }
+        $widgetDTO->setPageGroups($loadInstance->getPageGroups());
 
         return $widgetDTO;
     }
