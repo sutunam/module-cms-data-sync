@@ -1,0 +1,37 @@
+Push All to %1,Push all to %1
+Pull All from %1,Pull all from %1
+Synced successfully,Synced successfully
+%1 item(s) have been successfully synced,%1 item(s) synced successfully
+Some error occurred. Please try again,An error occurred. Please try again
+Type/Action of request is required.,Request type/action is required
+Successfully created %1 item(s),%1 item(s) created successfully
+Successfully updated %1 item(s),%1 item(s) updated successfully
+%1 item(s) have been synced fauikliled,%1 item(s) failed to sync
+SyncCmsData is not enabled,SyncCmsData is not enabled
+The extension settings are not configured correctly.,Extension settings are incorrectly configured
+Can not generate the access token of remote host,Cannot generate access token for remote host
+Error: … Response: HTTP Error: %1 %2,Error: … Response: HTTP error %1: %2
+"The CMS block with the ""%1"" ID doesn't exist.",CMS block with ID “%1” does not exist
+The CMS block cannot be overwritten.,CMS block cannot be overwritten
+"The CMS page with the ""%1"" ID doesn't exist.",CMS page with ID “%1” does not exist
+The CMS page cannot be overwritten.,CMS page cannot be overwritten
+Couldn't load CMS block content.,Failed to load CMS block content
+The store scope of block is not match.,Block store scope does not match
+There is no remote block with identifier %1,No remote block found with identifier %1
+Update block identifier %1,Updating block identifier %1
+There is no remote block on the remote host %1,No remote block found on remote host %1
+Pull Block ID: %1 || Status: %2,Pull Block ID %1 – Status: %2
+Pull Block || Status: Create – %1,Pull Block – Status: Created %1
+Something went wrong when trying to get configs of remote host %1,Failed to retrieve configuration from remote host %1
+No remote store found by block id %1,No remote store found for block ID %1
+Update remote block for my block ID: %1 failed – Reason:%2,Failed to update remote block for block ID %1 – Reason: %2
+…was skipped – Reason: Overwrite disabled on the remote host %3,Skipped – overwrite disabled on remote host %3
+…on remote host %3 successfully,Updated successfully on remote host %3
+Created new remote block with ID: %1…,New remote block %1 created successfully
+Created new remote block…failed – Reason:%2,Failed to create remote block – Reason: %2
+Push Block ID: %1 || Status: %2,Push Block ID %1 – Status: %2
+Updated Successfully,Updated successfully
+Created Successfully,Created successfully
+Couldn't load CMS page content.,Failed to load CMS page content
+The store scope of page does not match.,Page store scope does not match
+No unique remote page found with identifier %1,No unique remote page found for identifier %1
