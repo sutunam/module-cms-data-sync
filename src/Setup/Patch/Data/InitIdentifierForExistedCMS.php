@@ -53,7 +53,7 @@ class InitIdentifierForExistedCMS implements DataPatchInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function apply()
     {
