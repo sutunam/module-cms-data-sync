@@ -18,28 +18,31 @@
             <group id="connection" type="text" sortOrder="0"
                    showInDefault="1" showInWebsite="0" showInStore="0" translate="label">
                 <label>Connection</label>
-                <field id="enabled" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
-                       showInStore="0">
+                <field id="enabled" type="select" sortOrder="10" translate="label"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                 </field>
-                <field id="site_name" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="site_name" type="text" translate="label comment"
+                       sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Website Name</label>
                     <validate>required-entry</validate>
-                    <comment>Live/Staging/Local ..etc</comment>
+                    <comment><![CDATA[Live/Staging/Local ..etc]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="site_url" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="site_url" type="text" sortOrder="30" translate="label comment"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Website URL</label>
-                    <comment>For Example: http://magento.com/ (slash at the end of URL is required)</comment>
+                    <comment><![CDATA[For Example: http://magento.com/ (slash at the end of URL is required)]]></comment>
                     <validate>validate-url required-entry</validate>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="username" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="username" type="text" sortOrder="40" translate="label comment"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Username</label>
                     <validate>required-entry</validate>
                     <comment>Enter Admin account of target website</comment>
@@ -47,7 +50,8 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="password" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="password" type="obscure" translate="label comment"
+                       sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Password</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <validate>required-entry</validate>
@@ -65,15 +69,16 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="sync_media" type="select" sortOrder="70" showInDefault="1" showInWebsite="1"
-                       showInStore="0">
+                <field id="sync_media" type="select" translate="label"
+                       sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Sync Media</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="media_type" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="media_type" type="text" sortOrder="80" translate="label comment"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Media Type</label>
                     <comment>Media type allowed to be synced(Separated by comma). E.g: jpg,png,jpeg </comment>
                     <depends>
@@ -81,7 +86,7 @@
                         <field id="sync_media">1</field>
                     </depends>
                 </field>
-                <field id="remote_media_subdir" type="text" sortOrder="100"
+                <field id="remote_media_subdir" type="text" sortOrder="100" translate="label comment"
                        showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Remote Media Sub Directory</label>
                     <comment>Sub folder store Media of target website inside Root Media Directory. E.g: media/</comment>
@@ -90,11 +95,11 @@
                         <field id="sync_media">1</field>
                     </depends>
                 </field>
-                <field id="is_overwrite" type="select" sortOrder="110" showInDefault="1" showInWebsite="1"
-                       showInStore="0">
+                <field id="is_overwrite" type="select" sortOrder="110" translate="label comment"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Is Overwrite</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
-                    <comment>The content will be overwrited when syncing if yes </comment>
+                    <comment>The content will be overwrited when syncing if yes</comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
