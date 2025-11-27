@@ -17,7 +17,7 @@
             <resource>Sutunam_CmsDataSync::config</resource>
             <group id="connection" type="text" sortOrder="0"
                    showInDefault="1" showInWebsite="0" showInStore="0" translate="label">
-                <label>Connection</label>
+                <label>Connection Setting</label>
                 <field id="enabled" type="select" sortOrder="10" translate="label"
                        showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Enable</label>
@@ -25,7 +25,7 @@
                 </field>
                 <field id="site_name" type="text" translate="label comment"
                        sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Website Name</label>
+                    <label>Website name</label>
                     <validate>required-entry</validate>
                     <comment><![CDATA[Live/Staging/Local ..etc]]></comment>
                     <depends>
@@ -45,7 +45,7 @@
                        showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Username</label>
                     <validate>required-entry</validate>
-                    <comment>Enter Admin account of target website</comment>
+                    <comment><![CDATA[Enter Admin account of target website]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -55,7 +55,7 @@
                     <label>Password</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <validate>required-entry</validate>
-                    <comment>Enter Admin password of target website</comment>
+                    <comment><![CDATA[Enter Admin password of target website]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -80,7 +80,7 @@
                 <field id="media_type" type="text" sortOrder="80" translate="label comment"
                        showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Media Type</label>
-                    <comment>Media type allowed to be synced(Separated by comma). E.g: jpg,png,jpeg </comment>
+                    <comment><![CDATA[Media type allowed to be synced(Separated by comma). E.g: jpg,png,jpeg]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                         <field id="sync_media">1</field>
@@ -89,7 +89,7 @@
                 <field id="remote_media_subdir" type="text" sortOrder="100" translate="label comment"
                        showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Remote Media Sub Directory</label>
-                    <comment>Sub folder store Media of target website inside Root Media Directory. E.g: media/</comment>
+                    <comment><![CDATA[Sub folder store Media of target website inside Root Media Directory. E.g: media/]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                         <field id="sync_media">1</field>
@@ -99,7 +99,7 @@
                        showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Is Overwrite</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
-                    <comment>The content will be overwrited when syncing if yes</comment>
+                    <comment><![CDATA[The content will be overwritten during synchronization if Yes.]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
