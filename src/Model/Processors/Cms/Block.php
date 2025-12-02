@@ -119,7 +119,7 @@ class Block implements ProcessorInterface
         $mappedStoresIds = $remoteStoreIds[DataHelper::STORES_MAPPED] ?? [];
 
         if (!$mappedStoresIds) {
-            return ['success' => false, 'error_message' => __('The store scope of block is not match.')];
+            return ['success' => false, 'error_message' => __('Block store scope does not match')];
         }
 
         // Get data remote block
@@ -132,7 +132,7 @@ class Block implements ProcessorInterface
         if (!$remoteBlocks) {
             return [
                 'success' => false,
-                'error_message' => __('There is no remote block with identifier %1', $block->getIdentifier()),
+                'error_message' => __('No remote block found with identifier %1', $block->getIdentifier()),
                 'notice_message' => ''
             ];
         }
@@ -140,7 +140,7 @@ class Block implements ProcessorInterface
         if (count($remoteBlocks) !== 1) {
             return [
                 'success' => false,
-                'error_message' => __('The store scope of block is not match.'),
+                'error_message' => __('Block store scope does not match'),
                 'notice_message' => ''
             ];
         }
@@ -190,7 +190,7 @@ class Block implements ProcessorInterface
 
             return [
                 'success' => true,
-                'success_message' => __('Update block identifier %1', $block->getIdentifier())
+                'success_message' => __('Updating block identifier %1', $block->getIdentifier())
             ];
 
         } catch (\Exception $e) {
@@ -218,7 +218,7 @@ class Block implements ProcessorInterface
         $allRemoteBlocks = $this->apiHelper->getAllCms(ApiHelper::CMS_TYPE_BLOCK);
         if (!$allRemoteBlocks) {
             $result['error_message'] = __(
-                'There is no remote block on the remote host %1',
+                'No remote block found on remote host %1',
                 $this->configHelper->getSiteName()
             );
             return $result;
@@ -250,7 +250,7 @@ class Block implements ProcessorInterface
                     $usagedStores = array_merge($myBlock->getStores(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
-                            'Pull Block ID: %1 || Status: %2.<br>',
+                            'Pull Block ID %1 – Status: %2.<br>',
                             $myBlock->getId(),
                             __('Overwrite disabled - Skipped')
                         );
@@ -261,12 +261,12 @@ class Block implements ProcessorInterface
                     if (!$response['success']) {
                         $result['total_failed']++;
                         $result['error_message'] .= ($response['error_message'] ? __(
-                            'Pull Block ID: %1 || Status: %2.<br>',
+                            'Pull Block ID %1 – Status: %2.<br>',
                             $myBlock->getId(),
                             $response['error_message']
                         ) : '');
                         $result['notice_message'] .= ($response['notice_message'] ? __(
-                            'Pull Block ID: %1 || Status: %2.<br>',
+                            'Pull Block ID %1 – Status: %2.<br>',
                             $myBlock->getId(),
                             $response['notice_message']
                         ) : '');
@@ -274,9 +274,9 @@ class Block implements ProcessorInterface
                     }
 
                     $result['success_message'] .= __(
-                        'Pull Block ID: %1 || Status: %2.<br>',
+                        'Pull Block ID %1 – Status: %2.<br>',
                         $myBlock->getId(),
-                        __('Updated Successfully')
+                        __('Updated successfully')
                     );
                     $result['total_update_success']++;
                 }
@@ -310,9 +310,9 @@ class Block implements ProcessorInterface
                 }
 
                 $result['success_message'] .= __(
-                    'Pull Block ID: %1 || Status: %2.<br>',
+                    'Pull Block ID %1 – Status: %2.<br>',
                     $myBlock->getId(),
-                    __('Created Successfully')
+                    __('Created successfully')
                 );
                 $result['total_create_success']++;
 
@@ -348,14 +348,14 @@ class Block implements ProcessorInterface
 
         $entity = $this->getBlock($id);
         if (!$entity) {
-            $result['error_message'] = __("Couldn't load CMS block content.");
+            $result['error_message'] = __("Failed to load CMS block content");
             return $result;
         }
 
         $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
         if (!$remoteCmsSyncConfigs) {
             $result['error_message'] = __(
-                'Something went wrong when trying to get configs of remote host %1',
+                'Failed to retrieve configuration from remote host %1',
                 $this->configHelper->getSiteName()
             );
             return $result;
@@ -364,7 +364,7 @@ class Block implements ProcessorInterface
         $isRemoteHostOverWritable = $remoteCmsSyncConfigs[ConfigHelper::XML_CMS_DATA_SYNC_IS_OVERWRITE] ?: 0;
         $remoteStoreIds = $this->dataHelper->getMappedRemoteStoreIdsListByMyStoreIds($entity->getStores());
         if (!$remoteStoreIds) {
-            $result['error_message'] = __('No remote store found by block id %1', $id);
+            $result['error_message'] = __('No remote store found for block ID %1', $id);
             return $result;
         }
 
@@ -394,7 +394,7 @@ class Block implements ProcessorInterface
 
         if ($checkNumOfBlockWithIdentifier > 1) {
             $result['error_message'] = __(
-                'Update remote block for my block ID: %1 failed - Reason:%2',
+                'Failed to update remote block for block ID %1 – Reason: %2',
                 $id,
                 'There\'s another CMS block affecting the same remote CMS block except block ID: ' . $id
             );
@@ -550,7 +550,7 @@ class Block implements ProcessorInterface
         if (!$allBlockIds) {
             return array_merge($result, [
                 'error_message' => __(
-                    'There is no remote block on the remote host %1',
+                    'No remote block found on remote host %1',
                     $this->configHelper->getSiteName()
                 )
             ]);
@@ -563,14 +563,14 @@ class Block implements ProcessorInterface
                 $result['total_failed']++;
                 if (!empty($response['error_message'])) {
                     $result['error_message'] .= __(
-                        'Push Block ID: %1 || Status: %2.<br>',
+                        'Push Block ID %1 – Status: %2.<br>',
                         $blockId,
                         $response['error_message']
                     );
                 }
                 if (!empty($response['notice_message'])) {
                     $result['notice_message'] .= __(
-                        'Push Block ID: %1 || Status: %2.<br>',
+                        'Push Block ID %1 – Status: %2.<br>',
                         $blockId,
                         $response['notice_message']
                     );
@@ -578,18 +578,18 @@ class Block implements ProcessorInterface
                 continue;
             }
 
-            $statusMessage = __('Updated Successfully');
+            $statusMessage = __('Updated successfully');
             switch ($response['type']) {
                 case 'created':
                     $result['total_create_success']++;
-                    $statusMessage = __('Created Successfully');
+                    $statusMessage = __('Created successfully');
                     break;
                 default:
                     $result['total_update_success']++;
             }
 
             $result['success_message'] .= __(
-                'Push Block ID: %1 || Status: %2.<br>',
+                'Push Block ID %1 – Status: %2.<br>',
                 $blockId,
                 $statusMessage
             );

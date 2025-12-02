@@ -49,7 +49,7 @@ class SyncAll extends Action implements HttpGetActionInterface
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
         if (!$type || !$action) {
-            $this->messageManager->addErrorMessage(__('Type/Action of request is required.'));
+            $this->messageManager->addErrorMessage(__('Request type/action is required'));
             $resultRedirect->setUrl($this->_redirect->getRefererUrl());
             return $resultRedirect;
         }
@@ -67,7 +67,7 @@ class SyncAll extends Action implements HttpGetActionInterface
             }
             $message = [];
             if ($createSuccess = $result['total_create_success']) {
-                $message[] = __('Successfully created %1 item(s)', $createSuccess);
+                $message[] = __('%1 item(s) created successfully', $createSuccess);
             }
             if ($updateSuccess = $result['total_update_success']) {
                 $message[] = __('Successfully updated %1 item(s)', $updateSuccess);
@@ -78,7 +78,7 @@ class SyncAll extends Action implements HttpGetActionInterface
             }
 
             if ($totalFailed = $result['total_failed']) {
-                $message = __('%1 item(s) have been synced failed', $totalFailed);
+                $message = __('%1 item(s) failed to sync', $totalFailed);
                 $this->messageManager->addErrorMessage($message);
             }
             if ($result['error_message']) {

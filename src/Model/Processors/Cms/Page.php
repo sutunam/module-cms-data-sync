@@ -122,7 +122,7 @@ class Page implements ProcessorInterface
 
         $page = $this->getPage($id);
         if (!$page) {
-            return $this->setError($result, __('Couldn\'t load CMS page content.'));
+            return $this->setError($result, __('Failed to load CMS page content'));
         }
 
         $pageStoreIds = $page->getStores();
@@ -131,7 +131,7 @@ class Page implements ProcessorInterface
         $mappedStoresIds = $remoteStoreIds[DataHelper::STORES_MAPPED] ?? [];
 
         if (empty($mappedStoresIds)) {
-            return $this->setError($result, __('The store scope of page does not match.'));
+            return $this->setError($result, __('Page store scope does not match'));
         }
 
         $remotePages = $this->apiHelper->getDataByIdentifier(
@@ -143,7 +143,7 @@ class Page implements ProcessorInterface
         if (!$remotePages || count($remotePages) !== 1) {
             return $this->setError(
                 $result,
-                __('No unique remote page found with identifier %1', $page->getIdentifier())
+                __('No unique remote page found for identifier %1', $page->getIdentifier())
             );
         }
 
@@ -305,7 +305,7 @@ class Page implements ProcessorInterface
                     $result['success_message'] .= __(
                         'Pull Page ID: %1 || Status: %2.<br>',
                         $myPage->getId(),
-                        __('Updated Successfully')
+                        __('Updated successfully')
                     );
                     $result['total_update_success']++;
                 }
@@ -334,7 +334,7 @@ class Page implements ProcessorInterface
                 $result['success_message'] .= __(
                     'Pull Page ID: %1 || Status: %2.<br>',
                     $myPage->getId(),
-                    __('Created Successfully')
+                    __('Created successfully')
                 );
                 $result['total_create_success']++;
 
@@ -616,8 +616,8 @@ class Page implements ProcessorInterface
             }
 
             $statusMessage = ($response['type'] === 'created') ?
-                __('Created Successfully') :
-                __('Updated Successfully');
+                __('Created successfully') :
+                __('Updated successfully');
             $successMessages[] = __('Push Page ID: %1 ||Status: %2.', $pageId, $statusMessage);
 
             if ($response['type'] === 'created') {

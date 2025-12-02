@@ -87,12 +87,12 @@ class MassSync extends Action implements HttpPostActionInterface
             if ($success) {
                 $message = __("Synced successfully");
                 if ($success > 1) {
-                    $message = __("%1 item(s) have been successfully synced", $success);
+                    $message = __("%1 item(s) synced successfully", $success);
                 }
                 $this->messageManager->addSuccessMessage($message);
             }
         } else {
-            $this->messageManager->addErrorMessage(__("Some error occurred. Please try again"));
+            $this->messageManager->addErrorMessage(__("An error occurred. Please try again"));
         }
         /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);

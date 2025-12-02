@@ -65,7 +65,7 @@ class Sync extends Action implements HttpGetActionInterface
                 $result['notice_message'] ?? $this->messageManager->addNotice($result['notice_message']);
             }
         } else {
-            $this->messageManager->addErrorMessage(__("Some error occurred. Please try again"));
+            $this->messageManager->addErrorMessage(__("An error occurred. Please try again"));
         }
         /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);

@@ -1,43 +1,43 @@
 button_label,Libellé du bouton
-Push All to %1,Pousser tout vers %1
-Pull All from %1,Récupérer tout depuis %1
+Push all to %1,Pousser tout vers %1
+Pull all to %1,Récupérer tout depuis %1
 Synced successfully,Synchronisation terminée avec succès
-%1 item(s) have been successfully synced,%1 élément(s) synchronisé(s) avec succès
-Some error occurred. Please try again,Une erreur est survenue. Veuillez réessayer
-Type/Action of request is required.,Le type ou l’action de la requête est requis
-Successfully created %1 item(s),%1 élément(s) créé(s) avec succès
+%1 item(s) synced successfully,%1 élément(s) synchronisé(s) avec succès
+An error occurred. Please try again,Une erreur est survenue. Veuillez réessayer
+Request type/action is required,Le type ou l’action de la requête est requis
+%1 item(s) created successfully,%1 élément(s) créé(s) avec succès
 Successfully updated %1 item(s),%1 élément(s) mis à jour avec succès
-%1 item(s) have been synced failed,La synchronisation de %1 élément(s) a échoué
+%1 item(s) failed to sync,La synchronisation de %1 élément(s) a échoué
 SyncCmsData is not enabled,SyncCmsData n’est pas activé
-The extension settings are not configured correctly.,Les paramètres de l’extension sont incorrects
-Can not generate the access token of remote host,Impossible de générer le jeton d’accès de l’hôte distant
+Extension settings are incorrectly configured,Les paramètres de l’extension sont incorrects
+Cannot generate access token for remote host,Impossible de générer le jeton d’accès de l’hôte distant
 """Error: "" . . ""\n"" .",Message d’erreur
 Response: \nHTTP Error: %1 \n %2,Réponse : Erreur HTTP %1 — %2
 "The CMS block with the ""%1"" ID doesn't exist.",Le bloc CMS avec l’ID « %1 » n’existe pas
-The CMS block cannot be overwritten.,Le bloc CMS ne peut pas être écrasé
+CMS block cannot be overwritten,Le bloc CMS ne peut pas être écrasé
 "The CMS page with the ""%1"" ID doesn't exist.",La page CMS avec l’ID « %1 » n’existe pas
-The CMS page cannot be overwritten.,La page CMS ne peut pas être écrasée
-Couldn't load CMS block content.,Impossible de charger le contenu du bloc CMS
-The store scope of block is not match.,La portée du magasin du bloc ne correspond pas
-There is no remote block with identifier %1,Aucun bloc distant trouvé avec l’identifiant %1
-Update block identifier %1,Mise à jour de l’identifiant du bloc %1
-There is no remote block on the remote host %1,Aucun bloc n’existe sur l’hôte distant %1
-Pull Block ID: %1 || Status: %2.<br>,"Récupération du bloc — ID : %1, Statut : %2"
+CMS page cannot be overwritten,La page CMS ne peut pas être écrasée
+Failed to load CMS block content,Impossible de charger le contenu du bloc CMS
+Block store scope does not match,La portée du magasin du bloc ne correspond pas
+No remote block found with identifier %1,Aucun bloc distant trouvé avec l’identifiant %1
+Updating block identifier %1,Mise à jour de l’identifiant du bloc %1
+No remote block found on remote host %1,Aucun bloc n’existe sur l’hôte distant %1
+Pull Block ID %1 – Status: %2.<br>,"Récupération du bloc — ID : %1, Statut : %2"
 Pull Block || Status: Create - %1.<br>,Récupération du bloc — Créé : %1
-Something went wrong when trying to get configs of remote host %1,Impossible d’obtenir la configuration de l’hôte %1
-No remote store found by block id %1,Aucun magasin distant trouvé pour l’ID de bloc %1
-Update remote block for my block ID: %1 failed - Reason:%2,Échec de la mise à jour du bloc distant pour l’ID %1 — Raison : %2
+Failed to retrieve configuration from remote host %1,Impossible d’obtenir la configuration de l’hôte %1
+No remote store found for block ID %1,Aucun magasin distant trouvé pour l’ID de bloc %1
+Failed to update remote block for block ID %1 – Reason: %2,Échec de la mise à jour du bloc distant pour l’ID %1 — Raison : %2
 <br>Update remote block for my block ID: %1 (Remote Block ID: %2) was skipped - Reason: Overwrite disabled on the remote host %3,"Mise à jour ignorée — écrasement désactivé (ID %1, ID distant %2, Hôte %3)"
 Update remote block for my block ID: %1 (Remote block ID: %2) on remote host %3 successfully,"Bloc distant mis à jour avec succès (ID %1, ID distant %2, Hôte %3)"
 Update remote block for my block ID: %1 (Remote Block ID: %2) failed - Reason: %3,"Échec de mise à jour du bloc distant (ID %1, ID distant %2) — %3"
 Created new remote block with ID: %1 (My block ID: %2) on remote host %3 successfully,"Nouveau bloc distant créé avec succès (ID %1, ID local %2, Hôte %3)"
 Created new remote block for my block ID: %1 failed - Reason:%2,Échec de création du bloc distant pour l’ID %1 — %2
-Push Block ID: %1 || Status: %2.<br>,"Envoi du bloc — ID : %1, Statut : %2"
-Updated Successfully,Mis à jour avec succès
-Created Successfully,Créé avec succès
-Couldn't load CMS page content.,Impossible de charger le contenu de la page CMS
-The store scope of page does not match.,La portée de magasin de la page ne correspond pas
-No unique remote page found with identifier %1,Aucune page distante unique trouvée pour l’identifiant %1
+Push Block ID %1 – Status: %2.<br>,"Envoi du bloc — ID : %1, Statut : %2"
+Updated successfully,Mis à jour avec succès
+Created successfully,Créé avec succès
+Failed to load CMS page content,Impossible de charger le contenu de la page CMS
+Page store scope does not match,La portée de magasin de la page ne correspond pas
+No unique remote page found for identifier %1,Aucune page distante unique trouvée pour l’identifiant %1
 Pull Successfully,Récupération réussie
 There is no remote page on the remote host %1,Aucune page distante n’existe sur l’hôte %1
 Pull Page ID: %1 || Status: %2.<br>,"Récupération de la page — ID : %1, Statut : %2"
@@ -101,15 +101,15 @@ button_label,Libellé du bouton
 Push All to %2,Envoyer tout vers %2
 Pull All from %2,Récupérer tout depuis %2
 Synced successfully,Synchronisation terminée avec succès
-%1 item(s) have been successfully synced,%1 élément(s) synchronisé(s) avec succès
-Some error occurred. Please try again,Une erreur est survenue. Veuillez réessayer
-Type/Action of request is required.,Le type ou l’action de la requête est requis
-Successfully created %1 item(s),%1 élément(s) créé(s) avec succès
+%1 item(s) synced successfully,%1 élément(s) synchronisé(s) avec succès
+An error occurred. Please try again,Une erreur est survenue. Veuillez réessayer
+Request type/action is required,Le type ou l’action de la requête est requis
+%1 item(s) created successfully,%1 élément(s) créé(s) avec succès
 Successfully updated %1 item(s),%1 élément(s) mis à jour avec succès
-%1 item(s) have been synced failed,La synchronisation de %1 élément(s) a échoué
+%1 item(s) failed to sync,La synchronisation de %1 élément(s) a échoué
 SyncCmsData is not enabled,SyncCmsData est désactivé
-The extension settings are not configured correctly.,Les paramètres de l’extension sont incorrects
-Can not generate the access token of remote host,Impossible de générer le jeton d’accès de l’hôte distant
+Extension settings are incorrectly configured,Les paramètres de l’extension sont incorrects
+Cannot generate access token for remote host,Impossible de générer le jeton d’accès de l’hôte distant
 """Error: "" . . ""\n"" .",Message d’erreur
 "Enter Admin account of target website","Saisissez le compte administrateur du site web cible"
 "Enter Admin password of target website","Saisissez le mot de passe administrateur du site web cible"

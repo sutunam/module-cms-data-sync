@@ -132,7 +132,7 @@ class PageRepository implements SutunamPageRepositoryInterface
         $page->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($page->getStores()));
 
         if (!$page->getId()) {
-            throw new NoSuchEntityException(__('The CMS page with the "%1" ID doesn\'t exist.', $pageId));
+            throw new NoSuchEntityException(__('CMS page with ID “%1” does not exist', $pageId));
         }
         return $page;
     }
@@ -232,7 +232,7 @@ class PageRepository implements SutunamPageRepositoryInterface
     {
         /** @var Page $page */
         if ($page->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
-            throw new CouldNotSaveException(__('The CMS page cannot be overwritten.'));
+            throw new CouldNotSaveException(__('CMS page cannot be overwritten'));
         }
 
         $page->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($page->getStores()));

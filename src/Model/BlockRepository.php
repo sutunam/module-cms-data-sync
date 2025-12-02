@@ -128,7 +128,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
         $this->resource->load($block, $blockId);
 
         if (!$block->getId()) {
-            throw new NoSuchEntityException(__('The CMS block with the "%1" ID doesn\'t exist.', $blockId));
+            throw new NoSuchEntityException(__('CMS block with ID “%1” does not exist', $blockId));
         }
         $block->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($block->getStores()));
 
@@ -218,7 +218,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
     {
         /** @var Block $block */
         if ($block->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
-            throw new CouldNotSaveException(__('The CMS block cannot be overwritten.'));
+            throw new CouldNotSaveException(__('CMS block cannot be overwritten'));
         }
         $block->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($block->getStores()));
 

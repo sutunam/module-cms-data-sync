@@ -306,7 +306,7 @@ class Widget implements ProcessorInterface
                     $result['success_message'] .= __(
                         'Pull Widget ID: %1 || Status: %2.<br>',
                         $myWidgetInstance->getId(),
-                        __('Updated Successfully')
+                        __('Updated successfully')
                     );
                     $result['total_update_success']++;
                 }
@@ -350,7 +350,7 @@ class Widget implements ProcessorInterface
                 $result['success_message'] .= __(
                     'Pull Widget ID: %1 ||Status: %2.<br>',
                     $myWidgetInstance->getId(),
-                    __('Created Successfully')
+                    __('Created successfully')
                 );
 
             } catch (\Exception $e) {
@@ -388,7 +388,7 @@ class Widget implements ProcessorInterface
             $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
             if (!$remoteCmsSyncConfigs) {
                 $result['error_message'] = __(
-                    'Something went wrong when trying to get configs of remote host %1',
+                    'Failed to retrieve configuration from remote host %1',
                     $this->configHelper->getSiteName()
                 );
                 return $result;
@@ -625,7 +625,7 @@ class Widget implements ProcessorInterface
                 $result['success_message'] .= __(
                     'Push Widget ID: %1 ||Status: %2.<br>',
                     $widgetId,
-                    __('Created Successfully')
+                    __('Created successfully')
                 );
                 continue;
             }
@@ -633,7 +633,7 @@ class Widget implements ProcessorInterface
             $result['success_message'] .= __(
                 'Push Widget ID: %1 ||Status: %2.<br>',
                 $widgetId,
-                __('Updated Successfully')
+                __('Updated successfully')
             );
             $result['total_update_success']++;
         }
