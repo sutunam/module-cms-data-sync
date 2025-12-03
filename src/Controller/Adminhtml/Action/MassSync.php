@@ -85,7 +85,7 @@ class MassSync extends Action implements HttpPostActionInterface
                 }
             }
             if ($success) {
-                $message = __("Sync completed successfully");
+                $message = __("Sync successfully");
                 if ($success > 1) {
                     $message = __("%1 item(s) synced successfully", $success);
                 }

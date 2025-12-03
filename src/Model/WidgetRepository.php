@@ -170,7 +170,7 @@ class WidgetRepository implements WidgetRepositoryInterface
     {
         /** @var WidgetInstance $widgetInstance */
         if ($widgetInstance->getId() && !$this->configHelper->isOverwrite()) {
-            throw new CouldNotSaveException(__('CMS block cannot be overwritten'));
+            throw new CouldNotSaveException(__('The CMS block cannot be overwritten'));
         }
 
         /** @var WidgetInstance $instance */
@@ -181,7 +181,7 @@ class WidgetRepository implements WidgetRepositoryInterface
         }
 
         if ($widgetInstance->getCode() && !$this->dataHelper->getThemeIdByCode($widgetInstance->getThemeCode())) {
-            throw new CouldNotSaveException(__('CMS block cannot be overwritten'));
+            throw new CouldNotSaveException(__('The CMS block cannot be overwritten'));
         }
 
         try {

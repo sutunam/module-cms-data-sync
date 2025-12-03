@@ -17,7 +17,7 @@ use Sutunam\CmsDataSync\Block\Adminhtml\System\Config\TestConnection;
             "url": "<?= $escaper->escapeUrl($block->getAjaxUrl()) ?>",
             "elementId": "<?= /* @noEscape */ $block->getHtmlId() ?>",
             "successText": "<?= $escaper->escapeHtmlAttr(__('Success! Test again?')) ?>",
-            "failedText": "<?= $escaper->escapeHtmlAttr(__('Connection failed! Retry?')) ?>",
+            "failedText": "<?= $escaper->escapeHtmlAttr(__('Fail to connect! Retry?')) ?>",
             "fieldMapping": "<?= /* @noEscape */ $block->getFieldMapping() ?>"}, "validation": {}}'>
     <span id="<?= /* @noEscape */ $block->getHtmlId() ?>_result">
         <?= $escaper->escapeHtml($block->getButtonLabel()) ?>

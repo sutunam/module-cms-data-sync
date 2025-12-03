@@ -126,7 +126,7 @@ class Widget implements ProcessorInterface
         /** @var WidgetInstance $widgetInstance */
         $widgetInstance = $this->getWigetInstance($id);
         if (!$widgetInstance) {
-            $result['notice_message'] = __('Could\'t load CMS widget content.');
+            $result['notice_message'] = __('Fail to load CMS widget content');
         }
 
         $widgetInstanceStoreIds = $widgetInstance->getStoreIds();
@@ -135,7 +135,7 @@ class Widget implements ProcessorInterface
 
         $mappedStoresIds = $remoteStoreIds[DataHelper::STORES_MAPPED];
         if (!$mappedStoresIds) {
-            $result['error_message'] = __('The store scope of widget is not match.');
+            $result['error_message'] = __('Widget store scope does not match');
             return $result;
         }
 
@@ -147,14 +147,14 @@ class Widget implements ProcessorInterface
 
         if (!$remoteWidgetInstances) {
             $result['error_message'] = __(
-                'There is no remote widget instance with identifier %1',
+                'No widget instance exists with identifier %1',
                 $widgetInstance->getData(WidgetInstanceInterface::IDENTIFIER)
             );
             return $result;
         }
 
         if (count($remoteWidgetInstances) != 1) {
-            $result['error_message'] = __('The store scope of widget instance is not match.');
+            $result['error_message'] = __('Widget instance store scope does not match');
             return $result;
         }
 
@@ -163,7 +163,7 @@ class Widget implements ProcessorInterface
         $myThemeId = $this->dataHelper->getThemeIdByCode($remoteWidgetInstance[WidgetInstanceInterface::THEME_CODE]);
         if (!$myThemeId) {
             $result['error_message'] = __(
-                'There is no theme corresponding to the remote theme code %.',
+                'No theme found for remote theme code %',
                 $remoteWidgetInstance[WidgetInstanceInterface::THEME_CODE]
             );
             return $result;
@@ -238,7 +238,7 @@ class Widget implements ProcessorInterface
         $allRemoteWidgetInstances = $this->apiHelper->getAllCms(ApiHelper::CMS_TYPE_WIDGET);
         if (!$allRemoteWidgetInstances) {
             $result['error_message'] = __(
-                'There is no remote widget instance on the remote host %1',
+                'No widget instance exists on remote host %1',
                 $this->configHelper->getSiteName()
             );
             return $result;
@@ -282,7 +282,7 @@ class Widget implements ProcessorInterface
                         $result['notice_message'] .= __(
                             'Pull Widget ID: %1 || Status: %2.<br>',
                             $myWidgetInstance->getId(),
-                            __('Overwrite disabled - Skipped')
+                            __('Skip - Overwrite disabled')
                         );
                         continue;
                     }
@@ -306,7 +306,7 @@ class Widget implements ProcessorInterface
                     $result['success_message'] .= __(
                         'Pull Widget ID: %1 || Status: %2.<br>',
                         $myWidgetInstance->getId(),
-                        __('Updated successfully')
+                        __('Update successfully')
                     );
                     $result['total_update_success']++;
                 }
@@ -350,14 +350,15 @@ class Widget implements ProcessorInterface
                 $result['success_message'] .= __(
                     'Pull Widget ID: %1 ||Status: %2.<br>',
                     $myWidgetInstance->getId(),
-                    __('Created successfully')
+                    __('Create successfully')
                 );
 
             } catch (\Exception $e) {
                 $result['total_failed']++;
                 $result['error_message'] .= __(
-                    'Pull Widget || Status: Create - %1.<br>',
-                    $e->getMessage()
+                    'Pull Widget — ID: %1, Status: %2',
+                    $e->getMessage(),
+                    __('Create failed')
                 );
                 $this->logger->critical($e->getMessage());
             }
@@ -388,7 +389,7 @@ class Widget implements ProcessorInterface
             $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
             if (!$remoteCmsSyncConfigs) {
                 $result['error_message'] = __(
-                    'Failed to retrieve configuration from remote host %1',
+                    'Fail to retrieve configuration from remote host %1',
                     $this->configHelper->getSiteName()
                 );
                 return $result;
@@ -398,7 +399,7 @@ class Widget implements ProcessorInterface
 
             $remoteStoreIds = $this->dataHelper->getMappedRemoteStoreIdsListByMyStoreIds($entity->getStoreIds());
             if (!$remoteStoreIds) {
-                $result['error_message'] = __('No remote store found by widget id %1', $id);
+                $result['error_message'] = __('No remote store found for widget ID %1', $id);
                 return $result;
             }
 
@@ -432,14 +433,14 @@ class Widget implements ProcessorInterface
                     $result['success'] = $response['success'];
                     $result['type'] = 'created';
                     $result['success_message'] = __(
-                        'Created new remote widget ID: %1 successfully',
+                        'Creat new remote widget ID: %1 successfully',
                         $response['data'][WidgetInstanceInterface::ID]
                     );
                     return $result;
                 }
 
                 $result['error_message'] = __(
-                    'Created new remote widget instance for my widget instance ID: %1 failed - Reason:%2',
+                    'Fail to create new remote widget instance ID: %1 - Reason:%2',
                     $id,
                     $response['message']
                 );
@@ -469,7 +470,7 @@ class Widget implements ProcessorInterface
 
             if ($checkNumOfInstanceWithIdentifier > 1) {
                 $result['error_message'] = __(
-                    'Update remote widget instance for my widget instance ID: %1 failed - Reason:%2',
+                    'Fail to update remote widget instance ID: %1 - Reason:%2',
                     $id,
                     'There\'s other CMS widget instance affects
                     with the same remote CMS widget instance except widget instance ID: ' . $id
@@ -519,10 +520,13 @@ class Widget implements ProcessorInterface
                 if ($response['success']) {
                     $result['success'] = true;
                     $result['success_message'] .= __(
-                        'Update remote widget instance ID %1 successfully', $remoteWidgetInstanceId);
+                        'Update remote widget instance ID %1 successfully',
+                        $remoteWidgetInstanceId
+                    );
                 } else {
                     $result['error_message'] .= __(
-                        'Update remote widget instance ID %1 failed', $remoteWidgetInstanceId
+                        'Fail to update remote widget ID %1',
+                        $remoteWidgetInstanceId
                     );
                 }
             }
@@ -544,14 +548,14 @@ class Widget implements ProcessorInterface
                     );
                 } else {
                     $result['error_message'] .= __(
-                        'Created new remote widget instance for my widget instance ID %1 failed',
+                        'Failed to update remote widget instance  ID %1',
                         $id
                     );
                 }
             }
             $result['type'] = 'updated';
         } else {
-            $result['error_message'] = __('Failed to load CMS widget content.');
+            $result['error_message'] = __('Fail to load CMS widget content.');
         }
         return $result;
     }
@@ -575,7 +579,7 @@ class Widget implements ProcessorInterface
         $allWidgetInstanceIds = $this->instanceCollectionFactory->create()->getAllIds();
         if (!$allWidgetInstanceIds) {
             $result['error_message'] = __(
-                'There is no remote widget instance on the remote host %1',
+                'No widget instance exists on remote host %1',
                 $this->configHelper->getSiteName()
             );
             return $result;
@@ -603,7 +607,7 @@ class Widget implements ProcessorInterface
                 $result['success_message'] .= __(
                     'Push Widget ID: %1',
                     $widgetId,
-                    __('Created successfully')
+                    __('Create successfully')
                 );
                 continue;
             }
@@ -611,7 +615,7 @@ class Widget implements ProcessorInterface
             $result['success_message'] .= __(
                 'Push Widget ID: %1',
                 $widgetId,
-                __('Updated successfully')
+                __('Update successfully')
             );
             $result['total_update_success']++;
         }

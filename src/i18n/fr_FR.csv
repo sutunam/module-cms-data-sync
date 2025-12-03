@@ -1,121 +1,107 @@
 button_label,Libellé du bouton
 Push all to %1,Pousser tout vers %1
-Pull all to %1,Récupérer tout depuis %1
-Sync completed successfully,Synchronisation terminée avec succès
+Pull all from %1,Récupérer tout depuis %1
+Sync successfully,Synchronisation terminée avec succès
 %1 item(s) synced successfully,%1 élément(s) synchronisé(s) avec succès
 An error occurred. Please try again,Une erreur est survenue. Veuillez réessayer
 Request type/action is required,Le type ou l’action de la requête est requis
-%1 item(s) created successfully,%1 élément(s) créé(s) avec succès
-%1 item(s) updated successfully,%1 élément(s) mis à jour avec succès
-%1 item(s) failed to sync,La synchronisation de %1 élément(s) a échoué
+Create successfully %1 item(s),%1 élément(s) créé(s) avec succès
+Update successfully %1 item(s),%1 élément(s) mis à jour avec succès
+Fail to sync %1 item(s),La synchronisation de %1 élément(s) a échoué
 SyncCmsData is disabled,SyncCmsData n’est pas activé
-Extension settings are incorrectly configured,Les paramètres de l’extension sont incorrects
-Cannot generate access token for remote host,Impossible de générer le jeton d’accès de l’hôte distant
+Extension settings are misconfigured,Les paramètres de l’extension sont incorrects
+Unable to generate remote host access token,Impossible de générer le jeton d’accès de l’hôte distant
 """Error: "" . . ""\n"" .",Message d’erreur
 Response: \nHTTP Error: %1 \n %2,Réponse : Erreur HTTP %1 — %2
-"The CMS block with the ""%1"" ID doesn't exist.",Le bloc CMS avec l’ID « %1 » n’existe pas
-CMS block cannot be overwritten,Le bloc CMS ne peut pas être écrasé
-"The CMS page with the ""%1"" ID doesn't exist.",La page CMS avec l’ID « %1 » n’existe pas
-CMS page cannot be overwritten,La page CMS ne peut pas être écrasée
-Failed to load CMS block content,Impossible de charger le contenu du bloc CMS
+CMS block with ID “%1” does not exist,Le bloc CMS avec l’ID « %1 » n’existe pas
+The CMS block cannot be overwritten,Le bloc CMS ne peut pas être écrasé
+CMS page with ID “%1” does not exist,La page CMS avec l’ID « %1 » n’existe pas
+The CMS page cannot be overwritten,La page CMS ne peut pas être écrasée
+Fail to load CMS block content,Impossible de charger le contenu du bloc CMS
 Block store scope does not match,La portée du magasin du bloc ne correspond pas
 No remote block found with identifier %1,Aucun bloc distant trouvé avec l’identifiant %1
-Updating block identifier %1,Mise à jour de l’identifiant du bloc %1
-No remote block found on remote host %1,Aucun bloc n’existe sur l’hôte distant %1
-Pull Block ID %1 – Status: %2.<br>,"Récupération du bloc — ID : %1, Statut : %2"
-Pull Block — Created: %1<br>,Récupération du bloc — Créé : %1
-Failed to retrieve configuration from remote host %1,Impossible d’obtenir la configuration de l’hôte %1
+Update block identifier %1,Mise à jour de l’identifiant du bloc %1
+No block exists on remote host %1,Aucun bloc n’existe sur l’hôte distant %1
+Pull Block ID: %1 || Status: %2.<br>,"Récupération du bloc — ID : %1, Statut : %2"
+Pull Block || Create - %1.<br>,Récupération du bloc — Créé : %1
+Fail to retrieve configuration from remote host %1,Impossible d’obtenir la configuration de l’hôte %1
 No remote store found for block ID %1,Aucun magasin distant trouvé pour l’ID de bloc %1
-Failed to update remote block for block ID %1 – Reason: %2,Échec de la mise à jour du bloc distant pour l’ID %1 — Raison : %2
-<br>Update remote block for my block ID: %1 (Remote Block ID: %2) was skipped - Reason: Overwrite disabled on the remote host %3,"Mise à jour ignorée — écrasement désactivé (ID %1, ID distant %2, Hôte %3)"
-Update remote block for my block ID: %1 (Remote block ID: %2) on remote host %3 successfully,"Bloc distant mis à jour avec succès (ID %1, ID distant %2, Hôte %3)"
-Update remote block for my block ID: %1 (Remote Block ID: %2) failed - Reason: %3,"Échec de mise à jour du bloc distant (ID %1, ID distant %2) — %3"
-Created new remote block with ID: %1 (My block ID: %2) on remote host %3 successfully,"Nouveau bloc distant créé avec succès (ID %1, ID local %2, Hôte %3)"
-Created new remote block for my block ID: %1 failed - Reason:%2,Échec de création du bloc distant pour l’ID %1 — %2
+Fail to update remote block ID %1,Échec de la mise à jour du bloc distant pour l’ID %1 — Raison : %2
+Overwrite disabled on the remote host %1,"Mise à jour ignorée — écrasement désactivé (ID %1, ID distant %2, Hôte %3)"
+Update remote block ID %1 successfully ,"Bloc distant mis à jour avec succès (ID %1, ID distant %2, Hôte %3)"
+Fail to update remote block ID %1,"Échec de mise à jour du bloc distant (ID %1, ID distant %2) — %3"
+"Creat new remote block ID %1  successfully (ID %1, Local ID %2, Host %3)","Nouveau bloc distant créé avec succès (ID %1, ID local %2, Hôte %3)"
+Fail to create remote block for ID %1,Échec de création du bloc distant pour l’ID %1 — %2
 Push Block ID %1 – Status: %2.<br>,"Envoi du bloc — ID : %1, Statut : %2"
-Updated successfully,Mis à jour avec succès
-Created successfully,Créé avec succès
-Failed to load CMS page content,Impossible de charger le contenu de la page CMS
+Update successfully,Mis à jour avec succès
+Create successfully,Créé avec succès
+Create failed,Échec de la création
+Fail to load CMS page content,Impossible de charger le contenu de la page CMS
 Page store scope does not match,La portée de magasin de la page ne correspond pas
 No unique remote page found for identifier %1,Aucune page distante unique trouvée pour l’identifiant %1
-Pull Successfully,Récupération réussie
-There is no remote page on the remote host %1,Aucune page distante n’existe sur l’hôte %1
-Pull Page — ID: %1, Status: %2,"Récupération de la page — ID : %1, Statut : %2"
-Pull Page — Created: %1,Récupération de la page — Créée : %1
-Failed to load CMS page content,Impossible de charger le contenu de la page CMS
-Failed to load remote host configs for %1,Impossible de charger les configurations de l’hôte %1
+Pull successfully,Récupération réussie
+No remote page exists on host %1,Aucune page distante n’existe sur l’hôte %1
+Skip - Overwrite disabled,"Récupération de la page — ID : %1, Statut : %2"
+"Pull Page — ID: %1, Status: %2",Récupération de la page — Créée : %1
+Pull Page — Creat: %1,Impossible de charger le contenu de la page CMS
+Fail to load remote host configs for %1,Impossible de charger les configurations de l’hôte %1
 No remote store found for page ID %1,Aucun magasin distant trouvé pour l’ID de page %1
-Remote page update failed for ID %1 — Reason: %2,Échec de la mise à jour de la page distante pour l’ID %1 — Raison : %2
-Update remote page for my page ID: %1 (Remote Page ID: %2) was skipped - Reason: Overwrite disabled on the remote host %3,"Mise à jour ignorée — écrasement désactivé (ID %1, ID distant %2, Hôte %3)"
-"Update remote page for my page ID: %1
-                    (Remote page ID: %2) on remote host %2 successfully","Page distante mise à jour avec succès (ID %1, ID distant %2)"
-"Update remote page for my page ID: %1
-                    (Remote Page ID: %2) failed - Reason:%3","Échec de mise à jour de la page distante (ID %1, ID distant %2) — %3"
-Created new remote page with ID: %1 (My page ID: %2) on remote host %3 successfully,"Nouvelle page distante créée avec succès (ID %1, ID local %2, Hôte %3)"
-Failed to create remote page for my page ID: %1 - Reason: %2,Échec de la création de la page distante pour l’ID %1 — %2
-Push Page — ID: %1, Status: %2,"Envoi de la page — ID : %1, Statut : %2"
-Could't load CMS widget content.,Impossible de charger le contenu du widget CMS
-The store scope of widget is not match.,La portée de magasin du widget ne correspond pas
-There is no remote widget instance with identifier %1,Aucun widget distant trouvé avec l’identifiant %1
-The store scope of widget instance is not match.,La portée de magasin de l’instance de widget ne correspond pas
-There is no theme corresponding to the remote theme code %.,Aucun thème trouvé pour le code de thème distant %
-There is no remote widget instance on the remote host %1,Aucune instance de widget n’existe sur l’hôte distant %1
-Pull Widget ID: %1 || Status: %2.<br>,"Récupération du widget — ID : %1, Statut : %2"
+Fail to update remote page ID %1 — Reason: %2,Échec de la mise à jour de la page distante pour l’ID %1 — Raison : %2
+Update remote page ID: %1 successfully,"Mise à jour ignorée — écrasement désactivé (ID %1, ID distant %2, Hôte %3)"
+Fail to update remote page ID: %1,"Page distante mise à jour avec succès (ID %1, ID distant %2)"
+Create new remote page ID %1 successfully,"Échec de mise à jour de la page distante (ID %1, ID distant %2) — %3"
+Fail to create remote page for my page ID: %1,"Nouvelle page distante créée avec succès (ID %1, ID local %2, Hôte %3)"
+"Push Page — ID: %1, Status: %2",Échec de la création de la page distante pour l’ID %1 — %2
+Fail to load CMS widget content,"Envoi de la page — ID : %1, Statut : %2"
+Widget store scope does not match,Impossible de charger le contenu du widget CMS
+No widget instance exists with identifier %1,La portée de magasin du widget ne correspond pas
+Widget instance store scope does not match,Aucun widget distant trouvé avec l’identifiant %1
+No theme found for remote theme code %,La portée de magasin de l’instance de widget ne correspond pas
+No widget instance exists on remote host %1,Aucun thème trouvé pour le code de thème distant %
+Pull Widget ID: %1 || Status: %2.<br>,Aucune instance de widget n’existe sur l’hôte distant %1
 Pull Widget ID: %1 ||Status: %2.<br>,"Récupération du widget — ID : %1, Statut : %2"
-Pull Widget || Status: Create - %1.<br>,Récupération du widget — Créé : %1
-No remote store found by widget id %1,Aucun magasin distant trouvé pour l’ID du widget %1
-"Created new remote widget instance with ID: %1
-                        (My widget instance ID: %2) on remote host %3 successfully","Nouvelle instance de widget distante créée avec succès (ID %1, ID local %2, Hôte %3)"
-Created new remote widget instance for my widget instance ID: %1 failed - Reason:%2,Échec de la création de l’instance de widget distante (ID %1) — Raison : %2
-Update remote widget instance for my widget instance ID: %1 failed - Reason:%2,Échec de la mise à jour de l’instance de widget distante (ID %1) — Raison : %2
-"Update remote widget instance for my widget instance ID: %1
-                        (Remote widget instance ID: %2) was skipped - Reason: Overwrite disabled on the remote host %3","Mise à jour ignorée — écrasement désactivé (ID local %1, ID distant %2, Hôte %3)"
-"Update remote widget instance for my widget instance ID: %1
-                        (Remote widget instance ID: %2) on remote host %2 successfully","Instance de widget distante mise à jour avec succès (ID local %1, ID distant %2, Hôte %2)"
-"Update remote widget instance for my widget instance ID: %1
-                        (Remote widget instance ID: %2) failed - Reason:%3","Échec de mise à jour de l’instance de widget distante (ID local %1, ID distant %2) — %3"
-Couldn't load CMS widget content.,Impossible de charger le contenu du widget CMS
+"Pull Widget — ID: %1, Status: %2","Récupération du widget — ID : %1, Statut : %2"
+No remote store found for widget ID %1,Récupération du widget — Créé : %1
+Creat new remote widget ID: %1 successfully,Aucun magasin distant trouvé pour l’ID du widget %1
+Fail to create new remote widget instance ID: %1 - Reason:%2,"Nouvelle instance de widget distante créée avec succès (ID %1, ID local %2, Hôte %3)"
+Fail to update remote widget instance ID: %1 - Reason:%2,Échec de la création de l’instance de widget distante (ID %1) — Raison : %2
+Update remote widget instance ID %1 successfully,Échec de la mise à jour de l’instance de widget distante (ID %1) — Raison : %2
+Fail to update remote widget ID %1,"Mise à jour ignorée — écrasement désactivé (ID local %1, ID distant %2, Hôte %3)"
+Created new remote widget instance ID %1 successfully,"Instance de widget distante mise à jour avec succès (ID local %1, ID distant %2, Hôte %2)"
+Failed to update remote widget instance  ID %1,"Échec de mise à jour de l’instance de widget distante (ID local %1, ID distant %2) — %3"
+Fail to load CMS widget content.,Impossible de charger le contenu du widget CMS
 Push Widget ID: %1,Envoi Widget ID: %1
 Pull from %1,Récupérer depuis %1
 Push to %1,Envoyer vers %1
 Identifier,Identifiant
 "If left empty, an identifier will be auto-generated","Si ce champ est vide, un identifiant sera généré automatiquement"
 Success! Test again?,Réussi ! Tester à nouveau ?
-Connection failed! Retry?,Connexion échouée ! Réessayer ?
-Cms Data Sync,Synchronisation des données CMS
+Fail to connect! Retry?,Échec de connexion ! Réessayer ?
+CMS Data Sync,Synchronisation des données CMS
 Sutunam,Sutunam
-Connection,Connexion
+Connection Setting,Connexion
 Enable,Activer
-Website name,Nom du site
-Live/Staging/Local ..etc,"Production / Préproduction / Local, etc."
+Website Name,Nom du site
+"Live / Staging / Local, etc.","Production / Préproduction / Local, etc."
 Website URL,URL du site
 Example: http://magento.com/ (trailing slash required),Exemple : http://magento.com/ (le slash final est obligatoire)
 Username,Nom d’utilisateur
-Enter Admin account of target website,Saisir le compte administrateur du site cible
+Enter admin account of target website,Saisir le compte administrateur du site cible
 Password,Mot de passe
-Enter Admin password of target website,Saisir le mot de passe administrateur du site cible
+Enter admin password for target website,Saisir le mot de passe administrateur du site cible
 Test Connection,Tester la connexion
 Sync Media,Synchroniser les médias
 Media Type,Type de média
-button_label,Libellé du bouton
-Push All to %2,Envoyer tout vers %2
-Pull All from %2,Récupérer tout depuis %2
-Sync completed successfully,Synchronisation terminée avec succès
-%1 item(s) synced successfully,%1 élément(s) synchronisé(s) avec succès
-An error occurred. Please try again,Une erreur est survenue. Veuillez réessayer
-Request type/action is required,Le type ou l’action de la requête est requis
-%1 item(s) created successfully,%1 élément(s) créé(s) avec succès
-%1 item(s) updated successfully,%1 élément(s) mis à jour avec succès
-%1 item(s) failed to sync,La synchronisation de %1 élément(s) a échoué
-SyncCmsData is disabled,SyncCmsData est désactivé
-Extension settings are incorrectly configured,Les paramètres de l’extension sont incorrects
-Cannot generate access token for remote host,Impossible de générer le jeton d’accès de l’hôte distant
-"""Error: "" . . ""\n"" .",Message d’erreur
-"Enter Admin account of target website","Saisissez le compte administrateur du site web cible"
-"Enter Admin password of target website","Saisissez le mot de passe administrateur du site web cible"
-"Media type allowed to be synced(Separated by comma). E.g: jpg,png,jpeg","Types de médias pouvant être synchronisés (séparés par une virgule). Ex: jpg, png, jpeg"
-"Sub folder store Media of target website inside Root Media Directory. E.g: media/","Le sous-dossier stocke les médias du site web cible dans le répertoire racine des médias. Par exemple: media/"
-"Remote Media Sub Directory","Sous-répertoire multimédia distant"
-"Connection Setting","Paramètres de connexion"
-"Is Overwrite","Est-ce que c'est écrasé"
-"The content will be overwritten during synchronization if Yes.","Le contenu sera écrasé lors de la synchronisation si la réponse est oui."
+Allowed media types for synchronization (comma-separated),
+Media subfolder inside the Root Media Directory,
+Subfolder for the target website’s media within the Root Media Directory,
+Overwrite Existing Data,Écraser les données existantes
+"If enabled, existing content will be overwritten during synchronization",Le contenu existant sera écrasé durant la synchronisation si Activer
+Sync Push,Envoi des données
+Are you sure you want to sync selected items?,Êtes-vous sûr de vouloir synchroniser les éléments sélectionnés ?
+Sync Pull,Récupération des données
+Delete,Supprimer
+Are you sure you want to delete the selected widget(s)?,Êtes-vous sûr de vouloir supprimer le(s) widget(s) sélectionné(s) ?
+Sync items,Synchroniser les éléments
+Sync (Push),Envoi
+Sync (Pull),Récupération

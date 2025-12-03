@@ -1,37 +1,107 @@
+button_label,button_label
 Push all to %1,Push all to %1
-Pull all to %1,Pull all from %1
-Sync completed successfully,Sync completed successfully
+Pull all from %1,Pull all from %1
+Sync successfully,Sync successfully
 %1 item(s) synced successfully,%1 item(s) synced successfully
 An error occurred. Please try again,An error occurred. Please try again
 Request type/action is required,Request type/action is required
-%1 item(s) created successfully,%1 item(s) created successfully
-%1 item(s) updated successfully,%1 item(s) updated successfully
-%1 item(s) have been synced fail,%1 item(s) failed to sync
+Create successfully %1 item(s),Create successfully %1 item(s)
+Update successfully %1 item(s),Update successfully %1 item(s)
+Fail to sync %1 item(s),Fail to sync %1 item(s)
 SyncCmsData is disabled,SyncCmsData is disabled
-Extension settings are incorrectly configured,Extension settings are incorrectly configured
-Cannot generate access token for remote host,Cannot generate access token for remote host
-Error: … Response: HTTP Error: %1 %2,Error: … Response: HTTP error %1: %2
-"The CMS block with the ""%1"" ID doesn't exist.",CMS block with ID “%1” does not exist
-CMS block cannot be overwritten,CMS block cannot be overwritten
-"The CMS page with the ""%1"" ID doesn't exist.",CMS page with ID “%1” does not exist
-CMS page cannot be overwritten,CMS page cannot be overwritten
-Failed to load CMS block content,Failed to load CMS block content
+Extension settings are misconfigured,Extension settings are misconfigured
+Unable to generate remote host access token,Unable to generate remote host access token
+"""Error: "" . . ""\n"" .","""Error: "" . . ""\n"" ."
+Response: \nHTTP Error: %1 \n %2,Response: \nHTTP Error: %1 \n %2
+CMS block with ID “%1” does not exist,CMS block with ID “%1” does not exist
+The CMS block cannot be overwritten,The CMS block cannot be overwritten
+CMS page with ID “%1” does not exist,CMS page with ID “%1” does not exist
+The CMS page cannot be overwritten,The CMS page cannot be overwritten
+Fail to load CMS block content,Fail to load CMS block content
 Block store scope does not match,Block store scope does not match
 No remote block found with identifier %1,No remote block found with identifier %1
-Updating block identifier %1,Updating block identifier %1
-No remote block found on remote host %1,No remote block found on remote host %1
-Pull Block ID %1 – Status: %2,Pull Block ID %1 – Status: %2
-Pull Block – Status: Created %1,Pull Block – Status: Created %1
-Failed to retrieve configuration from remote host %1,Failed to retrieve configuration from remote host %1
+Update block identifier %1,Update block identifier %1
+No block exists on remote host %1,No block exists on remote host %1
+Pull Block ID: %1 || Status: %2.<br>,Pull Block ID: %1 || Status: %2.<br>
+Pull Block || Create - %1.<br>,Pull Block || Create - %1.<br>
+Fail to retrieve configuration from remote host %1,Fail to retrieve configuration from remote host %1
 No remote store found for block ID %1,No remote store found for block ID %1
-Failed to update remote block for block ID %1 – Reason: %2,Failed to update remote block for block ID %1 – Reason: %2
-…was skipped – Reason: Overwrite disabled on the remote host %3,Skipped – overwrite disabled on remote host %3
-…on remote host %3 successfully,Updated successfully on remote host %3
-Created new remote block with ID: %1…,New remote block %1 created successfully
-Created new remote block…failed – Reason:%2,Failed to create remote block – Reason: %2
-Push Block ID %1 – Status: %2,Push Block ID %1 – Status: %2
-Updated successfully,Updated successfully
-Created successfully,Created successfully
-Failed to load CMS page content,Failed to load CMS page content
+Fail to update remote block ID %1,Fail to update remote block ID %1
+Overwrite disabled on the remote host %1,Overwrite disabled on the remote host %1
+Update remote block ID %1 successfully ,Update remote block ID %1 successfully
+Fail to update remote block ID %1,Fail to update remote block ID %1
+"Creat new remote block ID %1  successfully (ID %1, Local ID %2, Host %3)","Creat new remote block ID %1  successfully (ID %1, Local ID %2, Host %3)"
+Fail to create remote block for ID %1,Fail to create remote block for ID %1
+Push Block ID %1 – Status: %2.<br>,Push Block ID %1 – Status: %2.<br>
+Update successfully,Update successfully
+Create successfully,Create successfully
+Create failed,Create failed
+Fail to load CMS page content,Fail to load CMS page content
 Page store scope does not match,Page store scope does not match
 No unique remote page found for identifier %1,No unique remote page found for identifier %1
+Pull successfully,Pull successfully
+No remote page exists on host %1,No remote page exists on host %1
+Skip - Overwrite disabled,Skip - Overwrite disabled
+"Pull Page — ID: %1, Status: %2","Pull Page — ID: %1, Status: %2"
+Pull Page — Creat: %1,Pull Page — Creat: %1
+Fail to load remote host configs for %1,Fail to load remote host configs for %1
+No remote store found for page ID %1,No remote store found for page ID %1
+Fail to update remote page ID %1 — Reason: %2,Fail to update remote page ID %1 — Reason: %2
+Update remote page ID: %1 successfully,Update remote page ID: %1 successfully
+Fail to update remote page ID: %1,Fail to update remote page ID: %1
+Create new remote page ID %1 successfully,Create new remote page ID %1 successfully
+Fail to create remote page for my page ID: %1,Fail to create remote page for my page ID: %1
+"Push Page — ID: %1, Status: %2","Push Page — ID: %1, Status: %2"
+Fail to load CMS widget content,Fail to load CMS widget content
+Widget store scope does not match,Widget store scope does not match
+No widget instance exists with identifier %1,No widget instance exists with identifier %1
+Widget instance store scope does not match,Widget instance store scope does not match
+No theme found for remote theme code %,No theme found for remote theme code %
+No widget instance exists on remote host %1,No widget instance exists on remote host %1
+Pull Widget ID: %1 || Status: %2.<br>,Pull Widget ID: %1 || Status: %2.<br>
+Pull Widget ID: %1 ||Status: %2.<br>,Pull Widget ID: %1 ||Status: %2.<br>
+"Pull Widget — ID: %1, Status: %2","Pull Widget — ID: %1, Status: %2"
+No remote store found for widget ID %1,No remote store found for widget ID %1
+Creat new remote widget ID: %1 successfully,Creat new remote widget ID: %1 successfully
+Fail to create new remote widget instance ID: %1 - Reason:%2,Fail to create new remote widget instance ID: %1 - Reason:%2
+Fail to update remote widget instance ID: %1 - Reason:%2,Fail to update remote widget instance ID: %1 - Reason:%2
+Update remote widget instance ID %1 successfully,Update remote widget instance ID %1 successfully
+Fail to update remote widget ID %1,Fail to update remote widget ID %1
+Created new remote widget instance ID %1 successfully,Created new remote widget instance ID %1 successfully
+Failed to update remote widget instance  ID %1,Failed to update remote widget instance  ID %1
+Fail to load CMS widget content.,Fail to load CMS widget content.
+Push Widget ID: %1,Push Widget ID: %1
+Pull from %1,Pull from %1
+Push to %1,Push to %1
+Identifier,Identifier
+"If left empty, an identifier will be auto-generated","If left empty, an identifier will be auto-generated"
+Success! Test again?,Success! Test again?
+Fail to connect! Retry?,Fail to connect! Retry?
+CMS Data Sync,CMS Data Sync
+Sutunam,Sutunam
+Connection Setting,Connection Setting
+Enable,Enable
+Website Name,Website Name
+"Live / Staging / Local, etc.","Live / Staging / Local, etc."
+Website URL,Website URL
+Example: http://magento.com/ (trailing slash required),Example: http://magento.com/ (trailing slash required)
+Username,Username
+Enter admin account of target website,Enter admin account of target website
+Password,Password
+Enter admin password for target website,Enter admin password for target website
+Test Connection,Test Connection
+Sync Media,Sync Media
+Media Type,Media Type
+Allowed media types for synchronization (comma-separated),Allowed media types for synchronization (comma-separated)
+Media subfolder inside the Root Media Directory,Media subfolder inside the Root Media Directory
+Subfolder for the target website’s media within the Root Media Directory,Subfolder for the target website’s media within the Root Media Directory
+Overwrite Existing Data,Overwrite Existing Data
+"If enabled, existing content will be overwritten during synchronization","If enabled, existing content will be overwritten during synchronization"
+Sync Push,Sync Push
+Are you sure you want to sync selected items?,Are you sure you want to sync selected items?
+Sync Pull,Sync Pull
+Delete,Delete
+Are you sure you want to delete the selected widget(s)?,Are you sure you want to delete the selected widget(s)?
+Sync items,Sync items
+Sync (Push),Sync (Push)
+Sync (Pull),Sync (Pull)
