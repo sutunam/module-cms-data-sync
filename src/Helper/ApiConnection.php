@@ -96,7 +96,7 @@ class ApiConnection
         ];
 
         if (!$this->configHelper->isEnabled()) {
-            $response['message'] = __('SyncCmsData is not enabled');
+            $response['message'] = __('SyncCmsData is disabled');
             $this->logger->info($response['message']);
             return $response;
         }

@@ -70,7 +70,7 @@ class SyncAll extends Action implements HttpGetActionInterface
                 $message[] = __('%1 item(s) created successfully', $createSuccess);
             }
             if ($updateSuccess = $result['total_update_success']) {
-                $message[] = __('Successfully updated %1 item(s)', $updateSuccess);
+                $message[] = __('%1 item(s) updated successfully', $updateSuccess);
             }
 
             if ($message) {

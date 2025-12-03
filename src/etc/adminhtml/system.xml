@@ -35,7 +35,7 @@
                 <field id="site_url" type="text" sortOrder="30" translate="label comment"
                        showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Website URL</label>
-                    <comment><![CDATA[For Example: http://magento.com/ (slash at the end of URL is required)]]></comment>
+                    <comment><![CDATA[Example: http://magento.com/ (trailing slash required)]]></comment>
                     <validate>validate-url required-entry</validate>
                     <depends>
                         <field id="enabled">1</field>

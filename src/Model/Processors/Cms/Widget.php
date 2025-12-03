@@ -432,11 +432,8 @@ class Widget implements ProcessorInterface
                     $result['success'] = $response['success'];
                     $result['type'] = 'created';
                     $result['success_message'] = __(
-                        'Created new remote widget instance with ID: %1
-                        (My widget instance ID: %2) on remote host %3 successfully',
-                        $response['data'][WidgetInstanceInterface::ID],
-                        $id,
-                        $this->configHelper->getSiteName()
+                        'Created new remote widget ID: %1 successfully',
+                        $response['data'][WidgetInstanceInterface::ID]
                     );
                     return $result;
                 }
@@ -493,13 +490,7 @@ class Widget implements ProcessorInterface
                 $remoteUsedStoreIds = array_merge($remoteWidgetInstanceStoreIds, $remoteUsedStoreIds);
 
                 if (!$isRemoteHostOverWritable) {
-                    $result['notice_message'] .= __(
-                        'Update remote widget instance for my widget instance ID: %1
-                        (Remote widget instance ID: %2) was skipped - Reason: Overwrite disabled on the remote host %3',
-                        $id,
-                        $remoteWidgetInstanceId,
-                        $this->configHelper->getSiteName()
-                    );
+                    $result['notice_message'] .= __('Overwrite disabled on the remote host %1');
                     continue;
                 }
 
@@ -528,19 +519,10 @@ class Widget implements ProcessorInterface
                 if ($response['success']) {
                     $result['success'] = true;
                     $result['success_message'] .= __(
-                        'Update remote widget instance for my widget instance ID: %1
-                        (Remote widget instance ID: %2) on remote host %2 successfully',
-                        $id,
-                        $remoteWidgetInstanceId,
-                        $this->configHelper->getSiteName()
-                    );
+                        'Update remote widget instance ID %1 successfully', $remoteWidgetInstanceId);
                 } else {
                     $result['error_message'] .= __(
-                        'Update remote widget instance for my widget instance ID: %1
-                        (Remote widget instance ID: %2) failed - Reason:%3',
-                        $id,
-                        $remoteWidgetInstanceId,
-                        $response['message']
+                        'Update remote widget instance ID %1 failed', $remoteWidgetInstanceId
                     );
                 }
             }
@@ -557,23 +539,19 @@ class Widget implements ProcessorInterface
 
                 if ($response['success']) {
                     $result['success_message'] .= __(
-                        'Created new remote widget instance with ID: %1
-                        (My widget instance ID: %2) on remote host %3 successfully',
+                        'Created new remote widget instance ID %1 successfully',
                         $response['data'][WidgetInstanceInterface::ID],
-                        $id,
-                        $this->configHelper->getSiteName()
                     );
                 } else {
                     $result['error_message'] .= __(
-                        'Created new remote widget instance for my widget instance ID: %1 failed - Reason:%2',
-                        $id,
-                        $response['message']
+                        'Created new remote widget instance for my widget instance ID %1 failed',
+                        $id
                     );
                 }
             }
             $result['type'] = 'updated';
         } else {
-            $result['error_message'] = __('Couldn\'t load CMS widget content.');
+            $result['error_message'] = __('Failed to load CMS widget content.');
         }
         return $result;
     }
@@ -608,12 +586,12 @@ class Widget implements ProcessorInterface
             if (!$response['success']) {
                 $result['total_failed']++;
                 $result['error_message'] .= ($response['error_message'] ? __(
-                    'Push Widget ID: %1 ||Status: %2.<br>',
+                    'Push Widget ID: %1',
                     $widgetId,
                     $response['error_message']
                 ) : '');
                 $result['notice_message'] .= ($response['notice_message'] ? __(
-                    'Push Widget ID: %1 ||Status: %2.<br>',
+                    'Push Widget ID: %1',
                     $widgetId,
                     $response['notice_message']
                 ) : '');
@@ -623,7 +601,7 @@ class Widget implements ProcessorInterface
             if ($response['type'] == 'created') {
                 $result['total_create_success']++;
                 $result['success_message'] .= __(
-                    'Push Widget ID: %1 ||Status: %2.<br>',
+                    'Push Widget ID: %1',
                     $widgetId,
                     __('Created successfully')
                 );
@@ -631,7 +609,7 @@ class Widget implements ProcessorInterface
             }
 
             $result['success_message'] .= __(
-                'Push Widget ID: %1 ||Status: %2.<br>',
+                'Push Widget ID: %1',
                 $widgetId,
                 __('Updated successfully')
             );

@@ -56,7 +56,7 @@ class Instance extends \Magento\Widget\Block\Adminhtml\Widget\Instance
             })'
             ]);
             $this->buttonList->add('pull_all', [
-                'label' => __('Pull all to %1', $this->configHelper->getSiteName()),
+                'label' => __('Pull all from %1', $this->configHelper->getSiteName()),
                 'class' => 'primary',
                 'on_click' => 'require([\'Magento_Ui/js/modal/confirm\'], function(confirm) {
                 confirm({

@@ -278,11 +278,7 @@ class Page implements ProcessorInterface
                     // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
                     $usagedStores = array_merge($myPage->getStores(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
-                        $result['notice_message'] .= __(
-                            'Pull Page ID: %1 || Status: %2.<br>',
-                            $myPage->getId(),
-                            __('Overwrite disabled - Skipped')
-                        );
+                        $result['notice_message'] .= __('Overwrite disabled - Skipped');
                         continue;
                     }
 
@@ -290,12 +286,12 @@ class Page implements ProcessorInterface
                     if (!$response['success']) {
                         $result['total_failed']++;
                         $result['error_message'] .= ($response['error_message'] ? __(
-                            'Pull Page ID: %1 || Status: %2.<br>',
+                            'Pull Page — ID: %1, Status: %2',
                             $myPage->getId(),
                             $response['error_message']
                         ) : '');
                         $result['notice_message'] .= ($response['notice_message'] ? __(
-                            'Pull Page ID: %1 || Status: %2.<br>',
+                            'Pull Page — ID: %1, Status: %2',
                             $myPage->getId(),
                             $response['notice_message']
                         ) : '');
@@ -303,7 +299,7 @@ class Page implements ProcessorInterface
                     }
 
                     $result['success_message'] .= __(
-                        'Pull Page ID: %1 || Status: %2.<br>',
+                        'Pull Page — ID: %1, Status: %2',
                         $myPage->getId(),
                         __('Updated successfully')
                     );
@@ -332,7 +328,7 @@ class Page implements ProcessorInterface
                 $myPage->save();
 
                 $result['success_message'] .= __(
-                    'Pull Page ID: %1 || Status: %2.<br>',
+                    'Pull Page — ID: %1, Status: %2',
                     $myPage->getId(),
                     __('Created successfully')
                 );
@@ -347,7 +343,7 @@ class Page implements ProcessorInterface
             } catch (\Exception $e) {
                 $result['total_failed']++;
                 $result['error_message'] .= __(
-                    'Pull Page || Status: Create - %1.<br>',
+                    'Pull Page — Created: %1',
                     $e->getMessage()
                 );
                 $this->logger->critical($e->getMessage());
@@ -376,13 +372,13 @@ class Page implements ProcessorInterface
 
         $entity = $this->getPage($id);
         if (!$entity) {
-            $result['error_message'] = __("Couldn't load CMS page content");
+            $result['error_message'] = __("Failed to load CMS page content");
             return $result;
         }
         $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
         if (!$remoteCmsSyncConfigs) {
             $result['error_message'] = __(
-                'Failed to get remote host configs for %1',
+                'Failed to load remote host configs for %1',
                 $this->configHelper->getSiteName()
             );
             return $result;
@@ -392,7 +388,7 @@ class Page implements ProcessorInterface
         $remoteStoreIds = $this->dataHelper->getMappedRemoteStoreIdsListByMyStoreIds($entity->getStores());
 
         if (!$remoteStoreIds) {
-            $result['error_message'] = __('No remote store found by page id %1', $id);
+            $result['error_message'] = __('No remote store found for page ID %1', $id);
             return $result;
         }
 
@@ -421,7 +417,7 @@ class Page implements ProcessorInterface
             ->getSize();
         if ($checkNumOfPageWithIdentifier > 1) {
             $result['error_message'] = __(
-                'Update remote page for my page ID: %1 failed - Reason:%2',
+                'Remote page update failed for ID %1 — Reason: %2',
                 $id,
                 'There\'s other CMS page affects with the same remote CMS page except page ID: ' . $id
             );
@@ -436,11 +432,7 @@ class Page implements ProcessorInterface
             // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
             $remoteUsedStoreIds = array_merge($remotePageStoreIds, $remoteUsedStoreIds);
             if (!$isRemoteHostOverWritable) {
-                $result['notice_message'] .= __(
-                    'Update remote page for my page ID: %1 (Remote Page ID: %2) was skipped'
-                    .' - Reason: Overwrite disabled on the remote host %3',
-                    $id,
-                    $remotePageId,
+                $result['notice_message'] .= __('Overwrite disabled on the remote host %1',
                     $this->configHelper->getSiteName()
                 );
                 continue;
@@ -471,19 +463,15 @@ class Page implements ProcessorInterface
             if ($response['success']) {
                 $result['success'] = true;
                 $result['success_message'] .= __(
-                    'Update remote page for my page ID: %1
-                    (Remote page ID: %2) on remote host %2 successfully',
-                    $id,
+                    'Update remote page ID: %1 for my page ID: %2 successfully',
                     $remotePageId,
-                    $this->configHelper->getSiteName()
+                    $id
                 );
             } else {
                 $result['error_message'] .= __(
-                    'Update remote page for my page ID: %1
-                    (Remote Page ID: %2) failed - Reason:%3',
-                    $id,
+                    'Update remote page ID: %1 for my page ID: %2 failed',
                     $remotePageId,
-                    $response['message']
+                    $id
                 );
             }
         }
@@ -554,21 +542,16 @@ class Page implements ProcessorInterface
                 'success' => true,
                 'type' => 'created',
                 'success_message' => __(
-                    'Created new remote page with ID: %1 (My page ID: %2) on remote host %3 successfully',
+                    'Created new remote page ID %1 (My page ID: %2)',
                     $response['data'][SutunamPageInterface::ID],
-                    $id,
-                    $this->configHelper->getSiteName()
+                    $id
                 )
             ];
         }
 
         return [
             'success' => false,
-            'error_message' => __(
-                'Failed to create remote page for my page ID: %1 - Reason: %2',
-                $id,
-                $response['message']
-            )
+            'error_message' => __('Failed to create remote page for my page ID: %1', $id)
         ];
     }
 
@@ -607,10 +590,10 @@ class Page implements ProcessorInterface
             if (!$response['success']) {
                 $result['total_failed']++;
                 if (!empty($response['error_message'])) {
-                    $errorMessages[] = __('Push Page ID: %1 ||Status: %2.', $pageId, $response['error_message']);
+                    $errorMessages[] = __('Push Page — ID: %1, Status: %2', $pageId, $response['error_message']);
                 }
                 if (!empty($response['notice_message'])) {
-                    $noticeMessages[] = __('Push Page ID: %1 ||Status: %2.', $pageId, $response['notice_message']);
+                    $noticeMessages[] = __('Push Page — ID: %1, Status: %2', $pageId, $response['notice_message']);
                 }
                 continue;
             }
@@ -618,7 +601,7 @@ class Page implements ProcessorInterface
             $statusMessage = ($response['type'] === 'created') ?
                 __('Created successfully') :
                 __('Updated successfully');
-            $successMessages[] = __('Push Page ID: %1 ||Status: %2.', $pageId, $statusMessage);
+            $successMessages[] = __('Push Page — ID: %1, Status: %2', $pageId, $statusMessage);
 
             if ($response['type'] === 'created') {
                 $result['total_create_success']++;

@@ -1,13 +1,13 @@
 Push all to %1,Push all to %1
 Pull all to %1,Pull all from %1
-Synced successfully,Synced successfully
+Sync completed successfully,Sync completed successfully
 %1 item(s) synced successfully,%1 item(s) synced successfully
 An error occurred. Please try again,An error occurred. Please try again
 Request type/action is required,Request type/action is required
 %1 item(s) created successfully,%1 item(s) created successfully
-Successfully updated %1 item(s),%1 item(s) updated successfully
+%1 item(s) updated successfully,%1 item(s) updated successfully
 %1 item(s) have been synced fail,%1 item(s) failed to sync
-SyncCmsData is not enabled,SyncCmsData is not enabled
+SyncCmsData is disabled,SyncCmsData is disabled
 Extension settings are incorrectly configured,Extension settings are incorrectly configured
 Cannot generate access token for remote host,Cannot generate access token for remote host
 Error: … Response: HTTP Error: %1 %2,Error: … Response: HTTP error %1: %2

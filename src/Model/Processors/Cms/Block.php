@@ -109,7 +109,7 @@ class Block implements ProcessorInterface
     {
         $block = $this->getBlock($id);
         if (!$block) {
-            return ['success' => false, 'error_message' => __('Couldn\'t load CMS block content.')];
+            return ['success' => false, 'error_message' => __('Failed to load CMS block content')];
         }
 
         // Get Store ID and Map to Store Code
@@ -319,7 +319,7 @@ class Block implements ProcessorInterface
             } catch (\Exception $e) {
                 $result['total_failed']++;
                 $result['error_message'] .= __(
-                    'Pull Block || Status: Create - %1.<br>',
+                    'Pull Block — Created: %1<br>',
                     $e->getMessage()
                 );
                 $this->logger->critical($e->getMessage());
@@ -394,9 +394,8 @@ class Block implements ProcessorInterface
 
         if ($checkNumOfBlockWithIdentifier > 1) {
             $result['error_message'] = __(
-                'Failed to update remote block for block ID %1 – Reason: %2',
-                $id,
-                'There\'s another CMS block affecting the same remote CMS block except block ID: ' . $id
+                'Failed to update remote block for block ID %1',
+                $id
             );
             return $result;
         }
@@ -411,10 +410,7 @@ class Block implements ProcessorInterface
 
             if (!$isRemoteHostOverWritable) {
                 $result['notice_message'] .= __(
-                    '<br>Update remote block for my block ID: %1 (Remote Block ID: %2) was skipped'
-                    . ' - Reason: Overwrite disabled on the remote host %3',
-                    $id,
-                    $remoteBlockId,
+                    'Overwrite disabled on the remote host %1',
                     $this->configHelper->getSiteName()
                 );
                 continue;
@@ -443,17 +439,15 @@ class Block implements ProcessorInterface
             if ($response['success']) {
                 $result['success'] = true;
                 $result['success_message'] .= __(
-                    'Update remote block for my block ID: %1 (Remote block ID: %2) on remote host %3 successfully',
-                    $id,
+                    'Update remote block ID %1 for my block ID: %1 successfully',
                     $remoteBlockId,
-                    $this->configHelper->getSiteName()
+                    $id
                 );
             } else {
                 $result['error_message'] .= __(
-                    'Update remote block for my block ID: %1 (Remote Block ID: %2) failed - Reason: %3',
-                    $id,
+                    'Update remote block %1 for my block ID: %2 failed',
                     $remoteBlockId,
-                    $response['message']
+                    $id
                 );
             }
         }
@@ -514,16 +508,14 @@ class Block implements ProcessorInterface
             $result['success'] = true;
             $result['type'] = 'created';
             $result['success_message'] = __(
-                'Created new remote block with ID: %1 (My block ID: %2) on remote host %3 successfully',
+                'Created new remote block ID %1 (My block ID: %2) successfully',
                 $response['data'][SutunamBlockInterface::ID],
-                $id,
-                $this->configHelper->getSiteName()
+                $id
             );
         } else {
             $result['error_message'] = __(
-                'Created new remote block for my block ID: %1 failed - Reason:%2',
-                $id,
-                $response['message']
+                'Created new remote block for my block ID: %1 failed',
+                $id
             );
         }
 

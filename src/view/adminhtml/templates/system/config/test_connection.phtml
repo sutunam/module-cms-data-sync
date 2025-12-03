@@ -16,8 +16,8 @@ use Sutunam\CmsDataSync\Block\Adminhtml\System\Config\TestConnection;
         data-mage-init='{"testConnection":{
             "url": "<?= $escaper->escapeUrl($block->getAjaxUrl()) ?>",
             "elementId": "<?= /* @noEscape */ $block->getHtmlId() ?>",
-            "successText": "<?= $escaper->escapeHtmlAttr(__('Successful! Test again?')) ?>",
-            "failedText": "<?= $escaper->escapeHtmlAttr(__('Connection failed! Test again?')) ?>",
+            "successText": "<?= $escaper->escapeHtmlAttr(__('Success! Test again?')) ?>",
+            "failedText": "<?= $escaper->escapeHtmlAttr(__('Connection failed! Retry?')) ?>",
             "fieldMapping": "<?= /* @noEscape */ $block->getFieldMapping() ?>"}, "validation": {}}'>
     <span id="<?= /* @noEscape */ $block->getHtmlId() ?>_result">
         <?= $escaper->escapeHtml($block->getButtonLabel()) ?>

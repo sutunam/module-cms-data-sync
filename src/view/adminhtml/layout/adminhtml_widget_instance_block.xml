@@ -18,26 +18,20 @@
                         <item name="label" xsi:type="string" translate="true">Sync Push</item>
                         <item name="url" xsi:type="string">cms_data_sync/action/massSync/type/Widget/action/push</item>
                         <item name="selected" xsi:type="string">0</item>
-                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to sync selected
-                            items?
-                        </item>
+                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to sync selected items?</item>
                         <item name="type" xsi:type="string">sync_push</item>
                     </item>
                     <item name="sync_pull" xsi:type="array">
                         <item name="label" xsi:type="string" translate="true">Sync Pull</item>
                         <item name="url" xsi:type="string">cms_data_sync/action/massSync/type/Widget/action/pull</item>
                         <item name="selected" xsi:type="string">0</item>
-                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to sync selected
-                            items?
-                        </item>
+                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to sync selected items?</item>
                     </item>
                     <item name="delete" xsi:type="array">
                         <item name="label" xsi:type="string" translate="true">Delete</item>
                         <item name="url" xsi:type="string">*/*/massDelete</item>
                         <item name="selected" xsi:type="string">0</item>
-                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to delete the
-                            selected widget(s)?
-                        </item>
+                        <item name="confirm" xsi:type="string" translate="true">Are you sure you want to delete the selected widget(s)?</item>
                     </item>
                 </argument>
             </arguments>

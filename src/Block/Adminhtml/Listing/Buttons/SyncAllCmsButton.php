@@ -59,7 +59,7 @@ class SyncAllCmsButton implements ButtonProviderInterface
         }
 
         $label = $this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PULL ?
-            'Pull all to %1' : ($this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PUSH ? 'Push all to %1' : '');
+            'Pull all from %1' : ($this->data['action'] == ApiHelper::REQUEST_SYNC_TYPE_PUSH ? 'Push all to %1' : '');
 
         return [
             'label' => __($label, $this->configHelper->getSiteName()),

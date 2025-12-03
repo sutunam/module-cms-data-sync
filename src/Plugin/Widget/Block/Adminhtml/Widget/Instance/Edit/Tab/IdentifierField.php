@@ -35,7 +35,7 @@ class IdentifierField
                 'id' => 'identifier',
                 'title' => __('Identifier'),
                 'required' => false,
-                'note' => __('If this field is empty, the identifier will be auto generated.'),
+                'note' => __('If left empty, an identifier will be auto-generated'),
                 'value' => $subject->getWidgetInstance()->getData('identifier')
             ]
         );

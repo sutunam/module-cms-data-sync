@@ -1,14 +1,14 @@
 button_label,Libellé du bouton
 Push all to %1,Pousser tout vers %1
 Pull all to %1,Récupérer tout depuis %1
-Synced successfully,Synchronisation terminée avec succès
+Sync completed successfully,Synchronisation terminée avec succès
 %1 item(s) synced successfully,%1 élément(s) synchronisé(s) avec succès
 An error occurred. Please try again,Une erreur est survenue. Veuillez réessayer
 Request type/action is required,Le type ou l’action de la requête est requis
 %1 item(s) created successfully,%1 élément(s) créé(s) avec succès
-Successfully updated %1 item(s),%1 élément(s) mis à jour avec succès
+%1 item(s) updated successfully,%1 élément(s) mis à jour avec succès
 %1 item(s) failed to sync,La synchronisation de %1 élément(s) a échoué
-SyncCmsData is not enabled,SyncCmsData n’est pas activé
+SyncCmsData is disabled,SyncCmsData n’est pas activé
 Extension settings are incorrectly configured,Les paramètres de l’extension sont incorrects
 Cannot generate access token for remote host,Impossible de générer le jeton d’accès de l’hôte distant
 """Error: "" . . ""\n"" .",Message d’erreur
@@ -23,7 +23,7 @@ No remote block found with identifier %1,Aucun bloc distant trouvé avec l’ide
 Updating block identifier %1,Mise à jour de l’identifiant du bloc %1
 No remote block found on remote host %1,Aucun bloc n’existe sur l’hôte distant %1
 Pull Block ID %1 – Status: %2.<br>,"Récupération du bloc — ID : %1, Statut : %2"
-Pull Block || Status: Create - %1.<br>,Récupération du bloc — Créé : %1
+Pull Block — Created: %1<br>,Récupération du bloc — Créé : %1
 Failed to retrieve configuration from remote host %1,Impossible d’obtenir la configuration de l’hôte %1
 No remote store found for block ID %1,Aucun magasin distant trouvé pour l’ID de bloc %1
 Failed to update remote block for block ID %1 – Reason: %2,Échec de la mise à jour du bloc distant pour l’ID %1 — Raison : %2
@@ -40,12 +40,12 @@ Page store scope does not match,La portée de magasin de la page ne correspond p
 No unique remote page found for identifier %1,Aucune page distante unique trouvée pour l’identifiant %1
 Pull Successfully,Récupération réussie
 There is no remote page on the remote host %1,Aucune page distante n’existe sur l’hôte %1
-Pull Page ID: %1 || Status: %2.<br>,"Récupération de la page — ID : %1, Statut : %2"
-Pull Page || Status: Create - %1.<br>,Récupération de la page — Créée : %1
-Couldn't load CMS page content,Impossible de charger le contenu de la page CMS
-Failed to get remote host configs for %1,Impossible de charger les configurations de l’hôte %1
-No remote store found by page id %1,Aucun magasin distant trouvé pour l’ID de page %1
-Update remote page for my page ID: %1 failed - Reason:%2,Échec de la mise à jour de la page distante pour l’ID %1 — Raison : %2
+Pull Page — ID: %1, Status: %2,"Récupération de la page — ID : %1, Statut : %2"
+Pull Page — Created: %1,Récupération de la page — Créée : %1
+Failed to load CMS page content,Impossible de charger le contenu de la page CMS
+Failed to load remote host configs for %1,Impossible de charger les configurations de l’hôte %1
+No remote store found for page ID %1,Aucun magasin distant trouvé pour l’ID de page %1
+Remote page update failed for ID %1 — Reason: %2,Échec de la mise à jour de la page distante pour l’ID %1 — Raison : %2
 Update remote page for my page ID: %1 (Remote Page ID: %2) was skipped - Reason: Overwrite disabled on the remote host %3,"Mise à jour ignorée — écrasement désactivé (ID %1, ID distant %2, Hôte %3)"
 "Update remote page for my page ID: %1
                     (Remote page ID: %2) on remote host %2 successfully","Page distante mise à jour avec succès (ID %1, ID distant %2)"
@@ -53,7 +53,7 @@ Update remote page for my page ID: %1 (Remote Page ID: %2) was skipped - Reason:
                     (Remote Page ID: %2) failed - Reason:%3","Échec de mise à jour de la page distante (ID %1, ID distant %2) — %3"
 Created new remote page with ID: %1 (My page ID: %2) on remote host %3 successfully,"Nouvelle page distante créée avec succès (ID %1, ID local %2, Hôte %3)"
 Failed to create remote page for my page ID: %1 - Reason: %2,Échec de la création de la page distante pour l’ID %1 — %2
-Push Page ID: %1 ||Status: %2.,"Envoi de la page — ID : %1, Statut : %2"
+Push Page — ID: %1, Status: %2,"Envoi de la page — ID : %1, Statut : %2"
 Could't load CMS widget content.,Impossible de charger le contenu du widget CMS
 The store scope of widget is not match.,La portée de magasin du widget ne correspond pas
 There is no remote widget instance with identifier %1,Aucun widget distant trouvé avec l’identifiant %1
@@ -75,13 +75,13 @@ Update remote widget instance for my widget instance ID: %1 failed - Reason:%2,�
 "Update remote widget instance for my widget instance ID: %1
                         (Remote widget instance ID: %2) failed - Reason:%3","Échec de mise à jour de l’instance de widget distante (ID local %1, ID distant %2) — %3"
 Couldn't load CMS widget content.,Impossible de charger le contenu du widget CMS
-Push Widget ID: %1 ||Status: %2.<br>,Envoi Widget ID: %1
+Push Widget ID: %1,Envoi Widget ID: %1
 Pull from %1,Récupérer depuis %1
 Push to %1,Envoyer vers %1
 Identifier,Identifiant
-"If this field is empty, the identifier will be auto generated.","Si ce champ est vide, un identifiant sera généré automatiquement"
-Successful! Test again?,Réussi ! Tester à nouveau ?
-Connection failed! Test again?,Connexion échouée ! Réessayer ?
+"If left empty, an identifier will be auto-generated","Si ce champ est vide, un identifiant sera généré automatiquement"
+Success! Test again?,Réussi ! Tester à nouveau ?
+Connection failed! Retry?,Connexion échouée ! Réessayer ?
 Cms Data Sync,Synchronisation des données CMS
 Sutunam,Sutunam
 Connection,Connexion
@@ -89,7 +89,7 @@ Enable,Activer
 Website name,Nom du site
 Live/Staging/Local ..etc,"Production / Préproduction / Local, etc."
 Website URL,URL du site
-For Example: http://magento.com/ (slash at the end of URL is required),Exemple : http://magento.com/ (le slash final est obligatoire)
+Example: http://magento.com/ (trailing slash required),Exemple : http://magento.com/ (le slash final est obligatoire)
 Username,Nom d’utilisateur
 Enter Admin account of target website,Saisir le compte administrateur du site cible
 Password,Mot de passe
@@ -100,14 +100,14 @@ Media Type,Type de média
 button_label,Libellé du bouton
 Push All to %2,Envoyer tout vers %2
 Pull All from %2,Récupérer tout depuis %2
-Synced successfully,Synchronisation terminée avec succès
+Sync completed successfully,Synchronisation terminée avec succès
 %1 item(s) synced successfully,%1 élément(s) synchronisé(s) avec succès
 An error occurred. Please try again,Une erreur est survenue. Veuillez réessayer
 Request type/action is required,Le type ou l’action de la requête est requis
 %1 item(s) created successfully,%1 élément(s) créé(s) avec succès
-Successfully updated %1 item(s),%1 élément(s) mis à jour avec succès
+%1 item(s) updated successfully,%1 élément(s) mis à jour avec succès
 %1 item(s) failed to sync,La synchronisation de %1 élément(s) a échoué
-SyncCmsData is not enabled,SyncCmsData est désactivé
+SyncCmsData is disabled,SyncCmsData est désactivé
 Extension settings are incorrectly configured,Les paramètres de l’extension sont incorrects
 Cannot generate access token for remote host,Impossible de générer le jeton d’accès de l’hôte distant
 """Error: "" . . ""\n"" .",Message d’erreur
