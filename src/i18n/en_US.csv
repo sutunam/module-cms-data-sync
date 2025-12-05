@@ -77,11 +77,11 @@ Identifier,Identifier
 "If left empty, an identifier will be auto-generated","If left empty, an identifier will be auto-generated"
 Success! Test again?,Success! Test again?
 Fail to connect! Retry?,Fail to connect! Retry?
-CMS Data Sync,CMS Data Sync
+Cms data sync,CMS Data Sync
 Sutunam,Sutunam
 Connection Setting,Connection Setting
 Enable,Enable
-Website Name,Website Name
+Website name,Website Name
 "Live / Staging / Local, etc.","Live / Staging / Local, etc."
 Website URL,Website URL
 Example: http://magento.com/ (trailing slash required),Example: http://magento.com/ (trailing slash required)
