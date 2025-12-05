@@ -25,7 +25,7 @@
                 </field>
                 <field id="site_name" type="text" translate="label comment"
                        sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Website name</label>
+                    <label>Website Name</label>
                     <validate>required-entry</validate>
                     <comment><![CDATA[Live / Staging / Local, etc.]]></comment>
                     <depends>

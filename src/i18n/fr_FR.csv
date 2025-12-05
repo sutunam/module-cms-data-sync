@@ -92,11 +92,11 @@ Enter admin password for target website,Saisir le mot de passe administrateur du
 Test Connection,Tester la connexion
 Sync Media,Synchroniser les médias
 Media Type,Type de média
-Allowed media types for synchronization (comma-separated),
-Media subfolder inside the Root Media Directory,
-Subfolder for the target website’s media within the Root Media Directory,
+Allowed media types for synchronization (comma-separated),Types de médias autorisés pour la synchronisation (séparés par des virgules)
+Media subfolder inside the Root Media Directory,Sous-dossier des médias dans le répertoire média principal
+Subfolder for the target website’s media within the Root Media Directory,Sous-dossier pour les médias du site cible dans le répertoire média principal
 Overwrite Existing Data,Écraser les données existantes
-"If enabled, existing content will be overwritten during synchronization",Le contenu existant sera écrasé durant la synchronisation si Activer
+"If enabled, existing content will be overwritten during synchronization","Le contenu existant sera écrasé durant la synchronisation si Activer"
 Sync Push,Envoi des données
 Are you sure you want to sync selected items?,Êtes-vous sûr de vouloir synchroniser les éléments sélectionnés ?
 Sync Pull,Récupération des données
