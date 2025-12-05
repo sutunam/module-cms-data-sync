@@ -67,10 +67,10 @@ class SyncAll extends Action implements HttpGetActionInterface
             }
             $message = [];
             if ($createSuccess = $result['total_create_success']) {
-                $message[] = __('%1 item(s) created successfully', $createSuccess);
+                $message[] = __('Create successfully %1 item(s)', $createSuccess);
             }
             if ($updateSuccess = $result['total_update_success']) {
-                $message[] = __('%1 item(s) updated successfully', $updateSuccess);
+                $message[] = __('Update successfully %1 item(s)', $updateSuccess);
             }
 
             if ($message) {
@@ -78,7 +78,7 @@ class SyncAll extends Action implements HttpGetActionInterface
             }
 
             if ($totalFailed = $result['total_failed']) {
-                $message = __('%1 item(s) failed to sync', $totalFailed);
+                $message = __('Fail to sync %1 item(s)', $totalFailed);
                 $this->messageManager->addErrorMessage($message);
             }
             if ($result['error_message']) {

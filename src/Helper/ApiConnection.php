@@ -102,14 +102,14 @@ class ApiConnection
         }
 
         if (!$this->settingCheck()) {
-            $response['message'] = __('Extension settings are incorrectly configured');
+            $response['message'] = __('Extension settings are misconfigured');
             $this->logger->info($response['message']);
             return $response;
         }
 
         $accessToken = $this->getAdminToken();
         if (!$accessToken) {
-            $response['message'] = __('Cannot generate access token for remote host');
+            $response['message'] = __('Unable to generate remote host access token');
             $this->logger->info($response['message']);
             return $response;
         }
@@ -188,7 +188,7 @@ class ApiConnection
         if (!$this->configHelper->getSiteName()) {
             $settingUrl = $this->url->getUrl('adminhtml/system_config/edit', ['section'=>'cms_data_sync']);
             $this->messageManager->addErrorMessage(
-                "Extension settings are incorrectly configured "
+                "Extension settings are misconfigured "
                 . "Please <a href='$settingUrl'>click here</a> to configure them."
             );
             return false;

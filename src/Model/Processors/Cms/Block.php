@@ -109,7 +109,7 @@ class Block implements ProcessorInterface
     {
         $block = $this->getBlock($id);
         if (!$block) {
-            return ['success' => false, 'error_message' => __('Failed to load CMS block content')];
+            return ['success' => false, 'error_message' => __('Fail to load CMS block content')];
         }
 
         // Get Store ID and Map to Store Code
@@ -190,7 +190,7 @@ class Block implements ProcessorInterface
 
             return [
                 'success' => true,
-                'success_message' => __('Updating block identifier %1', $block->getIdentifier())
+                'success_message' => __('Update block identifier %1', $block->getIdentifier())
             ];
 
         } catch (\Exception $e) {
@@ -218,7 +218,7 @@ class Block implements ProcessorInterface
         $allRemoteBlocks = $this->apiHelper->getAllCms(ApiHelper::CMS_TYPE_BLOCK);
         if (!$allRemoteBlocks) {
             $result['error_message'] = __(
-                'No remote block found on remote host %1',
+                'No block exists on remote host %1',
                 $this->configHelper->getSiteName()
             );
             return $result;
@@ -250,9 +250,9 @@ class Block implements ProcessorInterface
                     $usagedStores = array_merge($myBlock->getStores(), $usagedStores);
                     if (!$this->configHelper->isOverwrite()) {
                         $result['notice_message'] .= __(
-                            'Pull Block ID %1 – Status: %2.<br>',
+                            'Pull Block ID: %1 || Status: %2.<br>',
                             $myBlock->getId(),
-                            __('Overwrite disabled - Skipped')
+                            __('Skip - Overwrite disabled')
                         );
                         continue;
                     }
@@ -261,12 +261,12 @@ class Block implements ProcessorInterface
                     if (!$response['success']) {
                         $result['total_failed']++;
                         $result['error_message'] .= ($response['error_message'] ? __(
-                            'Pull Block ID %1 – Status: %2.<br>',
+                            'Pull Block ID: %1 || Status: %2.<br>',
                             $myBlock->getId(),
                             $response['error_message']
                         ) : '');
                         $result['notice_message'] .= ($response['notice_message'] ? __(
-                            'Pull Block ID %1 – Status: %2.<br>',
+                            'Pull Block ID: %1 || Status: %2.<br>',
                             $myBlock->getId(),
                             $response['notice_message']
                         ) : '');
@@ -274,9 +274,9 @@ class Block implements ProcessorInterface
                     }
 
                     $result['success_message'] .= __(
-                        'Pull Block ID %1 – Status: %2.<br>',
+                        'Pull Block ID: %1 || Status: %2.<br>',
                         $myBlock->getId(),
-                        __('Updated successfully')
+                        __('Update successfully')
                     );
                     $result['total_update_success']++;
                 }
@@ -310,16 +310,16 @@ class Block implements ProcessorInterface
                 }
 
                 $result['success_message'] .= __(
-                    'Pull Block ID %1 – Status: %2.<br>',
+                    'Pull Block ID: %1 || Status: %2.<br>',
                     $myBlock->getId(),
-                    __('Created successfully')
+                    __('Create successfully')
                 );
                 $result['total_create_success']++;
 
             } catch (\Exception $e) {
                 $result['total_failed']++;
                 $result['error_message'] .= __(
-                    'Pull Block — Created: %1<br>',
+                    'Pull Block || Create - %1.<br>',
                     $e->getMessage()
                 );
                 $this->logger->critical($e->getMessage());
@@ -348,14 +348,14 @@ class Block implements ProcessorInterface
 
         $entity = $this->getBlock($id);
         if (!$entity) {
-            $result['error_message'] = __("Failed to load CMS block content");
+            $result['error_message'] = __("Fail to load CMS block content");
             return $result;
         }
 
         $remoteCmsSyncConfigs = $this->dataHelper->getCmsSyncConfigs();
         if (!$remoteCmsSyncConfigs) {
             $result['error_message'] = __(
-                'Failed to retrieve configuration from remote host %1',
+                'Fail to retrieve configuration from remote host %1',
                 $this->configHelper->getSiteName()
             );
             return $result;
@@ -394,7 +394,7 @@ class Block implements ProcessorInterface
 
         if ($checkNumOfBlockWithIdentifier > 1) {
             $result['error_message'] = __(
-                'Failed to update remote block for block ID %1',
+                'Fail to update remote block ID %1',
                 $id
             );
             return $result;
@@ -439,13 +439,13 @@ class Block implements ProcessorInterface
             if ($response['success']) {
                 $result['success'] = true;
                 $result['success_message'] .= __(
-                    'Update remote block ID %1 for my block ID: %1 successfully',
+                    'Update remote block ID %1 successfully',
                     $remoteBlockId,
                     $id
                 );
             } else {
                 $result['error_message'] .= __(
-                    'Update remote block %1 for my block ID: %2 failed',
+                    'Fail to update remote block ID %1',
                     $remoteBlockId,
                     $id
                 );
@@ -508,13 +508,14 @@ class Block implements ProcessorInterface
             $result['success'] = true;
             $result['type'] = 'created';
             $result['success_message'] = __(
-                'Created new remote block ID %1 (My block ID: %2) successfully',
+                'Creat new remote block ID %1  successfully (ID %1, Local ID %2, Host %3)',
                 $response['data'][SutunamBlockInterface::ID],
-                $id
+                $id,
+                $this->configHelper->getSiteName()
             );
         } else {
             $result['error_message'] = __(
-                'Created new remote block for my block ID: %1 failed',
+                'Fail to create remote block for ID %1',
                 $id
             );
         }
@@ -542,7 +543,7 @@ class Block implements ProcessorInterface
         if (!$allBlockIds) {
             return array_merge($result, [
                 'error_message' => __(
-                    'No remote block found on remote host %1',
+                    'No block exists on remote host %1',
                     $this->configHelper->getSiteName()
                 )
             ]);
@@ -570,11 +571,11 @@ class Block implements ProcessorInterface
                 continue;
             }
 
-            $statusMessage = __('Updated successfully');
+            $statusMessage = __('Update successfully');
             switch ($response['type']) {
                 case 'created':
                     $result['total_create_success']++;
-                    $statusMessage = __('Created successfully');
+                    $statusMessage = __('Create successfully');
                     break;
                 default:
                     $result['total_update_success']++;

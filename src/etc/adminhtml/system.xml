@@ -27,7 +27,7 @@
                        sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Website name</label>
                     <validate>required-entry</validate>
-                    <comment><![CDATA[Live/Staging/Local ..etc]]></comment>
+                    <comment><![CDATA[Live / Staging / Local, etc.]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -55,7 +55,7 @@
                     <label>Password</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <validate>required-entry</validate>
-                    <comment><![CDATA[Enter Admin password of target website]]></comment>
+                    <comment><![CDATA[Enter admin password for target website]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -80,7 +80,7 @@
                 <field id="media_type" type="text" sortOrder="80" translate="label comment"
                        showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Media Type</label>
-                    <comment><![CDATA[Media type allowed to be synced(Separated by comma). E.g: jpg,png,jpeg]]></comment>
+                    <comment><![CDATA[Allowed media types for synchronization (comma-separated)]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                         <field id="sync_media">1</field>
@@ -88,8 +88,8 @@
                 </field>
                 <field id="remote_media_subdir" type="text" sortOrder="100" translate="label comment"
                        showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Remote Media Sub Directory</label>
-                    <comment><![CDATA[Sub folder store Media of target website inside Root Media Directory. E.g: media/]]></comment>
+                    <label>Media subfolder inside the Root Media Directory</label>
+                    <comment><![CDATA[Subfolder for the target website’s media within the Root Media Directory]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                         <field id="sync_media">1</field>
@@ -97,9 +97,9 @@
                 </field>
                 <field id="is_overwrite" type="select" sortOrder="110" translate="label comment"
                        showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Is Overwrite</label>
+                    <label>Overwrite Existing Data</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
-                    <comment><![CDATA[The content will be overwritten during synchronization if Yes.]]></comment>
+                    <comment><![CDATA[If enabled, existing content will be overwritten during synchronization]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>

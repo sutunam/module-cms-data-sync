@@ -232,7 +232,7 @@ class PageRepository implements SutunamPageRepositoryInterface
     {
         /** @var Page $page */
         if ($page->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
-            throw new CouldNotSaveException(__('CMS page cannot be overwritten'));
+            throw new CouldNotSaveException(__('The CMS page cannot be overwritten'));
         }
 
         $page->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($page->getStores()));

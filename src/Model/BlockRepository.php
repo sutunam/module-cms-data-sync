@@ -218,7 +218,7 @@ class BlockRepository implements SutunamBlockRepositoryInterface
     {
         /** @var Block $block */
         if ($block->getId() && !$this->sutunamConfigHelper->isOverwrite()) {
-            throw new CouldNotSaveException(__('CMS block cannot be overwritten'));
+            throw new CouldNotSaveException(__('The CMS block cannot be overwritten'));
         }
         $block->setStoreCode($this->sutunamDataHelper->getStoreCodesByIds($block->getStores()));
 
