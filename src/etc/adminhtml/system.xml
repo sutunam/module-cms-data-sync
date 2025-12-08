@@ -12,7 +12,7 @@
             <label>Sutunam</label>
         </tab>
         <section id="cms_data_sync" translate="label" showInDefault="1" showInWebsite="1" showInStore="0">
-            <label>Cms Data Sync</label>
+            <label>Cms data sync</label>
             <tab>sutunam</tab>
             <resource>Sutunam_CmsDataSync::config</resource>
             <group id="connection" type="text" sortOrder="0"
@@ -25,7 +25,7 @@
                 </field>
                 <field id="site_name" type="text" translate="label comment"
                        sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Website Name</label>
+                    <label>Website name</label>
                     <validate>required-entry</validate>
                     <comment><![CDATA[Live / Staging / Local, etc.]]></comment>
                     <depends>
