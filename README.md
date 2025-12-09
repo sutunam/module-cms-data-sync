@@ -118,19 +118,3 @@ Simply click the desired sync option, and the CMS data will be transferred autom
 ![](https://i.imgur.com/dI29nze.png)
 
 <i>Note: The cms page management is the same as the block ui listing page</i>
-
-# Change log
-    1.0.0
-        Init extension
-    1.0.1
-        Fix bug missing data table layout_update,layout_link and widget_instance_page_layout when setting module
-    1.0.2
-        Compatible to m2.4.8
-    1.0.3
-        Fix phpcs
-    1.0.4
-        Encrypt password in database
-    1.0.5
-        Update README.md
-    1.0.6
-        Improve coding, fix phpcs issues
