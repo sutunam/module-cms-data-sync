@@ -1,5 +1,8 @@
 # 📝 Changelog
 
+## 1.0.7
+- Update README with correct structure
+
 ## 1.0.6
 - Improve coding
 - Fix PHPCS issues
