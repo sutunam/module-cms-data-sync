@@ -1,29 +1,24 @@
-# CMS Data Sync - Magento 2 Extension
+# Sutunam_CmsDataSync Module
 
+This extension streamlines the process of copying CMS contents between two enviroments.
+It works seamlessly with any number of configurations, media files, styles, or blocks, reducing the need for manual work.
 
-- Description:
-This extension streamlines the process of copying all CMS blocks and pages from your testing site to your production site. It works seamlessly with any number of configurations, media files, styles, or blocks, reducing the need for manual work.
+## Features
+    - Bi-directional CMS synchronization (push & pull)
 
+    - Supports CMS blocks, pages, and widgets
 
-- Goal:
-Save time and effort by enabling users to migrate CMS content with just one or two clicks, ensuring accurate and efficient transfer between environments.
+    - Batch and single-entity synchronization
+
+    - REST API–driven, environment-agnostic architecture
 
 # Installation
 ## Composer
 
-Add Sutunam Composer repository:
-
-```json
-"repositories": {
-    "sutunam": {
-        "type": "composer",
-        "url": "https://composer.sutunam.com/m2/"
-    }
-}
-```
 Require the package:
 
 ```bash
+composer config repositories.sutunam composer https://composer.sutunam.com/m2/
 composer require sutunam/module-cms-data-sync
 ```
 Then, execute the following Magento commands:
@@ -31,14 +26,9 @@ Then, execute the following Magento commands:
 ```bash
 bin/magento module:enable Sutunam_CmsDataSync
 bin/magento setup:upgrade
-bin/magento cache:flush
-```
-
-If you are in production mode, also run:
-
-```bash
 bin/magento setup:di:compile
 bin/magento setup:static-content:deploy -f
+bin/magento cache:flush
 ```
 
 # Configurations:
@@ -111,10 +101,18 @@ Simply click the desired sync option, and the CMS data will be transferred autom
 
 
 1. In listing page:
-![](https://i.imgur.com/G3tuKMv.png)
+   ![](https://i.imgur.com/G3tuKMv.png)
 
 
 1. In each page:
-![](https://i.imgur.com/dI29nze.png)
+   ![](https://i.imgur.com/dI29nze.png)
 
 <i>Note: The cms page management is the same as the block ui listing page</i>
+
+### Layouts
+
+This module introduces the following layouts and layout handles in the `view/adminhtml/layout` directory:
+
+- `adminhtml_widget_instance_block`
+- `adminhtml_widget_instance_edit`
+- `adminhtml_widget_instance_index`
