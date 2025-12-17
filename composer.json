@@ -23,5 +23,12 @@
             "type": "composer",
             "url": "https://repo.magento.com/"
         }
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "magento/composer-dependency-version-audit-plugin": false
+        }
     }
+
 }
