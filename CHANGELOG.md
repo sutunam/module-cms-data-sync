@@ -1,5 +1,8 @@
 # 📝 Changelog
 
+## 1.0.9
+- Update folder structure
+
 ## 1.0.7
 - Update README with correct structure
 
