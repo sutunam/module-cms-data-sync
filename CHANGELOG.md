@@ -1,5 +1,8 @@
 # 📝 Changelog
 
+## 1.1.0
+- Publish the module
+
 ## 1.0.9
 - Update folder structure
 

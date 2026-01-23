@@ -1,4 +1,4 @@
-# Sutunam_CmsDataSync Module
+# CMS Data Sync – Magento 2 Extension
 
 This extension streamlines the process of copying CMS contents between two enviroments.
 It works seamlessly with any number of configurations, media files, styles, or blocks, reducing the need for manual work.
@@ -18,7 +18,6 @@ It works seamlessly with any number of configurations, media files, styles, or b
 Require the package:
 
 ```bash
-composer config repositories.sutunam composer https://composer.sutunam.com/m2/
 composer require sutunam/module-cms-data-sync
 ```
 Then, execute the following Magento commands:
@@ -116,3 +115,9 @@ This module introduces the following layouts and layout handles in the `view/adm
 - `adminhtml_widget_instance_block`
 - `adminhtml_widget_instance_edit`
 - `adminhtml_widget_instance_index`
+
+## Development by Sutunam
+
+We are an Open Source Software Development Company, specialized in Magento 2 and [Hyva Silver Partner](https://en.sutunam.vn/solutions/hyva-specialists-magento-experts/)
+
+[Contact us](https://en.sutunam.vn/contact/)

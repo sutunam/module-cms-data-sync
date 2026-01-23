@@ -1,23 +1,24 @@
 {
     "name": "sutunam/module-cms-data-sync",
-    "description": "This extension will allow to SYNC CMS pages or blocks from one website to other.",
+    "description": "This extension will allow to sync CMS pages or blocks from one website to other.",
+    "type": "magento2-module",
+    "version": "1.1.0",
     "require": {
-        "magento/framework": ">=100.1.0",
-        "magento/module-cms": ">=100.1.0"
+        "magento/framework": "*",
+        "magento/module-cms": ">=100.1.0",
+        "sutunam/module-base": "^2.0"
     },
     "license": [
-        "Proprietary"
+        "GPL-3.0-or-later"
     ],
     "autoload": {
-        "psr-4": {
-            "Sutunam\\CmsDataSync\\": ""
-        },
         "files": [
             "registration.php"
-        ]
+        ],
+        "psr-4": {
+            "Sutunam\\CmsDataSync\\": ""
+        }
     },
-    "type": "magento2-module",
-    "version": "1.0.9",
     "repositories": {
         "magento": {
             "type": "composer",
@@ -30,5 +31,4 @@
             "magento/composer-dependency-version-audit-plugin": false
         }
     }
-
 }
