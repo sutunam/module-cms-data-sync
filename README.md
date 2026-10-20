@@ -110,7 +110,7 @@ Simply click the desired sync option, and the CMS data will be transferred autom
 
 ### Layouts
 
-This module introduces the following layouts and layout handles in the `view/adminhtml/layout` directory:
+This module introduces the following layouts and layout handles in the `src/view/adminhtml/layout` directory:
 
 - `adminhtml_widget_instance_block`
 - `adminhtml_widget_instance_edit`
