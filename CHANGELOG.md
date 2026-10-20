@@ -1,5 +1,9 @@
 # 📝 Changelog
 
+## [1.1.1]
+### Changed
+- The module code is in `src/`, as in the other Sutunam modules (Composer autoload updated). Run `composer update sutunam/module-cms-data-sync` to install this version: an installed copy keeps the old autoload paths until then.
+
 ## 1.1.0
 - Publish the module
 
